@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { 
   Eye, EyeOff, Check, User, Mail, Phone, Lock, ArrowRight, Diamond, 
   ArrowLeft, ShieldCheck, KeyRound, Key, Search, Heart, ShoppingBag, 
@@ -13,7 +13,28 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help';
+type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help';
+
+type SearchContextValue = {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+};
+
+const SearchContext = React.createContext<SearchContextValue>({
+  searchTerm: '',
+  setSearchTerm: () => {}
+});
+
+const toNumericPrice = (value: string) => Number(value.replace(/[$,]/g, ''));
+
+const getCategoryForBrand = (brand?: string): View => {
+  const brandName = (brand || '').toLowerCase();
+  if (/vacheron|audemars|patek|richard|omega|cartier|chronos|aurelian|techne/.test(brandName)) return 'category-timepieces';
+  if (/chopard|graff|piaget|tiffany|bvlgari|harry winston|van cleef/.test(brandName)) return 'category-jewelry';
+  if (/hermès|louis vuitton|bottega|prada|fendi|dior|gucci|mara/.test(brandName)) return 'category-leather';
+  if (/saint laurent|chanel|savile|valeria/.test(brandName)) return 'category-fashion';
+  return 'shop';
+};
 
 const TopNavBar = ({ 
   view, 
@@ -28,31 +49,31 @@ const TopNavBar = ({
   showProfileDropdown: boolean,
   setShowProfileDropdown: (b: boolean) => void
 }) => {
+  const { searchTerm, setSearchTerm } = useContext(SearchContext);
+  const isCategory = view.startsWith('category-');
+  
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-outline-variant/10 px-6 md:px-12 py-4">
       <div className="max-w-[1920px] mx-auto flex items-center justify-between">
-        <div 
-          className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => setView('home')}
-        >
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-on-primary shadow-[0_0_20px_rgba(230,195,100,0.3)] group-hover:scale-110 transition-transform">
-            <Diamond size={20} />
-          </div>
-          <span className="font-headline text-xl font-bold tracking-tighter text-on-surface hidden md:block">The Obsidian Curator</span>
-        </div>
-
-        <div className="hidden lg:flex items-center gap-12">
-          {['shop', 'category-timepieces', 'category-jewelry', 'category-leather'].map((v) => (
+        <div className="flex items-center gap-4">
+          {isCategory && (
             <button
-              key={v}
-              onClick={() => setView(v as View)}
-              className={`text-[10px] uppercase tracking-[0.3em] font-bold transition-colors hover:text-primary ${
-                view === v ? 'text-primary' : 'text-on-surface-variant/60'
-              }`}
+              onClick={() => setView('home')}
+              className="p-2 hover:bg-surface-container-highest/30 rounded-lg transition-colors text-on-surface-variant hover:text-primary"
+              title="Go back"
             >
-              {v.replace('category-', '').replace('-', ' ')}
+              <ArrowLeft size={20} />
             </button>
-          ))}
+          )}
+          <div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => setView('home')}
+          >
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-on-primary shadow-[0_0_20px_rgba(230,195,100,0.3)] group-hover:scale-110 transition-transform">
+              <Diamond size={20} />
+            </div>
+            <span className="font-headline text-xl font-bold tracking-tighter text-on-surface hidden md:block">The Obsidian Curator</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-6">
@@ -62,6 +83,13 @@ const TopNavBar = ({
               type="text" 
               placeholder="Search collections..." 
               className="bg-transparent border-none outline-none text-xs px-3 w-40 focus:w-60 transition-all text-on-surface"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setView('shop');
+                }
+              }}
             />
           </div>
 
@@ -104,6 +132,63 @@ const TopNavBar = ({
         </div>
       </div>
     </nav>
+  );
+};
+
+const CategoryBar = ({ 
+  view, 
+  setView 
+}: { 
+  view: View, 
+  setView: (v: View) => void 
+}) => {
+  const categories = [
+    { id: 'category-timepieces', icon: Watch, label: 'Timepieces', count: '42 ITEMS' },
+    { id: 'category-fashion', icon: Shirt, label: 'Fashion', count: '842 ITEMS' },
+    { id: 'category-home', icon: Armchair, label: 'Home', count: '450 ITEMS' },
+    { id: 'category-beauty', icon: Sparkles, label: 'Beauty', count: '312 ITEMS' },
+    { id: 'category-sports', icon: Dumbbell, label: 'Sports', count: '210 ITEMS' },
+    { id: 'category-books', icon: BookOpen, label: 'Books', count: '1,029 ITEMS' },
+    { id: 'category-toys', icon: Gamepad2, label: 'Toys', count: '560 ITEMS' },
+    { id: 'category-jewelry', icon: Diamond, label: 'Jewelry', count: '150 ITEMS' },
+  ];
+
+  return (
+    <div className="w-full bg-background border-b border-outline-variant/10 sticky top-20 z-40">
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setView(cat.id as View)}
+              className={`flex flex-col items-center gap-3 p-4 rounded-xl transition-all duration-300 ${
+                view === cat.id 
+                  ? 'bg-primary/10 border border-primary/20' 
+                  : 'hover:bg-surface-container-highest/20 border border-outline-variant/10'
+              }`}
+            >
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
+                view === cat.id 
+                  ? 'bg-primary/20 text-primary' 
+                  : 'bg-surface-container-highest text-on-surface-variant group-hover:text-primary'
+              }`}>
+                <cat.icon size={24} />
+              </div>
+              <div className="text-center">
+                <p className={`font-headline text-sm font-semibold ${
+                  view === cat.id ? 'text-on-surface' : 'text-on-surface-variant'
+                }`}>
+                  {cat.label}
+                </p>
+                <p className="text-[9px] uppercase tracking-widest text-on-surface-variant/60 mt-1">
+                  {cat.count}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -198,6 +283,25 @@ const ProfileSidebar = ({ currentView, setView }: { currentView: View, setView: 
 };
 
 const Footer = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('');
+
+  const submitNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) {
+      setNewsletterStatus('Please enter your email address.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)) {
+      setNewsletterStatus('Please enter a valid email address.');
+      return;
+    }
+
+    setNewsletterStatus('Subscribed successfully.');
+    setNewsletterEmail('');
+  };
+
   return (
     <footer className="w-full mt-20 bg-surface-container-lowest border-t border-outline-variant/5 pt-16">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
@@ -217,12 +321,19 @@ const Footer = () => {
         </div>
         <div className="flex flex-col gap-6">
           <h4 className="text-primary text-[10px] uppercase tracking-[0.3em] font-bold mb-2">The Newsletter</h4>
-          <div className="relative">
-            <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary transition-colors py-2 text-xs text-on-surface outline-none" placeholder="Email Address" type="email"/>
-            <button className="absolute right-0 bottom-2 text-primary">
+          <form className="relative" onSubmit={submitNewsletter}>
+            <input
+              className="w-full bg-transparent border-b border-outline-variant focus:border-primary transition-colors py-2 text-xs text-on-surface outline-none"
+              placeholder="Email Address"
+              type="email"
+              value={newsletterEmail}
+              onChange={(e) => setNewsletterEmail(e.target.value)}
+            />
+            <button type="submit" className="absolute right-0 bottom-2 text-primary">
               <ArrowRight size={16} />
             </button>
-          </div>
+          </form>
+          {newsletterStatus && <p className="text-[10px] text-primary/80">{newsletterStatus}</p>}
           <p className="text-[10px] text-on-surface-variant/50">© 2024 The Obsidian Curator. All Rights Reserved.</p>
         </div>
       </div>
@@ -231,22 +342,76 @@ const Footer = () => {
 };
 
 const timepieceProducts = [
-  { id: 1, brand: 'Vacheron Heritage', name: 'Patrimony Moon Phase', price: '$38,500', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCg4jLNumTZ9u_3IIvtT55V8qAHr18zxNotLasqTM3p-5THG3a3DsWyvmd6LkPm35exGDFY73xFAdSfTdECPoFZSWyy885SyWPWQUf0GEQ480-_3V54pKIuup1d5ICu-k0zXfU6rAmmetQPR_lVEc4q69YOcbmdeBm-O5jCe4RNc2q3mZJkmcbGFHCkdz382X-hNmOYLudsidpcsvkWMqlzNREoJaEiWHbIRwUVynGuYMgyzM7twrC2b7hvQ1VjV0nAv9EfuluAyxw' },
-  { id: 2, brand: 'Audemars Piguet', name: 'Royal Oak Offshore', price: '$54,200', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA76mKRwPNdXb7rrdC4JZwaHxQEAqnf6GQ-pG3rii6G4h9toebKotniPk2PfECPZ03E4aT_eDh3cIr3gnZPFIQblYUaCohdF-MdaZA9iUMrlyEdl-7_TWA12OuDL6drKIp5OVRfGLKYo0O8fdEf4VFHKZA8Pk688_8xczY4Gzt7OqPyD6RNiWITHFF6Sm46O4lopRXfu5jmlpk6QKMbU45wcuyeHi-yLCi43CNTYKYnIO2IB2RmWYHAn1aRC915V0Dj9VGA5qSciqQ' },
-  { id: 3, brand: 'Patek Philippe', name: 'Nautilus Skeleton', price: '$120,000', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_EGAp8Mx5NunHFm93XPsZxTscNvGZMTS4srtioDBr6RvhjCZMxTpgxqlGu4GArhkcgR5zj0HqiyEeQ0ewd_MVLQkxcr5svZG0AkniOAhGP20GrXNplnOrwf2XnEr1MpWGphVyN4IGG8_h-klVUd23imAsQfcSyUBTE_oeacsU491wN8eZG3uWPVDaJYNS1F6aXx1KLF7-pV4hFwLY9E5kZh_YxIvkM3kpGZfVQQPiz0VFDYtFV_InMSlXS5uP-sT8_jX8Oy7XdHI' },
-  { id: 4, brand: 'Richard Mille', name: 'RM 011 Felipe Massa', price: '$185,000', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAfG1MJS5VqsCavJpQqMAi4rLBufS4XJe1zSLTsoeZGDx6OC2NnmVwHt4D4kLP58JGS5XjnEQPQ7XlEAKhy_OFd9LSDXXwSVIjvi-xiJlSevxuzzuGo4ke0Rb5JgoX0AKIsI1KKGXMR4iSeerNEiW5KjUUbtx2_okqRtdXdP7ynqerJMQkNFII3ydMNPtViIujRYb-1IPRi12DOVqXEWvvh1UWqjOOdk8PyrbCuEghETpbXGShuq2CpNn1itcX6nP5O9U5WKFFNihc' },
-  { id: 5, brand: 'Cartier', name: 'Tank Louis Cartier', price: '$14,800', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCzJKX7FhSQ4xkkzfi3MG4Dt9YngBN5G7ntrM6qbj-IDy7fiFzA82vebByMGjYnuEQPopITMXFfCysm-zPVfRlpB1JpnfuK8RrvvYV4IwMov5e2udoWfV-6E1Xc9JpaEx7pwgpOZhkpLjn_M5lqHmtzz8H_6L_ZRrzRrqB4oTfTM9tk2fqq8GlMXxkFVbUImHzpuZ4JW1GuVOPvN03f71lN_sCzZjieg-D0MEiX8WU-1UebURK4NNy6Oh-6PLip93BuRRcsk-Wsqr0' },
-  { id: 6, brand: 'Omega', name: 'Speedmaster Moonphase', price: '$12,400', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCVQoBK18TjsNDOA5cMLOoDBTZzRYJjBegdUy0nMpFHnrQwnM-cc1skk7bj0iPrYkUi01-3QWYhXkxO5hoHSwvkFXKato9zPIi5YCHUesA_G2ZtOWtcmyf6CwFrJ3hOCILPDsGmWzj3I2sppmlCCNNUbNL5z-rTQbTza1PUOiQKWyix1cv9QZT_vkwM6HFqKXx9m2IBBgTCOkFMx5GyYfDGIE7yVDDl5MPyCocjZzSCUlui1l2kjFW33r9-xqSWQagbjfCxuIFdCTg' }
+  { id: 1, brand: 'Vacheron Heritage', name: 'Patrimony Moon Phase', price: '$38,500', img: 'https://images.unsplash.com/photo-1523170335684-f042f1b8f374?w=500&h=500&fit=crop' },
+  { id: 2, brand: 'Audemars Piguet', name: 'Royal Oak Offshore', price: '$54,200', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
+  { id: 3, brand: 'Patek Philippe', name: 'Nautilus Skeleton', price: '$120,000', img: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&h=500&fit=crop' },
+  { id: 4, brand: 'Richard Mille', name: 'RM 011 Felipe Massa', price: '$185,000', img: 'https://images.unsplash.com/photo-1506084868230-bb8a9135be18?w=500&h=500&fit=crop' },
+  { id: 5, brand: 'Cartier', name: 'Tank Louis Cartier', price: '$14,800', img: 'https://images.unsplash.com/photo-1633114291692-bda994bb3334?w=500&h=500&fit=crop' },
+  { id: 6, brand: 'Omega', name: 'Speedmaster Moonphase', price: '$12,400', img: 'https://images.unsplash.com/photo-1489749798305-4fea3ba63d60?w=500&h=500&fit=crop' }
 ];
 
 const jewelryProducts = [
-  { id: 7, brand: 'Cartier', name: 'Love Bracelet Diamond-Paved', price: '$42,100', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_EGAp8Mx5NunHFm93XPsZxTscNvGZMTS4srtioDBr6RvhjCZMxTpgxqlGu4GArhkcgR5zj0HqiyEeQ0ewd_MVLQkxcr5svZG0AkniOAhGP20GrXNplnOrwf2XnEr1MpWGphVyN4IGG8_h-klVUd23imAsQfcSyUBTE_oeacsU491wN8eZG3uWPVDaJYNS1F6aXx1KLF7-pV4hFwLY9E5kZh_YxIvkM3kpGZfVQQPiz0VFDYtFV_InMSlXS5uP-sT8_jX8Oy7XdHI' },
-  { id: 8, brand: 'Tiffany & Co.', name: 'HardWear Graduated Link', price: '$18,500', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAfG1MJS5VqsCavJpQqMAi4rLBufS4XJe1zSLTsoeZGDx6OC2NnmVwHt4D4kLP58JGS5XjnEQPQ7XlEAKhy_OFd9LSDXXwSVIjvi-xiJlSevxuzzuGo4ke0Rb5JgoX0AKIsI1KKGXMR4iSeerNEiW5KjUUbtx2_okqRtdXdP7ynqerJMQkNFII3ydMNPtViIujRYb-1IPRi12DOVqXEWvvh1UWqjOOdk8PyrbCuEghETpbXGShuq2CpNn1itcX6nP5O9U5WKFFNihc' }
+  { id: 7, brand: 'Cartier', name: 'Love Bracelet Diamond-Paved', price: '$42,100', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
+  { id: 8, brand: 'Tiffany & Co.', name: 'HardWear Graduated Link', price: '$18,500', img: 'https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=500&h=500&fit=crop' },
+  { id: 11, brand: 'Van Cleef & Arpels', name: 'Alhambra Necklace Gold', price: '$28,500', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
+  { id: 12, brand: 'Bvlgari', name: 'Serpenti Viper Ring', price: '$15,800', img: 'https://images.unsplash.com/photo-1599643478582-9969c1e0b06b?w=500&h=500&fit=crop' },
+  { id: 13, brand: 'Chopard', name: 'Happy Diamonds Moving', price: '$22,900', img: 'https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=500&h=500&fit=crop' },
+  { id: 14, brand: 'Graff Diamonds', name: 'Infinity Diamond Earrings', price: '$65,000', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
+  { id: 15, brand: 'Piaget', name: 'Possession Bracelet', price: '$34,500', img: 'https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=500&h=500&fit=crop' },
+  { id: 16, brand: 'Harry Winston', name: 'Emerald Cluster Pendant', price: '$78,500', img: 'https://images.unsplash.com/photo-1599643478582-9969c1e0b06b?w=500&h=500&fit=crop' }
 ];
 
 const leatherProducts = [
-  { id: 9, brand: 'Hermès', name: 'Birkin 35 Togo', price: '$24,500', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCzJKX7FhSQ4xkkzfi3MG4Dt9YngBN5G7ntrM6qbj-IDy7fiFzA82vebByMGjYnuEQPopITMXFfCysm-zPVfRlpB1JpnfuK8RrvvYV4IwMov5e2udoWfV-6E1Xc9JpaEx7pwgpOZhkpLjn_M5lqHmtzz8H_6L_ZRrzRrqB4oTfTM9tk2fqq8GlMXxkFVbUImHzpuZ4JW1GuVOPvN03f71lN_sCzZjieg-D0MEiX8WU-1UebURK4NNy6Oh-6PLip93BuRRcsk-Wsqr0' },
-  { id: 10, brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', price: '$3,200', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCVQoBK18TjsNDOA5cMLOoDBTZzRYJjBegdUy0nMpFHnrQwnM-cc1skk7bj0iPrYkUi01-3QWYhXkxO5hoHSwvkFXKato9zPIi5YCHUesA_G2ZtOWtcmyf6CwFrJ3hOCILPDsGmWzj3I2sppmlCCNNUbNL5z-rTQbTza1PUOiQKWyix1cv9QZT_vkwM6HFqKXx9m2IBBgTCOkFMx5GyYfDGIE7yVDDl5MPyCocjZzSCUlui1l2kjFW33r9-xqSWQagbjfCxuIFdCTg' }
+  { id: 9, brand: 'Hermès', name: 'Birkin 35 Togo', price: '$24,500', img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop' },
+  { id: 10, brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', price: '$3,200', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop' },
+  { id: 17, brand: 'Bottega Veneta', name: 'Intrecciato Woven Tote', price: '$5,900', img: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=500&h=500&fit=crop' },
+  { id: 18, brand: 'Prada', name: 'Saffiano Leather Briefcase', price: '$4,200', img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop' },
+  { id: 19, brand: 'Gucci', name: 'Marmont Leather Shoulder Bag', price: '$2,650', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop' },
+  { id: 20, brand: 'Celine', name: 'Classic Box Leather Bag', price: '$3,850', img: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=500&h=500&fit=crop' },
+  { id: 21, brand: 'Fendi', name: 'Baguette Leather Crossbody', price: '$2,200', img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop' },
+  { id: 22, brand: 'Dior', name: 'Book Tote Embroidered Bag', price: '$3,600', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop' }
+];
+
+const fashionProducts = [
+  { id: 23, brand: 'Gucci', name: 'Silk Double Breasted Blazer', price: '$4,200', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=500&fit=crop' },
+  { id: 24, brand: 'Saint Laurent', name: 'Le Smoking Tuxedo', price: '$5,800', img: 'https://images.unsplash.com/photo-1617021231846-42bd5ce3fcd5?w=500&h=500&fit=crop' },
+  { id: 25, brand: 'Hermès', name: 'Trench Coat Cashmere', price: '$6,500', img: 'https://images.unsplash.com/photo-1539613881-24b0fed0edd9?w=500&h=500&fit=crop' },
+  { id: 26, brand: 'Chanel', name: 'Tweed Jacket', price: '$7,200', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=500&fit=crop' },
+];
+
+const homeProducts = [
+  { id: 27, brand: 'Baccarat', name: 'Empire Chandelier Gold', price: '$8,500', img: 'https://images.unsplash.com/photo-1565636192335-14f0c6710223?w=500&h=500&fit=crop' },
+  { id: 28, brand: 'Medusa Art', name: 'Marble Sculpture', price: '$12,000', img: 'https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=500&h=500&fit=crop' },
+  { id: 29, brand: 'Heritage Design', name: 'Persian Rug 4x6', price: '$18,900', img: 'https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=500&h=500&fit=crop' },
+  { id: 30, brand: 'Restoration Hardware', name: 'Victorian Settee', price: '$9,800', img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&h=500&fit=crop' },
+];
+
+const beautyProducts = [
+  { id: 31, brand: 'Creed', name: 'Royal Oud Parfum', price: '$620', img: 'https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=500&h=500&fit=crop' },
+  { id: 32, brand: 'Heeley', name: 'Rose Helena Perfume', price: '$480', img: 'https://images.unsplash.com/photo-1599599810694-b3b2f5532d1c?w=500&h=500&fit=crop' },
+  { id: 33, brand: 'Penhaligons', name: 'Heritage Collection Set', price: '$850', img: 'https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=500&h=500&fit=crop' },
+  { id: 34, brand: 'Acqua di Parma', name: 'Blu Mediterraneo', price: '$220', img: 'https://images.unsplash.com/photo-1599599810694-b3b2f5532d1c?w=500&h=500&fit=crop' },
+];
+
+const sportsProducts = [
+  { id: 35, brand: 'Callaway', name: 'Golf Club Set Carbon', price: '$2,850', img: 'https://images.unsplash.com/photo-1535088462336-e933e3f06e57?w=500&h=500&fit=crop' },
+  { id: 36, brand: 'Wilson', name: 'Pro Tennis Racket', price: '$680', img: 'https://images.unsplash.com/photo-1554068865-24cecd4e34c8?w=500&h=500&fit=crop' },
+  { id: 37, brand: 'Bauer', name: 'Ice Hockey Equipment', price: '$1,200', img: 'https://images.unsplash.com/photo-1535088462336-e933e3f06e57?w=500&h=500&fit=crop' },
+  { id: 38, brand: 'Specialized', name: 'Carbon Mountain Bike', price: '$4,500', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop' },
+];
+
+const booksProducts = [
+  { id: 39, brand: 'First Edition', name: 'Signed Hemingway Collection', price: '$4,200', img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop' },
+  { id: 40, brand: 'Antiquarian', name: 'Leather Bound Shakespeare', price: '$3,100', img: 'https://images.unsplash.com/photo-1507842217343-583f7270bfba?w=500&h=500&fit=crop' },
+  { id: 41, brand: 'Vintage Press', name: 'Limited Edition Art Book', price: '$1,850', img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop' },
+  { id: 42, brand: 'Collector Editions', name: 'Signed Philosophy Set', price: '$2,600', img: 'https://images.unsplash.com/photo-1507842217343-583f7270bfba?w=500&h=500&fit=crop' },
+];
+
+const toysProducts = [
+  { id: 43, brand: 'Steiff', name: 'Limited Edition Teddy Bear', price: '$1,200', img: 'https://images.unsplash.com/photo-1590080876/teddy-bear?w=500&h=500&fit=crop' },
+  { id: 44, brand: 'Lego', name: 'Platinum Set Collectible', price: '$890', img: 'https://images.unsplash.com/photo-1594545514411-854a028e7195?w=500&h=500&fit=crop' },
+  { id: 45, brand: 'Scalextric', name: 'Vintage Track Set', price: '$1,450', img: 'https://images.unsplash.com/photo-1594545514411-854a028e7195?w=500&h=500&fit=crop' },
+  { id: 46, brand: 'Hot Wheels', name: 'Rare 1968 Custom', price: '$2,800', img: 'https://images.unsplash.com/photo-1594545514411-854a028e7195?w=500&h=500&fit=crop' },
 ];
 
 const CategoryLayout = ({ 
@@ -270,6 +435,24 @@ const CategoryLayout = ({
   heroImg: string,
   products: any[]
 }) => {
+  const { searchTerm } = useContext(SearchContext);
+  const [sortBy, setSortBy] = useState<'newest' | 'high-to-low' | 'low-to-high'>('newest');
+  const [maxPriceFilter, setMaxPriceFilter] = useState<'all' | '5000' | '20000'>('all');
+
+  const filteredProducts = products
+    .filter((product) => {
+      const matchesSearch = !searchTerm.trim() ||
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+      const maxPrice = maxPriceFilter === 'all' ? Number.POSITIVE_INFINITY : Number(maxPriceFilter);
+      return matchesSearch && toNumericPrice(product.price) <= maxPrice;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'high-to-low') return toNumericPrice(b.price) - toNumericPrice(a.price);
+      if (sortBy === 'low-to-high') return toNumericPrice(a.price) - toNumericPrice(b.price);
+      return b.id - a.id;
+    });
+
   return (
     <motion.div
       key={view}
@@ -284,6 +467,11 @@ const CategoryLayout = ({
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         showProfileDropdown={showProfileDropdown}
         setShowProfileDropdown={setShowProfileDropdown}
+      />
+
+      <CategoryBar 
+        view={view} 
+        setView={setView} 
       />
 
       <main className="flex flex-col">
@@ -314,21 +502,34 @@ const CategoryLayout = ({
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/60">
                 <span>Sort By:</span>
-                <select className="bg-transparent border-none outline-none text-primary cursor-pointer">
-                  <option>Newest First</option>
-                  <option>Price: High to Low</option>
-                  <option>Price: Low to High</option>
+                <select
+                  className="bg-transparent border-none outline-none text-primary cursor-pointer"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'high-to-low' | 'low-to-high')}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="high-to-low">Price: High to Low</option>
+                  <option value="low-to-high">Price: Low to High</option>
                 </select>
               </div>
+              <select
+                className="px-6 py-3 bg-surface-container-highest/30 border border-outline-variant/10 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-primary/10 transition-colors outline-none"
+                value={maxPriceFilter}
+                onChange={(e) => setMaxPriceFilter(e.target.value as 'all' | '5000' | '20000')}
+              >
+                <option value="all">All Prices</option>
+                <option value="5000">Under $5,000</option>
+                <option value="20000">Under $20,000</option>
+              </select>
               <button className="flex items-center gap-2 px-6 py-3 bg-surface-container-highest/30 border border-outline-variant/10 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-primary/10 transition-colors">
                 <Filter size={14} />
-                Filter
+                {filteredProducts.length} Results
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-20">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <div key={product.id} className="group flex flex-col gap-6">
                 <div className="aspect-[3/4] overflow-hidden bg-surface-container-lowest relative rounded-sm">
                   <img 
@@ -426,7 +627,7 @@ const ProfileDropdown = ({ setView, onClose }: { setView: (v: View) => void, onC
 };
 
 export default function App() {
-  const [view, setView] = useState<View>('login');
+  const [view, setView] = useState<View>('home');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [cartItems, setCartItems] = useState([
@@ -500,6 +701,13 @@ export default function App() {
   const [rememberMe, setRememberMe] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [shopSortBy, setShopSortBy] = useState<'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated'>('relevance');
+  const [shopMaxPrice, setShopMaxPrice] = useState<'all' | '5000' | '10000' | '20000'>('all');
+  const [shopMinRating, setShopMinRating] = useState<0 | 4 | 5>(0);
+  const [otpError, setOtpError] = useState('');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
 
   // Forgot Password states
   const [forgotStep, setForgotStep] = useState(1); // 1: Identify, 2: Verify, 3: Restore, 4: Success
@@ -541,6 +749,13 @@ export default function App() {
 
   const handleForgotVerify = (e: React.FormEvent) => {
     e.preventDefault();
+    const enteredOtp = otp.join('');
+    if (!/^\d{6}$/.test(enteredOtp)) {
+      setOtpError('Enter a valid 6-digit code to continue.');
+      return;
+    }
+
+    setOtpError('');
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
@@ -558,10 +773,11 @@ export default function App() {
   };
 
   const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return;
+    if (value.length > 1 || (value && !/^[0-9]$/.test(value))) return;
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+    setOtpError('');
 
     // Auto-focus next input
     if (value && index < 5) {
@@ -569,6 +785,48 @@ export default function App() {
       nextInput?.focus();
     }
   };
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) {
+      setNewsletterMessage('Please enter your email address.');
+      return;
+    }
+
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail);
+    if (!isValidEmail) {
+      setNewsletterMessage('Please enter a valid email address.');
+      return;
+    }
+
+    setNewsletterMessage('Subscribed successfully. Invitations will arrive in your inbox.');
+    setNewsletterEmail('');
+  };
+
+  const shopProducts = [
+    { id: 1001, brand: 'AUREL & CO', name: 'The Midnight Chrono', price: '$12,400', rating: 4.5, reviews: 42, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcc1ysQTol8JUR_QreOBTctd9-wWDZTkjgw6rFkk_zhsFfGrVwu5ZkkGcJDEggJVbHGxXlVVjZu-eGynLe0RyjNwzAS4WlAphEPGEwQKfH4LXdw3Nigkyl8CgpPItELUNH_-CAlxghstdiGpJgVXcaIJKpi4snCZBtp7JkVIKU7p8PhsKMFN1s0we3JFPYcLhrc0PuLefjls6FSF3wOmJpyyItsKFth-SJ04PYsffCXCbD0pklmEZo9Z_U7Kdo_wkgCI6IRk3r6Os' },
+    { id: 1002, brand: 'ESSENCE NOIR', name: 'Velvet Oud Extract', price: '$850', rating: 5, reviews: 128, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnY3IkrKndvvqBCsfooDiD_mMXWFCCjhHzRd7qKfwagVxOzE_moPQP068Odna3MU4G18919aI3gd2Sq59Kijpc11Rgd3HcgHT7RQaFBkmPHuFlNjJ_WgloGA0oTpy3xqenip2EDT3THGMPk4soKH1xJ8HVlPv8S3UqoyzHFThLN1FeoK1IhMondM9UNUXfobdZZO73eTu5StIpyScS_DGXHjuBqUSeEsN6CQiKw7biXaPtU2px-tVmSPyFXTekrgNxckuBZ2uFryo' },
+    { id: 1003, brand: 'VALERIA STELLE', name: 'Starlight Pumps', price: '$4,200', rating: 4.5, reviews: 18, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAO5gXJpE3HtQEdhHnrZZZY_6BjMhmIHHmNrXgi83MXmFpxUjXI6XBPPaCGYiHAp_NUeEde4vdzBx5LJnfwPqatK7W0BljXUCAX19bJ87vWGXJKdXLwQWWasBRtawH_ZXUavxU6rrAzTmTP7ak8ttIv8oGHUlVxtpJNoXddiiXXyW0w5bmTslKvD-U0KpI1IkM8AEHD_6Jl2BZ1YYmxDJuOFVnzppxHwej5yAuixR95WEkJ1XZNeYvPVHs3eUWuQY6jPHlPvGY6M74' },
+    { id: 1004, brand: 'SAVILE ELITE', name: 'Obsidian Tuxedo', price: '$6,800', rating: 4.8, reviews: 24, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwbQGzcfAAJP6mZQX8uh846G36_t1lidhdsU4F1DCgKR8gu1AKpiMDM5b6CA24uUyNvFGqgt2DwPQWVYhIEwGIizY4Eo1KwDHJRHPj_IfsVMDk2sbGvVE1T4xNHtEh2j56NhAe1x_CnnayPDf7qRdsNYfajYV7wAt91aAo_oxIXNzqqmNNnUdZihIi-r3pSYreEJa8U8W-r-3PEFA8LEGr1UO5jjnwkXRErZYrsnFSr4GV9fczgXBNc1cNlKfjCu9YbffkS3PyCyY' },
+    { id: 1005, brand: 'MAISON MARA', name: 'The Heritage Tote', price: '$3,150', rating: 4.9, reviews: 56, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB0C0J8X839ZwJ5BCotPeTrOp38HY1b1B-qwM2Obw4hg38S0MbWq433kvaKdyr8r2eShhEqxlH0JeWA6yn5q7CiGIcaxfY26zkTTPT3SXL87pkRX9vHc_GJ9tNoV_Pqm0N_4Pdvj_yH3ffD7Ci9ur85sF4zvKmzZumOoXJGV6qeYsDa6JVtA-Kl61e5rK1SG1MnHOFjWjm02VOJE40qSwmvCagtjGjAFffYypWZVWkq3bV8DnSfQsRVyDBDziyhZbtqvUznZ_ykBjE' },
+    { id: 1006, brand: 'AUREL & CO', name: 'The Midnight Chrono', price: '$12,400', rating: 4.5, reviews: 42, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcc1ysQTol8JUR_QreOBTctd9-wWDZTkjgw6rFkk_zhsFfGrVwu5ZkkGcJDEggJVbHGxXlVVjZu-eGynLe0RyjNwzAS4WlAphEPGEwQKfH4LXdw3Nigkyl8CgpPItELUNH_-CAlxghstdiGpJgVXcaIJKpi4snCZBtp7JkVIKU7p8PhsKMFN1s0we3JFPYcLhrc0PuLefjls6FSF3wOmJpyyItsKFth-SJ04PYsffCXCbD0pklmEZo9Z_U7Kdo_wkgCI6IRk3r6Os' }
+  ];
+
+  const filteredShopProducts = shopProducts
+    .filter((product) => {
+      const matchesSearch = !searchTerm.trim() ||
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesPrice = shopMaxPrice === 'all' || toNumericPrice(product.price) <= Number(shopMaxPrice);
+      const matchesRating = product.rating >= shopMinRating;
+      return matchesSearch && matchesPrice && matchesRating;
+    })
+    .sort((a, b) => {
+      if (shopSortBy === 'low-to-high') return toNumericPrice(a.price) - toNumericPrice(b.price);
+      if (shopSortBy === 'high-to-low') return toNumericPrice(b.price) - toNumericPrice(a.price);
+      if (shopSortBy === 'top-rated') return b.rating - a.rating;
+      return b.reviews - a.reviews;
+    });
 
   const removeFromWishlist = (id: number) => {
     setWishlistItems(prev => prev.filter(item => item.id !== id));
@@ -585,6 +843,7 @@ export default function App() {
   };
 
   return (
+    <SearchContext.Provider value={{ searchTerm, setSearchTerm }}>
     <div className="min-h-screen bg-background text-on-background font-body selection:bg-primary/30 relative overflow-hidden">
       {/* Overlay Grain Texture */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[100] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
@@ -635,6 +894,7 @@ export default function App() {
                           </div>
                         )}
                         <img 
+                          loading="lazy"
                           className={`w-full h-full object-cover transition-transform duration-700 ${!item.outOfStock ? 'grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105' : 'grayscale'}`} 
                           src={item.img} 
                           alt={item.name}
@@ -795,7 +1055,7 @@ export default function App() {
                   ].map((item, i) => (
                     <div key={i} className="min-w-[320px] snap-start group cursor-pointer">
                       <div className="h-96 w-full mb-6 overflow-hidden rounded-lg bg-surface-container-low">
-                        <img className="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-700" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
+                        <img loading="lazy" className="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-700" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                       </div>
                       <h4 className="font-headline text-xl mb-1 text-on-background group-hover:text-primary transition-colors">{item.name}</h4>
                       <span className="font-mono text-on-surface-variant">{item.price}</span>
@@ -1007,7 +1267,7 @@ export default function App() {
                         <div key={item.id} className="flex justify-between items-center group">
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-20 bg-surface-container-highest rounded overflow-hidden">
-                              <img className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
+                              <img loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                             </div>
                             <div>
                               <p className="text-sm font-headline text-on-surface mb-1">{item.name}</p>
@@ -1148,8 +1408,8 @@ export default function App() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <img className="h-6 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6COW9Wlghkg27HhY8Bv0r0aRHiAQ-Rs-5l3FjZC9jBT582dsgbTsu998n-UDSPlC9brVW-X3f4sjRUjJXM_APbPu73-tqN7Dt-oSrB3IDtjzSTwmdC1KluyTRU237t71CkWVvNXH1hcg-1KpLPiRQw5wl3kjuNuqJF5jp85Wm4UEgkbrHa6MHQ72xmU_04MiENtQgBfwG4ciVCTxuTPF6F66TMxEG6mJpa-gCW0_7jeGfecLkMvj2Erarrv1YvJXFXThRg0l4_VY" alt="Visa" />
-                          <img className="h-6 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiKrjxS9gB9now9ctq4FNKNBzsS1JCEpgwzu5KyhtRiz7SbaYGcd7-4qIjVu6Ue3D3O0IWnMUcmaQ7uQgHQNIq1GPrRmYYWXVNNNxaqzTweIJMTXO8hdarfPT_khnExM0YqxVVYbCQus1vuEJCfVFqV9eY3UtOzYehkyMmGEDhw1u55ZF-lxIds57XpZy1Su4XWjdK9J4M6ClN_9TDahf3ZGvDegmsHL2s4GAC-CifsxJTfjRV5RqJnMoN7_nrNhxJgKTTeiWYD6I" alt="Mastercard" />
+                          <img loading="lazy" className="h-6 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6COW9Wlghkg27HhY8Bv0r0aRHiAQ-Rs-5l3FjZC9jBT582dsgbTsu998n-UDSPlC9brVW-X3f4sjRUjJXM_APbPu73-tqN7Dt-oSrB3IDtjzSTwmdC1KluyTRU237t71CkWVvNXH1hcg-1KpLPiRQw5wl3kjuNuqJF5jp85Wm4UEgkbrHa6MHQ72xmU_04MiENtQgBfwG4ciVCTxuTPF6F66TMxEG6mJpa-gCW0_7jeGfecLkMvj2Erarrv1YvJXFXThRg0l4_VY" alt="Visa" />
+                          <img loading="lazy" className="h-6 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiKrjxS9gB9now9ctq4FNKNBzsS1JCEpgwzu5KyhtRiz7SbaYGcd7-4qIjVu6Ue3D3O0IWnMUcmaQ7uQgHQNIq1GPrRmYYWXVNNNxaqzTweIJMTXO8hdarfPT_khnExM0YqxVVYbCQus1vuEJCfVFqV9eY3UtOzYehkyMmGEDhw1u55ZF-lxIds57XpZy1Su4XWjdK9J4M6ClN_9TDahf3ZGvDegmsHL2s4GAC-CifsxJTfjRV5RqJnMoN7_nrNhxJgKTTeiWYD6I" alt="Mastercard" />
                         </div>
                       </label>
                       
@@ -1213,7 +1473,7 @@ export default function App() {
                             <span className={`font-headline text-lg ${paymentMethod === 'upi' ? 'text-on-surface' : 'text-on-surface-variant'}`}>UPI Payment</span>
                           </div>
                         </div>
-                        <img className="h-4 opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVzjbe1B4nl5VLbJzUTY-69oFjlLPemtPzOdLNImPLpPotGsZvJ8W6I07NkUD4CS9LdAaz9ZmYxXGebDHvTthUj_kmKDtlB5vYKKU7ea1bro_dT_tW7_4W0_g6bjblzvunZ7-4DbmHgahFCVgNzDfDod_IJnClJIIdDUMCwnYHwRPJ0M_J2vES8gkgQ2AhVH6nuwJ2ie67ngaTMmhJvwVWbrl3KHw7__t5t_yuhqThZZYhvvhSPpXzSqdDRDBNg7SdDer0namC8AY" alt="UPI" />
+                        <img loading="lazy" className="h-4 opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVzjbe1B4nl5VLbJzUTY-69oFjlLPemtPzOdLNImPLpPotGsZvJ8W6I07NkUD4CS9LdAaz9ZmYxXGebDHvTthUj_kmKDtlB5vYKKU7ea1bro_dT_tW7_4W0_g6bjblzvunZ7-4DbmHgahFCVgNzDfDod_IJnClJIIdDUMCwnYHwRPJ0M_J2vES8gkgQ2AhVH6nuwJ2ie67ngaTMmhJvwVWbrl3KHw7__t5t_yuhqThZZYhvvhSPpXzSqdDRDBNg7SdDer0namC8AY" alt="UPI" />
                       </label>
                     </div>
 
@@ -1308,7 +1568,7 @@ export default function App() {
                         {cartItems.map((item) => (
                           <div key={item.id} className="flex gap-4">
                             <div className="w-20 h-24 bg-surface-container-highest rounded overflow-hidden flex-shrink-0">
-                              <img className="w-full h-full object-cover" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
+                              <img loading="lazy" className="w-full h-full object-cover" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                             </div>
                             <div className="flex flex-col justify-between py-1">
                               <div>
@@ -1979,7 +2239,7 @@ export default function App() {
                     </div>
                     <div className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/30">
                       <div className="flex items-center gap-4 mb-4">
-                        <img className="w-12 h-12 rounded-full object-cover grayscale brightness-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANiWUQVAXT2mseIYESKYPqTOYmIInFyzgB7GybWRrvyxMEjNyXLOyUGilGLg3R8wgd1B_8BHiL0HgAB-h9UKandWii5N-Y-nBui-7Uut0AYFmXjw4jGH7OT5PoiXtRz3rH5_XWUSJP0Go9HWbN0RnHmgZZ6kfwkOKuJpEZtdy66bsYGey_xKfboJoPC0wZODIKeGsTxCpzcEA3tD0Y6PLQnY4YEfH-4j5lJtB5ksLsdDI7PtqlPYnq7GQ4t3sSCaojjgoIweijGpo" />
+                        <img loading="lazy" className="w-12 h-12 rounded-full object-cover grayscale brightness-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANiWUQVAXT2mseIYESKYPqTOYmIInFyzgB7GybWRrvyxMEjNyXLOyUGilGLg3R8wgd1B_8BHiL0HgAB-h9UKandWii5N-Y-nBui-7Uut0AYFmXjw4jGH7OT5PoiXtRz3rH5_XWUSJP0Go9HWbN0RnHmgZZ6kfwkOKuJpEZtdy66bsYGey_xKfboJoPC0wZODIKeGsTxCpzcEA3tD0Y6PLQnY4YEfH-4j5lJtB5ksLsdDI7PtqlPYnq7GQ4t3sSCaojjgoIweijGpo" alt="Designated Driver Avatar" />
                         <div>
                           <p className="font-label text-[10px] uppercase text-on-surface-variant">Designated Driver</p>
                           <p className="font-body font-bold text-on-surface">Julien Vasseur</p>
@@ -2039,7 +2299,7 @@ export default function App() {
                       <p className="text-on-surface-variant">France</p>
                     </div>
                     <div className="mt-6 aspect-video rounded-lg overflow-hidden grayscale brightness-50 contrast-125 border border-outline-variant/30">
-                      <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCETgRstAM0HrZBkWfOmkhLKzTxtROGgerIUjzUKoyXR2UgLc1jjD84BtJmV4HRzY9YR7FYSyx2OChoqd0vQ9yJ3jUdYLMSARtPqAT-fuN-DpOcer-SHrLB4lF3LOvRmDFhbDne9jxStsrQ4HFBeusOLdBZN11YT7Iw110SaJa5KQxIiYDMKrmevLKGexkfg494hp3H9fDdPdC1Cjk8McBHO9VYNuBrieKdVvxcmH6U8KGqm2YAHpSHaO-ykvJF7dJBSEQ7g2H9T-k" />
+                      <img loading="lazy" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCETgRstAM0HrZBkWfOmkhLKzTxtROGgerIUjzUKoyXR2UgLc1jjD84BtJmV4HRzY9YR7FYSyx2OChoqd0vQ9yJ3jUdYLMSARtPqAT-fuN-DpOcer-SHrLB4lF3LOvRmDFhbDne9jxStsrQ4HFBeusOLdBZN11YT7Iw110SaJa5KQxIiYDMKrmevLKGexkfg494hp3H9fDdPdC1Cjk8McBHO9VYNuBrieKdVvxcmH6U8KGqm2YAHpSHaO-ykvJF7dJBSEQ7g2H9T-k" alt="Luxury Interior Showcase" />
                     </div>
                   </div>
                   {/* Items in Shipment */}
@@ -2051,7 +2311,7 @@ export default function App() {
                     <div className="space-y-6">
                       <div className="flex gap-4 group">
                         <div className="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
-                          <img className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVanmtsmbt0gH7LorH6TuYJEDEM_Z3Qk4lGvh4PIBAbkA7hba9bdDihvYhBWtK9m2_UnCB-_EETqqOAw-a-D4iy5KiWr5IcD8OsgG0_7Z7-_ZaIHZVTkxSUjIZ7vamAKS3rWBSkjd-TwjKKoimdjzMW3tymVbVo3NBm2o_BYiGM6Q3BwAIxQV9W-j63nKa-AXbVdf3GlOdrtnNbT4VQ2L0k6n_8GH9JuBlptKXokGn8IhFX0twf4xFU54U0PZ4y_YPErKx3FsQqu0" />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVanmtsmbt0gH7LorH6TuYJEDEM_Z3Qk4lGvh4PIBAbkA7hba9bdDihvYhBWtK9m2_UnCB-_EETqqOAw-a-D4iy5KiWr5IcD8OsgG0_7Z7-_ZaIHZVTkxSUjIZ7vamAKS3rWBSkjd-TwjKKoimdjzMW3tymVbVo3NBm2o_BYiGM6Q3BwAIxQV9W-j63nKa-AXbVdf3GlOdrtnNbT4VQ2L0k6n_8GH9JuBlptKXokGn8IhFX0twf4xFU54U0PZ4y_YPErKx3FsQqu0" alt="Obsidian Heritage Signature" />
                         </div>
                         <div className="flex flex-col justify-center">
                           <p className="font-headline text-sm font-semibold leading-tight text-on-surface">Noire Saffiano Tote</p>
@@ -2060,7 +2320,7 @@ export default function App() {
                       </div>
                       <div className="flex gap-4 group">
                         <div className="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
-                          <img className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4IMP9xvc9vfj_82Z4AhX_2WQKLPXElmakGqZcwfNDpAEYy8SOvt-b4nXMrTehEjFtwoJGILWG7qV0bCXaMQpCX3Pd6_5WP4W1bZnzKbx6esio94_AEVcDB29Qcd5eFhSke-t2STghbwdK1oqBfoOx4HHyArs9kus0Ns21_tQ1tD0ujXWJ935_atkwLHGkNDqAc6RSfRiG-kFJy-zUTJ6cA3Unkcu4HbyOR0K4WtV7zz4L2edrnjPRoITgjtZCgKfXgnCkDEEtnVw" />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4IMP9xvc9vfj_82Z4AhX_2WQKLPXElmakGqZcwfNDpAEYy8SOvt-b4nXMrTehEjFtwoJGILWG7qV0bCXaMQpCX3Pd6_5WP4W1bZnzKbx6esio94_AEVcDB29Qcd5eFhSke-t2STghbwdK1oqBfoOx4HHyArs9kus0Ns21_tQ1tD0ujXWJ935_atkwLHGkNDqAc6RSfRiG-kFJy-zUTJ6cA3Unkcu4HbyOR0K4WtV7zz4L2edrnjPRoITgjtZCgKfXgnCkDEEtnVw" alt="Premium Crafted Essence" />
                         </div>
                         <div className="flex flex-col justify-center">
                           <p className="font-headline text-sm font-semibold leading-tight text-on-surface">Eclipse Chronometer</p>
@@ -2069,7 +2329,7 @@ export default function App() {
                       </div>
                       <div className="flex gap-4 group opacity-50">
                         <div className="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
-                          <img className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ80WVERTSqcG39j3RqBe2jz6cuJXg7OXKa3IZEYtmZeDGNxkQP8vK9dKSFG0JkahUsOZsX0Ajsx6uZ2AWNMRYYAjsJHORQdYujf7bulgCt9CFn-bFK1HwhJiGrOSuCpAVmzi0pDH1levb0D4xlZWFZsdAUt0W2Thy6gQoEWPZpQzJqyvGrdSkrUEoF8jgZeLJUxX1-kIrE4P5EDJb_Yka2LBX_EZNjdkSThqjTdlpA07WWDw9j0aHKqQZlojUs5kharrLdhslCEk" />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ80WVERTSqcG39j3RqBe2jz6cuJXg7OXKa3IZEYtmZeDGNxkQP8vK9dKSFG0JkahUsOZsX0Ajsx6uZ2AWNMRYYAjsJHORQdYujf7bulgCt9CFn-bFK1HwhJiGrOSuCpAVmzi0pDH1levb0D4xlZWFZsdAUt0W2Thy6gQoEWPZpQzJqyvGrdSkrUEoF8jgZeLJUxX1-kIrE4P5EDJb_Yka2LBX_EZNjdkSThqjTdlpA07WWDw9j0aHKqQZlojUs5kharrLdhslCEk" alt="Artisanal Leather Craft" />
                         </div>
                         <div className="flex flex-col justify-center">
                           <p className="font-headline text-sm font-semibold leading-tight text-on-surface">Velvet Step Loafers</p>
@@ -2211,10 +2471,10 @@ export default function App() {
                         </div>
                         <div className="flex -space-x-4">
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300">
-                            <img alt="Luxury silk scarf" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC33u-D5feId20_mfEE8zEDs0igE03Uk4FFop3NCatE5MKtVlY8DKU5Pfnw2v4A8GQ6MN2GOhKI6HlzsMFw7oIjpBfA8FMEPiLQ1vxK4Z9Npgr0zVxAf2RbRYwdazGHls1_UWw0-QxORsTL5lzXIOydvqu1IXvz9iXop6TzVLvFHQrZm2auFBF8DQ1cKAoitRB1oxwdAXuVjlKY85q4J5Wl26juIlBSPirv8XSWAzRDENT2id0UqIs6GpFulxd6Q0LvrVlY3hjOmyw" />
+                            <img loading="lazy" alt="Luxury silk scarf" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC33u-D5feId20_mfEE8zEDs0igE03Uk4FFop3NCatE5MKtVlY8DKU5Pfnw2v4A8GQ6MN2GOhKI6HlzsMFw7oIjpBfA8FMEPiLQ1vxK4Z9Npgr0zVxAf2RbRYwdazGHls1_UWw0-QxORsTL5lzXIOydvqu1IXvz9iXop6TzVLvFHQrZm2auFBF8DQ1cKAoitRB1oxwdAXuVjlKY85q4J5Wl26juIlBSPirv8XSWAzRDENT2id0UqIs6GpFulxd6Q0LvrVlY3hjOmyw" />
                           </div>
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300 delay-75">
-                            <img alt="Designer timepiece" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrwvNinjtVsciLIx2_xGa7Wdy8ryErfCWJW3lFnZKPQDBVU9IQZwEPfnyP4Bjpbox7HAel3RuKVV3NOyP-RVMuucIOMMSIAB7z5Ls-CjGLlr3_QiNCrf9kCIBRI-HskZY-7t3ATkY-QSdjCaG-GOo2m36AmBHt7n7I3YTNcnAUCygkDYIPVurjFm_zmHUVnURhDGYzjqVUefGK90pTytGGh-YVri62pdUKgTBZsDgdRcmfiNLAWOnMIwFBlf9ROhfjFnp0XVOBzkM" />
+                            <img loading="lazy" alt="Designer timepiece" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrwvNinjtVsciLIx2_xGa7Wdy8ryErfCWJW3lFnZKPQDBVU9IQZwEPfnyP4Bjpbox7HAel3RuKVV3NOyP-RVMuucIOMMSIAB7z5Ls-CjGLlr3_QiNCrf9kCIBRI-HskZY-7t3ATkY-QSdjCaG-GOo2m36AmBHt7n7I3YTNcnAUCygkDYIPVurjFm_zmHUVnURhDGYzjqVUefGK90pTytGGh-YVri62pdUKgTBZsDgdRcmfiNLAWOnMIwFBlf9ROhfjFnp0XVOBzkM" />
                           </div>
                           <div className="w-20 h-24 bg-surface-container-high rounded-lg flex items-center justify-center border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300 delay-150">
                             <span className="text-xs font-bold text-outline">+1</span>
@@ -2253,7 +2513,7 @@ export default function App() {
                         </div>
                         <div className="flex">
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl">
-                            <img alt="Bespoke leather boots" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1nFaLKAs15ex2WwLINfv3Vscb47Cyni7CNOhb-twK0R5YJ2y4rxE4hnXTyOR7LoI8DEO9B8ApPpQS1l8hlv4a3LJ8_4P5Dc4iA8uDKz6Edv_O6S8xQLkxh2ikMRViKLjVtBdfkhMAPTPt4cmxm-Z5nj52nkyCrKZw_qrCx_r8A-QW15YE5rolbyHY6WiULtNJTRmcl5mrWUkTgAzkhSp8X_aDDHka5_5QmR9YNamjqTabYmpfMnXFnSlh7M5TJekq2aGx2_NWIko" />
+                            <img loading="lazy" alt="Bespoke leather boots" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1nFaLKAs15ex2WwLINfv3Vscb47Cyni7CNOhb-twK0R5YJ2y4rxE4hnXTyOR7LoI8DEO9B8ApPpQS1l8hlv4a3LJ8_4P5Dc4iA8uDKz6Edv_O6S8xQLkxh2ikMRViKLjVtBdfkhMAPTPt4cmxm-Z5nj52nkyCrKZw_qrCx_r8A-QW15YE5rolbyHY6WiULtNJTRmcl5mrWUkTgAzkhSp8X_aDDHka5_5QmR9YNamjqTabYmpfMnXFnSlh7M5TJekq2aGx2_NWIko" />
                           </div>
                         </div>
                         <p className="text-sm text-on-surface-variant font-medium">1 Item total • <span className="text-on-surface">Delivered Oct 02, 2024</span></p>
@@ -2289,7 +2549,7 @@ export default function App() {
                         </div>
                         <div className="flex">
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest grayscale shadow-xl">
-                            <img alt="Crystal decanter" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKD_EFGiKYA46zgCCroiGNUAofr9VKqFbySpn87T_iJXA8gJ7aYAqC9ap1hS4R84_yQ0PJh17kEAEjFm3EXsM1GrLfQ1ci0M63CBw8bsWZJKROEEfA4m2CiC5tLRnPQFbZ5E86dXPu-AVD0UMbYDSt9rI7fGIY8B-MR7nGn2iFJvNO4vjQETpRgpvpscD2MHssqwM4y6UtZU_f14YI825Jy3EKr9dU7FZ571azXbz6Hpefbfi5lAQ59oq61uXG6WvfpFbdvUvrbFU" />
+                            <img loading="lazy" alt="Crystal decanter" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKD_EFGiKYA46zgCCroiGNUAofr9VKqFbySpn87T_iJXA8gJ7aYAqC9ap1hS4R84_yQ0PJh17kEAEjFm3EXsM1GrLfQ1ci0M63CBw8bsWZJKROEEfA4m2CiC5tLRnPQFbZ5E86dXPu-AVD0UMbYDSt9rI7fGIY8B-MR7nGn2iFJvNO4vjQETpRgpvpscD2MHssqwM4y6UtZU_f14YI825Jy3EKr9dU7FZ571azXbz6Hpefbfi5lAQ59oq61uXG6WvfpFbdvUvrbFU" />
                           </div>
                         </div>
                         <p className="text-sm text-outline font-medium italic">Order was cancelled by customer</p>
@@ -2336,12 +2596,19 @@ export default function App() {
                 </div>
                 <div>
                   <h4 className="text-primary text-xs uppercase tracking-widest font-bold mb-6 font-headline">Newsletter</h4>
-                  <div className="relative">
-                    <input className="w-full bg-surface-container-low border-b border-outline-variant/30 text-xs py-2 focus:border-primary transition-all bg-transparent outline-none" placeholder="Concierge Email" type="email"/>
-                    <button className="absolute right-0 top-1/2 -translate-y-1/2 text-primary">
+                  <form className="relative" onSubmit={handleNewsletterSubmit}>
+                    <input
+                      className="w-full bg-surface-container-low border-b border-outline-variant/30 text-xs py-2 focus:border-primary transition-all bg-transparent outline-none"
+                      placeholder="Concierge Email"
+                      type="email"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                    />
+                    <button type="submit" className="absolute right-0 top-1/2 -translate-y-1/2 text-primary">
                       <ArrowRight size={16} />
                     </button>
-                  </div>
+                  </form>
+                  {newsletterMessage && <p className="text-[10px] text-primary/80 mt-2">{newsletterMessage}</p>}
                 </div>
               </div>
               <div className="px-12 pb-12">
@@ -2452,7 +2719,7 @@ export default function App() {
                   <div className="flex flex-col md:flex-row gap-10 items-start md:items-center relative z-10">
                     <div className="relative group/avatar">
                       <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-primary/20 p-1">
-                        <img className="w-full h-full object-cover rounded-full" alt="Curator Identity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOb_-CF6n0kU_BRR35D8QXnZfNWMZ0hZBDDCGrrF4q_UOqszPvINYF_XpBq3nxGn2j5-OD7mY1v6nrW9mb-sGJGLvEP1hxYjHw273WYP7DYSqdZ-Wa22GdoGAIIgGnsLjs1Na4o8IlWizQSlVKvJbEB5A5NALojxA511bCbJ0CzNHv-c8jarzZ6VUKLFcmiSiMhtgjxXI0DA0uPBjGYccoxMyKrYKyw5lORzHJ7i_MUdEO6ydcokJpiY3Hm6NCJZr14qir068t3bQ" referrerPolicy="no-referrer" />
+                        <img loading="lazy" className="w-full h-full object-cover rounded-full" alt="Curator Identity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOb_-CF6n0kU_BRR35D8QXnZfNWMZ0hZBDDCGrrF4q_UOqszPvINYF_XpBq3nxGn2j5-OD7mY1v6nrW9mb-sGJGLvEP1hxYjHw273WYP7DYSqdZ-Wa22GdoGAIIgGnsLjs1Na4o8IlWizQSlVKvJbEB5A5NALojxA511bCbJ0CzNHv-c8jarzZ6VUKLFcmiSiMhtgjxXI0DA0uPBjGYccoxMyKrYKyw5lORzHJ7i_MUdEO6ydcokJpiY3Hm6NCJZr14qir068t3bQ" referrerPolicy="no-referrer" />
                       </div>
                       <button className="absolute bottom-2 right-2 bg-primary text-on-primary p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center">
                         <Camera size={16} />
@@ -2858,7 +3125,7 @@ export default function App() {
             setShowProfileDropdown={setShowProfileDropdown}
             title="Luxury Timepieces"
             subtitle="Engineering Eternity"
-            heroImg="https://lh3.googleusercontent.com/aida-public/AB6AXuBWmezpxPFDh190lUIq1SaZM4Y5DRFLJrSpvpHt9W6u1vBoFN_nrWJYP9lY_QSG-I6yyEPmkexrVFu1CrYct5YgQbwZEEVsffE-1WOWfCg7n6nXrZGuK_8caisdSPHfsV5pxssq0ky1XUDrWf57JkMqxwRWwKq_U8RncvubN_YftPDSlXhRu570SdKGwccpMsX-2wkyKKRuQ72c09p97EX20ek01PQfxBjolMaxHSRFqCFQPMrGc39nkTrx2aYNHq-4M0G95cF2xk8"
+            heroImg="https://images.unsplash.com/photo-1523170335684-f042f1b8f374?w=1600&h=800&fit=crop"
             products={timepieceProducts}
           />
         )}
@@ -2872,7 +3139,7 @@ export default function App() {
             setShowProfileDropdown={setShowProfileDropdown}
             title="High Jewelry"
             subtitle="Artisanal Brilliance"
-            heroImg="https://lh3.googleusercontent.com/aida-public/AB6AXuD_EGAp8Mx5NunHFm93XPsZxTscNvGZMTS4srtioDBr6RvhjCZMxTpgxqlGu4GArhkcgR5zj0HqiyEeQ0ewd_MVLQkxcr5svZG0AkniOAhGP20GrXNplnOrwf2XnEr1MpWGphVyN4IGG8_h-klVUd23imAsQfcSyUBTE_oeacsU491wN8eZG3uWPVDaJYNS1F6aXx1KLF7-pV4hFwLY9E5kZh_YxIvkM3kpGZfVQQPiz0VFDYtFV_InMSlXS5uP-sT8_jX8Oy7XdHI"
+            heroImg="https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=1600&h=800&fit=crop"
             products={jewelryProducts}
           />
         )}
@@ -2886,8 +3153,92 @@ export default function App() {
             setShowProfileDropdown={setShowProfileDropdown}
             title="Leather Goods"
             subtitle="Timeless Craftsmanship"
-            heroImg="https://lh3.googleusercontent.com/aida-public/AB6AXuCzJKX7FhSQ4xkkzfi3MG4Dt9YngBN5G7ntrM6qbj-IDy7fiFzA82vebByMGjYnuEQPopITMXFfCysm-zPVfRlpB1JpnfuK8RrvvYV4IwMov5e2udoWfV-6E1Xc9JpaEx7pwgpOZhkpLjn_M5lqHmtzz8H_6L_ZRrzRrqB4oTfTM9tk2fqq8GlMXxkFVbUImHzpuZ4JW1GuVOPvN03f71lN_sCzZjieg-D0MEiX8WU-1UebURK4NNy6Oh-6PLip93BuRRcsk-Wsqr0"
+            heroImg="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1600&h=800&fit=crop"
             products={leatherProducts}
+          />
+        )}
+
+        {view === 'category-fashion' && (
+          <CategoryLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            title="Haute Couture"
+            subtitle="Sartorial Excellence"
+            heroImg="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1600&h=800&fit=crop"
+            products={fashionProducts}
+          />
+        )}
+
+        {view === 'category-home' && (
+          <CategoryLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            title="Home & Living"
+            subtitle="Curated Interiors"
+            heroImg="https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=1600&h=800&fit=crop"
+            products={homeProducts}
+          />
+        )}
+
+        {view === 'category-beauty' && (
+          <CategoryLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            title="Fragrances & Beauty"
+            subtitle="Olfactory Masterpieces"
+            heroImg="https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=1600&h=800&fit=crop"
+            products={beautyProducts}
+          />
+        )}
+
+        {view === 'category-sports' && (
+          <CategoryLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            title="Sports & Recreation"
+            subtitle="Athletic Excellence"
+            heroImg="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1600&h=800&fit=crop"
+            products={sportsProducts}
+          />
+        )}
+
+        {view === 'category-books' && (
+          <CategoryLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            title="Rare Books & Manuscripts"
+            subtitle="Literary Treasures"
+            heroImg="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1600&h=800&fit=crop"
+            products={booksProducts}
+          />
+        )}
+
+        {view === 'category-toys' && (
+          <CategoryLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            title="Collectible Toys"
+            subtitle="Timeless Companions"
+            heroImg="https://images.unsplash.com/photo-1594545514411-854a028e7195?w=1600&h=800&fit=crop"
+            products={toysProducts}
           />
         )}
 
@@ -2908,6 +3259,11 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+            />
+            
+            <CategoryBar 
+              view={view} 
+              setView={setView} 
             />
 
             <main className="flex-grow">
@@ -3139,7 +3495,7 @@ export default function App() {
                       </div>
                       <p className="text-on-surface leading-relaxed mb-8 font-body italic text-lg">"{t.quote}"</p>
                       <div className="flex items-center gap-4">
-                        <img className="w-12 h-12 rounded-full object-cover border border-primary/20" src={t.img} alt={t.name} />
+                        <img loading="lazy" className="w-12 h-12 rounded-full object-cover border border-primary/20" src={t.img} alt={t.name} />
                         <div>
                           <h4 className="font-bold text-on-surface">{t.name}</h4>
                           <span className="text-[10px] text-primary/60 uppercase font-bold tracking-widest">{t.role}</span>
@@ -3204,10 +3560,17 @@ export default function App() {
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Newsletter</h4>
                   <p className="text-on-surface-variant/60 text-sm font-body mb-2">Join the inner circle for exclusive drops.</p>
-                  <div className="flex border-b border-primary/20 pb-2">
-                    <input className="bg-transparent border-none focus:ring-0 text-on-surface w-full text-sm outline-none" placeholder="Email Address" type="email" />
-                    <button className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
-                  </div>
+                  <form className="flex border-b border-primary/20 pb-2" onSubmit={handleNewsletterSubmit}>
+                    <input
+                      className="bg-transparent border-none focus:ring-0 text-on-surface w-full text-sm outline-none"
+                      placeholder="Email Address"
+                      type="email"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                    />
+                    <button type="submit" className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
+                  </form>
+                  {newsletterMessage && <p className="text-[10px] text-primary/80">{newsletterMessage}</p>}
                 </div>
               </div>
               <div className="px-6 md:px-12 py-8 border-t border-outline-variant/5 text-center text-on-surface-variant/20 tracking-widest text-[10px] uppercase font-bold">
@@ -3285,6 +3648,12 @@ export default function App() {
                     <span className="text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-2 inline-block">
                       {selectedProduct?.brand || 'Chronos Noir'}
                     </span>
+                    <button
+                      className="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant hover:text-primary transition-colors mb-2"
+                      onClick={() => setView(getCategoryForBrand(selectedProduct?.brand))}
+                    >
+                      View matching collection
+                    </button>
                     <h1 className="text-5xl font-headline text-on-surface font-light leading-tight mb-4 tracking-tight">
                       {selectedProduct?.name || 'The Midnight Eclipse Perpetual'}
                     </h1>
@@ -3417,7 +3786,12 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                    <a className="text-[10px] font-bold text-primary uppercase border-b border-primary/30 hover:border-primary transition-all tracking-widest" href="#">Visit Store</a>
+                    <button
+                      className="text-[10px] font-bold text-primary uppercase border-b border-primary/30 hover:border-primary transition-all tracking-widest"
+                      onClick={() => setView(getCategoryForBrand(selectedProduct?.brand))}
+                    >
+                      Visit Store
+                    </button>
                   </div>
                 </section>
               </div>
@@ -3488,7 +3862,7 @@ export default function App() {
                       <React.Fragment key={i}>
                         <div className="relative group text-center">
                           <div className="w-40 h-40 rounded-2xl overflow-hidden border border-outline-variant/20">
-                            <img className="w-full h-full object-cover" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
+                            <img loading="lazy" className="w-full h-full object-cover" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                           </div>
                           <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">{item.name}</p>
                         </div>
@@ -3532,7 +3906,7 @@ export default function App() {
                   ].map((item, i) => (
                     <div key={i} className="w-72 flex-shrink-0 group cursor-pointer" onClick={() => { setSelectedProduct(item); setSelectedImage(0); window.scrollTo(0, 0); }}>
                       <div className="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6 border border-outline-variant/10">
-                        <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
+                        <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                         <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-primary">
                           <Heart size={16} />
                         </button>
@@ -3555,24 +3929,31 @@ export default function App() {
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Navigation</h4>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Private Suite</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Shipping Etiquette</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Terms of Service</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Authenticity Guarantee</a>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('home')}>Private Suite</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('order-tracking')}>Shipping Etiquette</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('checkout-review')}>Terms of Service</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('shop')}>Authenticity Guarantee</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Concierge</h4>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Support</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Wholesale</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Journal</a>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('profile-help')}>Support</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('my-orders')}>Wholesale</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('profile')}>Journal</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Newsletter</h4>
                   <p className="text-on-surface-variant/60 text-sm font-body mb-2">Join our private list for exclusive curations.</p>
-                  <div className="flex border-b border-primary/20 pb-2">
-                    <input className="bg-transparent border-none focus:ring-0 text-on-surface w-full text-sm outline-none" placeholder="Email address" type="email" />
-                    <button className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
-                  </div>
+                  <form className="flex border-b border-primary/20 pb-2" onSubmit={handleNewsletterSubmit}>
+                    <input
+                      className="bg-transparent border-none focus:ring-0 text-on-surface w-full text-sm outline-none"
+                      placeholder="Email address"
+                      type="email"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                    />
+                    <button type="submit" className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
+                  </form>
+                  {newsletterMessage && <p className="text-[10px] text-primary/80">{newsletterMessage}</p>}
                 </div>
               </div>
               <div className="px-12 py-8 border-t border-outline-variant/5 text-center text-on-surface-variant/20 text-[10px] uppercase tracking-[0.3em] font-bold">
@@ -3599,6 +3980,11 @@ export default function App() {
               setShowProfileDropdown={setShowProfileDropdown}
             />
 
+            <CategoryBar 
+              view={view} 
+              setView={setView} 
+            />
+
             <div className="flex flex-1 max-w-[1920px] mx-auto w-full">
               {/* SideNavBar (Filter Gallery) */}
               <aside className="hidden lg:flex flex-col p-8 gap-8 bg-surface-container-lowest border-r border-outline-variant/10 w-80 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
@@ -3608,22 +3994,38 @@ export default function App() {
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="text-primary bg-surface-variant/30 rounded-lg flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => setShopMaxPrice('all')}
+                    className="w-full text-primary bg-surface-variant/30 rounded-lg flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
+                  >
                     <LayoutGrid size={20} />
                     <span className="font-label uppercase tracking-widest text-xs font-bold">Categories</span>
-                  </div>
-                  <div className="text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShopMaxPrice('5000')}
+                    className="w-full text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
+                  >
                     <DollarSign size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">Price Range</span>
-                  </div>
-                  <div className="text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+                    <span className="font-label uppercase tracking-widest text-xs font-bold">Price under $5K</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShopMinRating(4)}
+                    className="w-full text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
+                  >
                     <Award size={20} />
                     <span className="font-label uppercase tracking-widest text-xs font-bold">Designer Brands</span>
-                  </div>
-                  <div className="text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShopMinRating(5)}
+                    className="w-full text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
+                  >
                     <Star size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">Client Ratings</span>
-                  </div>
+                    <span className="font-label uppercase tracking-widest text-xs font-bold">5 Star Only</span>
+                  </button>
                   <div className="text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
                     <Package size={20} />
                     <span className="font-label uppercase tracking-widest text-xs font-bold">Availability</span>
@@ -3634,10 +4036,19 @@ export default function App() {
                   <button className="w-full py-4 bg-primary text-on-primary rounded-lg font-bold tracking-widest text-xs uppercase hover:opacity-90 transition-opacity mb-4">
                     Apply Filters
                   </button>
-                  <div className="text-on-surface-variant/40 hover:text-primary flex items-center justify-center gap-2 p-3 cursor-pointer text-xs font-bold uppercase tracking-widest">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShopMaxPrice('all');
+                      setShopMinRating(0);
+                      setShopSortBy('relevance');
+                      setSearchTerm('');
+                    }}
+                    className="w-full text-on-surface-variant/40 hover:text-primary flex items-center justify-center gap-2 p-3 cursor-pointer text-xs font-bold uppercase tracking-widest"
+                  >
                     <RotateCcw size={14} />
                     <span>Clear All</span>
-                  </div>
+                  </button>
                 </div>
               </aside>
 
@@ -3651,7 +4062,7 @@ export default function App() {
                       <p className="text-on-surface-variant max-w-xl font-body leading-relaxed">Curated excellence from the world's most exclusive ateliers. Each piece is authenticated by our master curators.</p>
                     </div>
                     <div className="flex items-center gap-4 text-xs font-mono">
-                      <span className="text-on-surface-variant uppercase tracking-widest opacity-60">Showing 1–24 of 340 products</span>
+                      <span className="text-on-surface-variant uppercase tracking-widest opacity-60">Showing {filteredShopProducts.length} curated products</span>
                     </div>
                   </div>
 
@@ -3679,12 +4090,15 @@ export default function App() {
                     <div className="flex items-center gap-8">
                       <div className="flex items-center gap-4">
                         <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Sort By</label>
-                        <select className="bg-transparent border-none text-sm text-on-surface focus:ring-0 cursor-pointer font-bold pr-8 outline-none">
-                          <option className="bg-background">Relevance</option>
-                          <option className="bg-background">Price: Low to High</option>
-                          <option className="bg-background">Price: High to Low</option>
-                          <option className="bg-background">Newest Arrivals</option>
-                          <option className="bg-background">Top Rated</option>
+                        <select
+                          className="bg-transparent border-none text-sm text-on-surface focus:ring-0 cursor-pointer font-bold pr-8 outline-none"
+                          value={shopSortBy}
+                          onChange={(e) => setShopSortBy(e.target.value as 'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated')}
+                        >
+                          <option className="bg-background" value="relevance">Relevance</option>
+                          <option className="bg-background" value="low-to-high">Price: Low to High</option>
+                          <option className="bg-background" value="high-to-low">Price: High to Low</option>
+                          <option className="bg-background" value="top-rated">Top Rated</option>
                         </select>
                       </div>
                       <div className="h-4 w-[1px] bg-outline-variant/20"></div>
@@ -3702,14 +4116,7 @@ export default function App() {
 
                 {/* Product Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-12 gap-y-20">
-                  {[
-                    { brand: 'AUREL & CO', name: 'The Midnight Chrono', price: '$12,400', rating: 4.5, reviews: 42, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcc1ysQTol8JUR_QreOBTctd9-wWDZTkjgw6rFkk_zhsFfGrVwu5ZkkGcJDEggJVbHGxXlVVjZu-eGynLe0RyjNwzAS4WlAphEPGEwQKfH4LXdw3Nigkyl8CgpPItELUNH_-CAlxghstdiGpJgVXcaIJKpi4snCZBtp7JkVIKU7p8PhsKMFN1s0we3JFPYcLhrc0PuLefjls6FSF3wOmJpyyItsKFth-SJ04PYsffCXCbD0pklmEZo9Z_U7Kdo_wkgCI6IRk3r6Os' },
-                    { brand: 'ESSENCE NOIR', name: 'Velvet Oud Extract', price: '$850', rating: 5, reviews: 128, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnY3IkrKndvvqBCsfooDiD_mMXWFCCjhHzRd7qKfwagVxOzE_moPQP068Odna3MU4G18919aI3gd2Sq59Kijpc11Rgd3HcgHT7RQaFBkmPHuFlNjJ_WgloGA0oTpy3xqenip2EDT3THGMPk4soKH1xJ8HVlPv8S3UqoyzHFThLN1FeoK1IhMondM9UNUXfobdZZO73eTu5StIpyScS_DGXHjuBqUSeEsN6CQiKw7biXaPtU2px-tVmSPyFXTekrgNxckuBZ2uFryo' },
-                    { brand: 'VALERIA STELLE', name: 'Starlight Pumps', price: '$4,200', rating: 4.5, reviews: 18, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAO5gXJpE3HtQEdhHnrZZZY_6BjMhmIHHmNrXgi83MXmFpxUjXI6XBPPaCGYiHAp_NUeEde4vdzBx5LJnfwPqatK7W0BljXUCAX19bJ87vWGXJKdXLwQWWasBRtawH_ZXUavxU6rrAzTmTP7ak8ttIv8oGHUlVxtpJNoXddiiXXyW0w5bmTslKvD-U0KpI1IkM8AEHD_6Jl2BZ1YYmxDJuOFVnzppxHwej5yAuixR95WEkJ1XZNeYvPVHs3eUWuQY6jPHlPvGY6M74' },
-                    { brand: 'SAVILE ELITE', name: 'Obsidian Tuxedo', price: '$6,800', rating: 4.8, reviews: 24, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwbQGzcfAAJP6mZQX8uh846G36_t1lidhdsU4F1DCgKR8gu1AKpiMDM5b6CA24uUyNvFGqgt2DwPQWVYhIEwGIizY4Eo1KwDHJRHPj_IfsVMDk2sbGvVE1T4xNHtEh2j56NhAe1x_CnnayPDf7qRdsNYfajYV7wAt91aAo_oxIXNzqqmNNnUdZihIi-r3pSYreEJa8U8W-r-3PEFA8LEGr1UO5jjnwkXRErZYrsnFSr4GV9fczgXBNc1cNlKfjCu9YbffkS3PyCyY' },
-                    { brand: 'MAISON MARA', name: 'The Heritage Tote', price: '$3,150', rating: 4.9, reviews: 56, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB0C0J8X839ZwJ5BCotPeTrOp38HY1b1B-qwM2Obw4hg38S0MbWq433kvaKdyr8r2eShhEqxlH0JeWA6yn5q7CiGIcaxfY26zkTTPT3SXL87pkRX9vHc_GJ9tNoV_Pqm0N_4Pdvj_yH3ffD7Ci9ur85sF4zvKmzZumOoXJGV6qeYsDa6JVtA-Kl61e5rK1SG1MnHOFjWjm02VOJE40qSwmvCagtjGjAFffYypWZVWkq3bV8DnSfQsRVyDBDziyhZbtqvUznZ_ykBjE' },
-                    { brand: 'AUREL & CO', name: 'The Midnight Chrono', price: '$12,400', rating: 4.5, reviews: 42, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcc1ysQTol8JUR_QreOBTctd9-wWDZTkjgw6rFkk_zhsFfGrVwu5ZkkGcJDEggJVbHGxXlVVjZu-eGynLe0RyjNwzAS4WlAphEPGEwQKfH4LXdw3Nigkyl8CgpPItELUNH_-CAlxghstdiGpJgVXcaIJKpi4snCZBtp7JkVIKU7p8PhsKMFN1s0we3JFPYcLhrc0PuLefjls6FSF3wOmJpyyItsKFth-SJ04PYsffCXCbD0pklmEZo9Z_U7Kdo_wkgCI6IRk3r6Os' },
-                  ].map((product, i) => (
+                  {filteredShopProducts.map((product, i) => (
                     <motion.div 
                       key={i}
                       initial={{ opacity: 0, y: 20 }}
@@ -3802,10 +4209,17 @@ export default function App() {
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Newsletter</h4>
                   <p className="text-on-surface-variant/60 text-sm font-body mb-2">Subscribe for invitations to private auctions.</p>
-                  <div className="flex border-b border-primary/20 pb-2">
-                    <input className="bg-transparent border-none focus:ring-0 text-on-surface w-full text-sm outline-none" placeholder="Email Address" type="email" />
-                    <button className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
-                  </div>
+                  <form className="flex border-b border-primary/20 pb-2" onSubmit={handleNewsletterSubmit}>
+                    <input
+                      className="bg-transparent border-none focus:ring-0 text-on-surface w-full text-sm outline-none"
+                      placeholder="Email Address"
+                      type="email"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                    />
+                    <button type="submit" className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
+                  </form>
+                  {newsletterMessage && <p className="text-[10px] text-primary/80">{newsletterMessage}</p>}
                 </div>
               </div>
               <div className="px-12 py-8 border-t border-outline-variant/5 flex justify-between items-center text-on-surface-variant/20 text-[10px] uppercase font-bold tracking-widest">
@@ -3954,7 +4368,7 @@ export default function App() {
                         id="remember"
                         type="checkbox"
                         checked={rememberMe}
-                        onChange={() => {}}
+                        onChange={(e) => setRememberMe(e.target.checked)}
                       />
                       {rememberMe && (
                         <Check size={12} className="absolute text-on-primary pointer-events-none left-0.5" />
@@ -4060,9 +4474,9 @@ export default function App() {
                 </p>
                 <div className="flex items-center gap-6">
                   <div className="flex -space-x-3">
-                    <img className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnqx1-pixOCBN02ewAIwKmI0jOn41p4JBnlytSLKnoonfYAA1qaqJqAKwbiTD0yjd3-OfWX34iovKlUUfs_Sy8m44EUhAH94cb0nvF0CZKFT-dU1OGjppFXVNmvmHuBXe5iIb0vanvbWHyjTk13s5m2NIUFrEjAAVH-kQngvCjZVNS35RvbUaNzi-JdnHUmiF1YL3kaoeOM0FGY-zrdurONRTVQZ_p91ctl5Xkr2Imc9RIJqQnuP21Dn5bR8rqiVVJR3YreFHPJxM" referrerPolicy="no-referrer" />
-                    <img className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTcY9kiSxEu3JIqlH4ioBRoo7EwVXhkhROVV6EdBWHDExhN8GuZfThAHZskyHxwXyD3S4S93BtGV2ZjjNDPe9jd_q7eSJshjCbn8Wsoj8fVOKjyN0mUhzEmaCL8CQ2bSUdn3CIFzjQ8kYRePNh5t3VvSY9xz8503q6GtCguJML8pQqSaP6DYNgJo_4YYNfctJgDpmZ08Dmli7F2CeZTjwM3R8KG4oaDndUg8sV3Mawl6ipa8YOINb1BY8x6kzsSVVfFaA2Hy6mbic" referrerPolicy="no-referrer" />
-                    <img className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAogWBpy1Gsu4mTHLtxpoasFq9bkA2N_IyfjZ8olraccrRkLl9oI9KjcIug3n87jza55p_5-5Iy1HttfgHq1-grftCtaBCglmTS_GGGf7moVFcIE1fro-UEOXzxe8LkBZXp3nT9yzzHNnhbrnrwOfv7kk2_Z37Ez-GCZ0uzA1aRZ6NACRD5EtzYhLi7UpsNRghMFrmbU8bm9Jnq3mrouPQ05ij1ZTcEx4IAE-vUSgeplsDKfBnprv9xQ9L-qD_AtspaYO9NATk1MkU" referrerPolicy="no-referrer" />
+                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnqx1-pixOCBN02ewAIwKmI0jOn41p4JBnlytSLKnoonfYAA1qaqJqAKwbiTD0yjd3-OfWX34iovKlUUfs_Sy8m44EUhAH94cb0nvF0CZKFT-dU1OGjppFXVNmvmHuBXe5iIb0vanvbWHyjTk13s5m2NIUFrEjAAVH-kQngvCjZVNS35RvbUaNzi-JdnHUmiF1YL3kaoeOM0FGY-zrdurONRTVQZ_p91ctl5Xkr2Imc9RIJqQnuP21Dn5bR8rqiVVJR3YreFHPJxM" referrerPolicy="no-referrer" alt="Curator Avatar 1" />
+                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTcY9kiSxEu3JIqlH4ioBRoo7EwVXhkhROVV6EdBWHDExhN8GuZfThAHZskyHxwXyD3S4S93BtGV2ZjjNDPe9jd_q7eSJshjCbn8Wsoj8fVOKjyN0mUhzEmaCL8CQ2bSUdn3CIFzjQ8kYRePNh5t3VvSY9xz8503q6GtCguJML8pQqSaP6DYNgJo_4YYNfctJgDpmZ08Dmli7F2CeZTjwM3R8KG4oaDndUg8sV3Mawl6ipa8YOINb1BY8x6kzsSVVfFaA2Hy6mbic" referrerPolicy="no-referrer" alt="Curator Avatar 2" />
+                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAogWBpy1Gsu4mTHLtxpoasFq9bkA2N_IyfjZ8olraccrRkLl9oI9KjcIug3n87jza55p_5-5Iy1HttfgHq1-grftCtaBCglmTS_GGGf7moVFcIE1fro-UEOXzxe8LkBZXp3nT9yzzHNnhbrnrwOfv7kk2_Z37Ez-GCZ0uzA1aRZ6NACRD5EtzYhLi7UpsNRghMFrmbU8bm9Jnq3mrouPQ05ij1ZTcEx4IAE-vUSgeplsDKfBnprv9xQ9L-qD_AtspaYO9NATk1MkU" referrerPolicy="no-referrer" alt="Curator Avatar 3" />
                   </div>
                   <p className="text-on-surface-variant text-sm tracking-wide">Joined by <span className="text-primary font-semibold">1,200+</span> luxury enthusiasts</p>
                 </div>
@@ -4389,6 +4803,9 @@ export default function App() {
                             />
                           ))}
                         </div>
+                        {otpError && (
+                          <p className="text-xs text-error text-center -mt-4">{otpError}</p>
+                        )}
                         <button 
                           className="w-full bg-primary/10 border border-primary/30 text-primary py-4 rounded-lg uppercase tracking-widest font-bold text-xs hover:bg-primary/20 transition-all disabled:opacity-50"
                           type="submit"
@@ -4519,5 +4936,6 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
+    </SearchContext.Provider>
   );
 }
