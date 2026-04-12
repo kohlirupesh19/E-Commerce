@@ -1,7 +1,4 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-
-export default function AdminDashboard({ setView }: { setView: (view: any) => void }) {
+export default function AdminDashboard({ setView: _setView }: { setView: (view: any) => void }) {
   return (
     <div className="animate-in fade-in">
 <header className="flex justify-between items-center mb-16">
@@ -26,7 +23,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 </div>
 </header>
 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-<!-- KPI 1 -->
+{/* KPI 1 */}
 <div className="glass-card p-8 rounded-xl border border-outline-variant/10 group hover:border-primary/20 transition-all">
 <div className="flex justify-between items-start mb-6">
 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -40,7 +37,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 <p className="text-on-surface-variant text-xs uppercase tracking-[0.2em] font-label mb-2">Total Revenue</p>
 <h3 className="text-3xl font-headline font-bold text-on-surface">$428,590</h3>
 </div>
-<!-- KPI 2 -->
+{/* KPI 2 */}
 <div className="glass-card p-8 rounded-xl border border-outline-variant/10 group hover:border-primary/20 transition-all">
 <div className="flex justify-between items-start mb-6">
 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -54,7 +51,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 <p className="text-on-surface-variant text-xs uppercase tracking-[0.2em] font-label mb-2">Orders Today</p>
 <h3 className="text-3xl font-headline font-bold text-on-surface">142</h3>
 </div>
-<!-- KPI 3 -->
+{/* KPI 3 */}
 <div className="glass-card p-8 rounded-xl border border-outline-variant/10 group hover:border-primary/20 transition-all">
 <div className="flex justify-between items-start mb-6">
 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -68,7 +65,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 <p className="text-on-surface-variant text-xs uppercase tracking-[0.2em] font-label mb-2">New Customers</p>
 <h3 className="text-3xl font-headline font-bold text-on-surface">2,841</h3>
 </div>
-<!-- KPI 4 -->
+{/* KPI 4 */}
 <div className="glass-card p-8 rounded-xl border border-outline-variant/10 group hover:border-primary/20 transition-all">
 <div className="flex justify-between items-start mb-6">
 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -84,7 +81,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 </div>
 </section>
 <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-<!-- Revenue Chart -->
+{/* Revenue Chart */}
 <div className="lg:col-span-2 glass-card p-8 rounded-xl border border-outline-variant/10">
 <div className="flex justify-between items-center mb-10">
 <h4 className="font-headline text-xl font-bold">Revenue Analytics</h4>
@@ -95,7 +92,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 </div>
 </div>
 <div className="h-80 relative flex items-end gap-2 pb-6 border-b border-outline-variant/20">
-<!-- Simulated Chart Bars -->
+{/* Simulated Chart Bars */}
 <div className="flex-1 bg-primary/20 rounded-t-sm h-[40%] group relative">
 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-primary font-mono text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">$12k</div>
 </div>
@@ -120,11 +117,11 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 <span>TODAY</span>
 </div>
 </div>
-<!-- Order Status Donut -->
+{/* Order Status Donut */}
 <div className="glass-card p-8 rounded-xl border border-outline-variant/10 flex flex-col">
 <h4 className="font-headline text-xl font-bold mb-10">Order Status</h4>
 <div className="flex-1 flex flex-col justify-center items-center relative">
-<!-- Abstract Visual Donut -->
+{/* Abstract Visual Donut */}
 <div className="w-48 h-48 rounded-full border-[12px] border-surface-container-highest flex items-center justify-center relative">
 <div className="absolute inset-0 border-[12px] border-primary border-t-transparent border-r-transparent rounded-full rotate-45"></div>
 <div className="text-center">
@@ -159,7 +156,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 </div>
 </section>
 <section className="grid grid-cols-1 xl:grid-cols-2 gap-12">
-<!-- Recent Orders -->
+{/* Recent Orders */}
 <div className="space-y-8">
 <div className="flex justify-between items-end">
 <h4 className="font-headline text-2xl font-bold tracking-tight">Recent Acquisitions</h4>
@@ -223,7 +220,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 </table>
 </div>
 </div>
-<!-- Top Selling Products -->
+{/* Top Selling Products */}
 <div className="space-y-8">
 <div className="flex justify-between items-end">
 <h4 className="font-headline text-2xl font-bold tracking-tight">Top Performance</h4>
@@ -233,7 +230,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 </div>
 </div>
 <div className="space-y-4">
-<!-- Product 1 -->
+{/* Product 1 */}
 <div className="glass-card flex items-center p-4 rounded-xl border border-outline-variant/10 hover:border-primary/30 transition-all cursor-pointer group">
 <div className="w-16 h-16 rounded overflow-hidden bg-surface-container-highest">
 <img alt="Product" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="minimalist expensive watch on dark velvet background, dramatic spot lighting, luxury product photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhrufPIkIo_APZwRB-aeThH56ijSMelehJem0JODwMRUwirTOG5aKfQucsTZ6p9g1afWKxP6JxnPy2iKdmoOszeMRHWEh0-sVZ6ICdAfcp-yFdkHH1WEfl7C7kTuzs0gmIbEuc4Wtxp88GWYt1RlUQE6NW29JRKzdRWW2yMvvFNcHeB26SmBuP7t3olHPXwQUpe58lFmor9hNRN51gAKedj94QjzEcmDCPDK6dKhlmetjrdYPUjP9NByBSEYf0DrRxZmIkK_o3Ois"/>
@@ -247,7 +244,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 <p className="text-[10px] text-on-surface-variant/60">82 Units Sold</p>
 </div>
 </div>
-<!-- Product 2 -->
+{/* Product 2 */}
 <div className="glass-card flex items-center p-4 rounded-xl border border-outline-variant/10 hover:border-primary/30 transition-all cursor-pointer group">
 <div className="w-16 h-16 rounded overflow-hidden bg-surface-container-highest">
 <img alt="Product" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="dark tailored wool coat on a designer mannequin, shadows and high contrast, editorial fashion style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD30nV4lMtVVQinOYaREvmtcnMzYZukWZmSa_HapPoWYqYit9eoKxBGFWiPdAj9oaVIUk4CFuRvTbEFf-i_F8W2Hqbr5A7Vy3L41XSmyOCwMMvIm17giXytofmYnWUxkRwnUEwaiqnNSG8NBr3TX1ov0pol_swxqCigzGYGFjK2lcgUXTdYc-1JyhemHGHlfwnUlJm9_KBacuXWB5lFb9XNWpH8n-_Wak2i6VvlZhvKb4zOLGUmD-513z33GzzInHkVq6bNoVvyjUI"/>
@@ -261,7 +258,7 @@ export default function AdminDashboard({ setView }: { setView: (view: any) => vo
 <p className="text-[10px] text-on-surface-variant/60">45 Units Sold</p>
 </div>
 </div>
-<!-- Product 3 -->
+{/* Product 3 */}
 <div className="glass-card flex items-center p-4 rounded-xl border border-outline-variant/10 hover:border-primary/30 transition-all cursor-pointer group">
 <div className="w-16 h-16 rounded overflow-hidden bg-surface-container-highest">
 <img alt="Product" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="exquisite hand-blown glass sculpture with golden amber swirl, dramatic dark gallery background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEnP-K63vf4ZSnkGFtOWoQX2KoMj7z9_xuqU0K-4Uk_J2Lf9XTsiH8ZfYLay6xtqGNjtCEMBD_oizVs_SHgiervuYnO7NRGRZfvBJzxoDOXAajas5xsqKMSg0tqYQAYAoUECooJIHseQiJZTS5yx2NwTL9q2XGcZHq0lTKl2RKEBjTiVHbwSIZJehrokvWoYQr5COJocCYE4IOHmwHKWq1YDduFODx4Dc3Mu84d40Lg7vRIqjAI9_7RPL9CvVYsqvUHkmmU3shGhc"/>

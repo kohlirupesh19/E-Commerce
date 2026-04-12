@@ -8,7 +8,7 @@ test.describe('Admin Navigation & Views', () => {
 
   test('should load admin products', async ({ page }) => {
     await page.goto('/admin-products');
-    await expect(page.locator('text=Welcome back').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Product Archive').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should load admin orders', async ({ page }) => {

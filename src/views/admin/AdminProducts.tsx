@@ -1,7 +1,5 @@
-import React from "react";
-
 export default function AdminProducts({
-  setView,
+  setView: _setView,
 }: {
   setView: (view: any) => void;
 }) {

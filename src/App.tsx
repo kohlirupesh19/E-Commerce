@@ -1,11 +1,4 @@
-import AdminLayout from './views/admin/AdminLayout';
-import AdminDashboard from './views/admin/AdminDashboard';
-import AdminProducts from './views/admin/AdminProducts';
-import AdminOrders from './views/admin/AdminOrders';
-import AdminCustomers from './views/admin/AdminCustomers';
-import AdminCustomerProfile from './views/admin/AdminCustomerProfile';
-import AdminCoupons from './views/admin/AdminCoupons';
-import React, { useState, useContext } from 'react';
+import React, { Suspense, lazy, useState, useContext } from 'react';
 import { 
   Eye, EyeOff, Check, User, Mail, Phone, Lock, ArrowRight, Diamond, 
   ArrowLeft, ShieldCheck, KeyRound, Key, Search, Heart, ShoppingBag, 
@@ -22,6 +15,32 @@ import { motion, AnimatePresence } from 'motion/react';
 
 type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons';
 
+const shopCategoryOptions = [
+  { id: 'timepieces', view: 'category-timepieces', icon: Watch, label: 'Timepieces', count: '42 ITEMS' },
+  { id: 'fashion', view: 'category-fashion', icon: Shirt, label: 'Fashion', count: '842 ITEMS' },
+  { id: 'leather', view: 'category-leather', icon: ShoppingBasket, label: 'Leather', count: '88 ITEMS' },
+  { id: 'home', view: 'category-home', icon: Armchair, label: 'Home', count: '450 ITEMS' },
+  { id: 'beauty', view: 'category-beauty', icon: Sparkles, label: 'Beauty', count: '312 ITEMS' },
+  { id: 'sports', view: 'category-sports', icon: Dumbbell, label: 'Sports', count: '210 ITEMS' },
+  { id: 'books', view: 'category-books', icon: BookOpen, label: 'Books', count: '1,029 ITEMS' },
+  { id: 'toys', view: 'category-toys', icon: Gamepad2, label: 'Toys', count: '560 ITEMS' },
+  { id: 'jewelry', view: 'category-jewelry', icon: Diamond, label: 'Jewelry', count: '150 ITEMS' },
+] as const;
+
+type ShopCategory = typeof shopCategoryOptions[number]['id'];
+type ShopCategoryFilter = 'all' | ShopCategory;
+type ShopSortBy = 'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated';
+type ShopMaxPrice = 'all' | '5000' | '10000' | '20000';
+type ShopMinRating = 0 | 4 | 5;
+
+const AdminLayout = lazy(() => import('./views/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./views/admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('./views/admin/AdminProducts'));
+const AdminOrders = lazy(() => import('./views/admin/AdminOrders'));
+const AdminCustomers = lazy(() => import('./views/admin/AdminCustomers'));
+const AdminCustomerProfile = lazy(() => import('./views/admin/AdminCustomerProfile'));
+const AdminCoupons = lazy(() => import('./views/admin/AdminCoupons'));
+
 type SearchContextValue = {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
@@ -34,13 +53,37 @@ const SearchContext = React.createContext<SearchContextValue>({
 
 const toNumericPrice = (value: string) => Number(value.replace(/[$,]/g, ''));
 
-const getCategoryForBrand = (brand?: string): View => {
+const getShopCategoryLabel = (category: ShopCategoryFilter) => {
+  if (category === 'all') return 'All Categories';
+  return shopCategoryOptions.find((item) => item.id === category)?.label || 'All Categories';
+};
+
+const getShopPriceLabel = (maxPrice: ShopMaxPrice) => {
+  if (maxPrice === '5000') return 'Under $5K';
+  if (maxPrice === '10000') return 'Under $10K';
+  if (maxPrice === '20000') return 'Under $20K';
+  return 'All Prices';
+};
+
+const getShopSortLabel = (sortBy: ShopSortBy) => {
+  if (sortBy === 'low-to-high') return 'Price: Low to High';
+  if (sortBy === 'high-to-low') return 'Price: High to Low';
+  if (sortBy === 'top-rated') return 'Top Rated';
+  return 'Relevance';
+};
+
+const getShopCategoryForBrand = (brand?: string): ShopCategoryFilter => {
   const brandName = (brand || '').toLowerCase();
-  if (/vacheron|audemars|patek|richard|omega|cartier|chronos|aurelian|techne/.test(brandName)) return 'category-timepieces';
-  if (/chopard|graff|piaget|tiffany|bvlgari|harry winston|van cleef/.test(brandName)) return 'category-jewelry';
-  if (/hermès|louis vuitton|bottega|prada|fendi|dior|gucci|mara/.test(brandName)) return 'category-leather';
-  if (/saint laurent|chanel|savile|valeria/.test(brandName)) return 'category-fashion';
-  return 'shop';
+  if (/vacheron|audemars|patek|richard|omega|cartier|chronos|aurelian|techne|aurel/.test(brandName)) return 'timepieces';
+  if (/chopard|graff|piaget|tiffany|bvlgari|harry winston|van cleef/.test(brandName)) return 'jewelry';
+  if (/hermès|hermes|louis vuitton|bottega|prada|fendi|dior|gucci|mara|celine/.test(brandName)) return 'leather';
+  if (/saint laurent|chanel|savile|valeria/.test(brandName)) return 'fashion';
+  if (/baccarat|medusa|heritage design|restoration hardware/.test(brandName)) return 'home';
+  if (/creed|heeley|penhaligons|acqua di parma|essence/.test(brandName)) return 'beauty';
+  if (/callaway|wilson|bauer|specialized/.test(brandName)) return 'sports';
+  if (/first edition|antiquarian|vintage press|collector editions/.test(brandName)) return 'books';
+  if (/steiff|lego|scalextric|hot wheels/.test(brandName)) return 'toys';
+  return 'all';
 };
 
 const TopNavBar = ({ 
@@ -133,19 +176,6 @@ const TopNavBar = ({
                     onClose={() => setShowProfileDropdown(false)} 
                   />
                 )}
-        
-        {['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(view) && (
-          <motion.div key="admin-layout" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="w-full relative z-50">
-            <AdminLayout activeView={view} setView={setView}>
-            {view === 'admin-dashboard' && <AdminDashboard setView={setView} />}
-            {view === 'admin-products' && <AdminProducts setView={setView} />}
-            {view === 'admin-orders' && <AdminOrders setView={setView} />}
-            {view === 'admin-customers' && <AdminCustomers setView={setView} />}
-            {view === 'admin-customer-profile' && <AdminCustomerProfile setView={setView} />}
-            {view === 'admin-coupons' && <AdminCoupons setView={setView} />}
-          </AdminLayout>
-          </motion.div>
-        )}
       </AnimatePresence>
             </div>
           </div>
@@ -157,38 +187,34 @@ const TopNavBar = ({
 
 const CategoryBar = ({ 
   view, 
-  setView 
+  setView,
+  activeCategory = 'all',
+  onCategorySelect
 }: { 
   view: View, 
-  setView: (v: View) => void 
+  setView: (v: View) => void,
+  activeCategory?: ShopCategoryFilter,
+  onCategorySelect?: (category: ShopCategory) => void
 }) => {
-  const categories = [
-    { id: 'category-timepieces', icon: Watch, label: 'Timepieces', count: '42 ITEMS' },
-    { id: 'category-fashion', icon: Shirt, label: 'Fashion', count: '842 ITEMS' },
-    { id: 'category-home', icon: Armchair, label: 'Home', count: '450 ITEMS' },
-    { id: 'category-beauty', icon: Sparkles, label: 'Beauty', count: '312 ITEMS' },
-    { id: 'category-sports', icon: Dumbbell, label: 'Sports', count: '210 ITEMS' },
-    { id: 'category-books', icon: BookOpen, label: 'Books', count: '1,029 ITEMS' },
-    { id: 'category-toys', icon: Gamepad2, label: 'Toys', count: '560 ITEMS' },
-    { id: 'category-jewelry', icon: Diamond, label: 'Jewelry', count: '150 ITEMS' },
-  ];
-
   return (
     <div className="w-full bg-background border-b border-outline-variant/10 sticky top-20 z-40">
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {categories.map((cat) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
+          {shopCategoryOptions.map((cat) => {
+            const isActive = activeCategory === cat.id || view === cat.view;
+
+            return (
             <button
               key={cat.id}
-              onClick={() => setView(cat.id as View)}
+              onClick={() => onCategorySelect ? onCategorySelect(cat.id) : setView(cat.view as View)}
               className={`flex flex-col items-center gap-3 p-4 rounded-xl transition-all duration-300 ${
-                view === cat.id 
+                isActive 
                   ? 'bg-primary/10 border border-primary/20' 
                   : 'hover:bg-surface-container-highest/20 border border-outline-variant/10'
               }`}
             >
               <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                view === cat.id 
+                isActive 
                   ? 'bg-primary/20 text-primary' 
                   : 'bg-surface-container-highest text-on-surface-variant group-hover:text-primary'
               }`}>
@@ -196,7 +222,7 @@ const CategoryBar = ({
               </div>
               <div className="text-center">
                 <p className={`font-headline text-sm font-semibold ${
-                  view === cat.id ? 'text-on-surface' : 'text-on-surface-variant'
+                  isActive ? 'text-on-surface' : 'text-on-surface-variant'
                 }`}>
                   {cat.label}
                 </p>
@@ -205,7 +231,8 @@ const CategoryBar = ({
                 </p>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -440,6 +467,9 @@ const CategoryLayout = ({
   cartItems, 
   showProfileDropdown, 
   setShowProfileDropdown,
+  activeCategory = 'all',
+  onCategorySelect,
+  onProductSelect,
   title,
   subtitle,
   heroImg,
@@ -450,6 +480,9 @@ const CategoryLayout = ({
   cartItems: any[],
   showProfileDropdown: boolean,
   setShowProfileDropdown: (b: boolean) => void,
+  activeCategory?: ShopCategoryFilter,
+  onCategorySelect?: (category: ShopCategory) => void,
+  onProductSelect?: (product: any) => void,
   title: string,
   subtitle: string,
   heroImg: string,
@@ -473,6 +506,15 @@ const CategoryLayout = ({
       return b.id - a.id;
     });
 
+  const handleProductSelect = (product: any) => {
+    const productWithCategory = activeCategory === 'all' ? product : { ...product, category: activeCategory };
+    if (onProductSelect) {
+      onProductSelect(productWithCategory);
+    } else {
+      setView('product-detail');
+    }
+  };
+
   return (
     <motion.div
       key={view}
@@ -492,6 +534,8 @@ const CategoryLayout = ({
       <CategoryBar 
         view={view} 
         setView={setView} 
+        activeCategory={activeCategory}
+        onCategorySelect={onCategorySelect}
       />
 
       <main className="flex flex-col">
@@ -564,7 +608,7 @@ const CategoryLayout = ({
                     </button>
                     <button 
                       className="px-6 py-3 bg-background/80 backdrop-blur text-[10px] uppercase tracking-widest font-bold text-on-surface hover:bg-on-surface hover:text-background transition-all"
-                      onClick={() => setView('product-detail')}
+                      onClick={() => handleProductSelect(product)}
                     >
                       Quick View
                     </button>
@@ -575,7 +619,7 @@ const CategoryLayout = ({
                     <p className="text-[10px] font-mono text-on-surface-variant uppercase tracking-widest mb-1">{product.brand}</p>
                     <h3 
                       className="text-xl font-headline text-on-surface group-hover:text-primary transition-colors cursor-pointer"
-                      onClick={() => setView('product-detail')}
+                      onClick={() => handleProductSelect(product)}
                     >
                       {product.name}
                     </h3>
@@ -741,9 +785,10 @@ export default function App() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [searchTerm, setSearchTerm] = useState('');
-  const [shopSortBy, setShopSortBy] = useState<'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated'>('relevance');
-  const [shopMaxPrice, setShopMaxPrice] = useState<'all' | '5000' | '10000' | '20000'>('all');
-  const [shopMinRating, setShopMinRating] = useState<0 | 4 | 5>(0);
+  const [shopSortBy, setShopSortBy] = useState<ShopSortBy>('relevance');
+  const [shopMaxPrice, setShopMaxPrice] = useState<ShopMaxPrice>('all');
+  const [shopMinRating, setShopMinRating] = useState<ShopMinRating>(0);
+  const [selectedShopCategory, setSelectedShopCategory] = useState<ShopCategoryFilter>('all');
   const [otpError, setOtpError] = useState('');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
@@ -752,6 +797,32 @@ export default function App() {
   const [forgotStep, setForgotStep] = useState(1); // 1: Identify, 2: Verify, 3: Restore, 4: Success
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  const openProductDetail = (product: any) => {
+    setSelectedProduct(product);
+    setSelectedImage(0);
+    setView('product-detail');
+    window.scrollTo(0, 0);
+  };
+
+  const clearShopFilters = () => {
+    setSelectedShopCategory('all');
+    setShopMaxPrice('all');
+    setShopMinRating(0);
+    setShopSortBy('relevance');
+    setSearchTerm('');
+  };
+
+  const openShopCategory = (category: ShopCategoryFilter) => {
+    clearShopFilters();
+    setSelectedShopCategory(category);
+    setView('shop');
+    window.scrollTo(0, 0);
+  };
+
+  const openSelectedProductCollection = () => {
+    openShopCategory(selectedProduct?.category || getShopCategoryForBrand(selectedProduct?.brand));
+  };
 
   const addToWishlist = (product: any) => {
     if (!wishlistItems.find(item => item.id === product.id)) {
@@ -842,23 +913,35 @@ export default function App() {
     setNewsletterEmail('');
   };
 
+  const withShopMeta = (products: any[], category: ShopCategory, ratingBase: number) =>
+    products.map((product, index) => ({
+      ...product,
+      category,
+      rating: Math.min(5, Number((ratingBase + (index % 4) * 0.1).toFixed(1))),
+      reviews: 24 + index * 11
+    }));
+
   const shopProducts = [
-    { id: 1001, brand: 'AUREL & CO', name: 'The Midnight Chrono', price: '$12,400', rating: 4.5, reviews: 42, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcc1ysQTol8JUR_QreOBTctd9-wWDZTkjgw6rFkk_zhsFfGrVwu5ZkkGcJDEggJVbHGxXlVVjZu-eGynLe0RyjNwzAS4WlAphEPGEwQKfH4LXdw3Nigkyl8CgpPItELUNH_-CAlxghstdiGpJgVXcaIJKpi4snCZBtp7JkVIKU7p8PhsKMFN1s0we3JFPYcLhrc0PuLefjls6FSF3wOmJpyyItsKFth-SJ04PYsffCXCbD0pklmEZo9Z_U7Kdo_wkgCI6IRk3r6Os' },
-    { id: 1002, brand: 'ESSENCE NOIR', name: 'Velvet Oud Extract', price: '$850', rating: 5, reviews: 128, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnY3IkrKndvvqBCsfooDiD_mMXWFCCjhHzRd7qKfwagVxOzE_moPQP068Odna3MU4G18919aI3gd2Sq59Kijpc11Rgd3HcgHT7RQaFBkmPHuFlNjJ_WgloGA0oTpy3xqenip2EDT3THGMPk4soKH1xJ8HVlPv8S3UqoyzHFThLN1FeoK1IhMondM9UNUXfobdZZO73eTu5StIpyScS_DGXHjuBqUSeEsN6CQiKw7biXaPtU2px-tVmSPyFXTekrgNxckuBZ2uFryo' },
-    { id: 1003, brand: 'VALERIA STELLE', name: 'Starlight Pumps', price: '$4,200', rating: 4.5, reviews: 18, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAO5gXJpE3HtQEdhHnrZZZY_6BjMhmIHHmNrXgi83MXmFpxUjXI6XBPPaCGYiHAp_NUeEde4vdzBx5LJnfwPqatK7W0BljXUCAX19bJ87vWGXJKdXLwQWWasBRtawH_ZXUavxU6rrAzTmTP7ak8ttIv8oGHUlVxtpJNoXddiiXXyW0w5bmTslKvD-U0KpI1IkM8AEHD_6Jl2BZ1YYmxDJuOFVnzppxHwej5yAuixR95WEkJ1XZNeYvPVHs3eUWuQY6jPHlPvGY6M74' },
-    { id: 1004, brand: 'SAVILE ELITE', name: 'Obsidian Tuxedo', price: '$6,800', rating: 4.8, reviews: 24, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwbQGzcfAAJP6mZQX8uh846G36_t1lidhdsU4F1DCgKR8gu1AKpiMDM5b6CA24uUyNvFGqgt2DwPQWVYhIEwGIizY4Eo1KwDHJRHPj_IfsVMDk2sbGvVE1T4xNHtEh2j56NhAe1x_CnnayPDf7qRdsNYfajYV7wAt91aAo_oxIXNzqqmNNnUdZihIi-r3pSYreEJa8U8W-r-3PEFA8LEGr1UO5jjnwkXRErZYrsnFSr4GV9fczgXBNc1cNlKfjCu9YbffkS3PyCyY' },
-    { id: 1005, brand: 'MAISON MARA', name: 'The Heritage Tote', price: '$3,150', rating: 4.9, reviews: 56, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB0C0J8X839ZwJ5BCotPeTrOp38HY1b1B-qwM2Obw4hg38S0MbWq433kvaKdyr8r2eShhEqxlH0JeWA6yn5q7CiGIcaxfY26zkTTPT3SXL87pkRX9vHc_GJ9tNoV_Pqm0N_4Pdvj_yH3ffD7Ci9ur85sF4zvKmzZumOoXJGV6qeYsDa6JVtA-Kl61e5rK1SG1MnHOFjWjm02VOJE40qSwmvCagtjGjAFffYypWZVWkq3bV8DnSfQsRVyDBDziyhZbtqvUznZ_ykBjE' },
-    { id: 1006, brand: 'AUREL & CO', name: 'The Midnight Chrono', price: '$12,400', rating: 4.5, reviews: 42, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcc1ysQTol8JUR_QreOBTctd9-wWDZTkjgw6rFkk_zhsFfGrVwu5ZkkGcJDEggJVbHGxXlVVjZu-eGynLe0RyjNwzAS4WlAphEPGEwQKfH4LXdw3Nigkyl8CgpPItELUNH_-CAlxghstdiGpJgVXcaIJKpi4snCZBtp7JkVIKU7p8PhsKMFN1s0we3JFPYcLhrc0PuLefjls6FSF3wOmJpyyItsKFth-SJ04PYsffCXCbD0pklmEZo9Z_U7Kdo_wkgCI6IRk3r6Os' }
+    ...withShopMeta(timepieceProducts, 'timepieces', 4.6),
+    ...withShopMeta(jewelryProducts, 'jewelry', 4.7),
+    ...withShopMeta(leatherProducts, 'leather', 4.5),
+    ...withShopMeta(fashionProducts, 'fashion', 4.6),
+    ...withShopMeta(homeProducts, 'home', 4.4),
+    ...withShopMeta(beautyProducts, 'beauty', 4.7),
+    ...withShopMeta(sportsProducts, 'sports', 4.3),
+    ...withShopMeta(booksProducts, 'books', 4.8),
+    ...withShopMeta(toysProducts, 'toys', 4.5)
   ];
 
   const filteredShopProducts = shopProducts
     .filter((product) => {
+      const matchesCategory = selectedShopCategory === 'all' || product.category === selectedShopCategory;
       const matchesSearch = !searchTerm.trim() ||
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.brand.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPrice = shopMaxPrice === 'all' || toNumericPrice(product.price) <= Number(shopMaxPrice);
       const matchesRating = product.rating >= shopMinRating;
-      return matchesSearch && matchesPrice && matchesRating;
+      return matchesCategory && matchesSearch && matchesPrice && matchesRating;
     })
     .sort((a, b) => {
       if (shopSortBy === 'low-to-high') return toNumericPrice(a.price) - toNumericPrice(b.price);
@@ -892,6 +975,20 @@ export default function App() {
       <div className="fixed bottom-0 left-0 -z-10 w-[30vw] h-[30vw] bg-primary/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4"></div>
 
       <AnimatePresence mode="wait">
+        {['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(view) && (
+          <motion.div key="admin-layout" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="w-full relative z-50">
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-on-surface-variant">Loading admin workspace...</div>}>
+              <AdminLayout activeView={view} setView={setView}>
+                {view === 'admin-dashboard' && <AdminDashboard setView={setView} />}
+                {view === 'admin-products' && <AdminProducts setView={setView} />}
+                {view === 'admin-orders' && <AdminOrders setView={setView} />}
+                {view === 'admin-customers' && <AdminCustomers setView={setView} />}
+                {view === 'admin-customer-profile' && <AdminCustomerProfile setView={setView} />}
+                {view === 'admin-coupons' && <AdminCoupons setView={setView} />}
+              </AdminLayout>
+            </Suspense>
+          </motion.div>
+        )}
         {view === 'cart' && (
           <motion.div
             key="cart"
@@ -3162,6 +3259,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="timepieces"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Luxury Timepieces"
             subtitle="Engineering Eternity"
             heroImg="https://images.unsplash.com/photo-1523170335684-f042f1b8f374?w=1600&h=800&fit=crop"
@@ -3176,6 +3276,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="jewelry"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="High Jewelry"
             subtitle="Artisanal Brilliance"
             heroImg="https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=1600&h=800&fit=crop"
@@ -3190,6 +3293,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="leather"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Leather Goods"
             subtitle="Timeless Craftsmanship"
             heroImg="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1600&h=800&fit=crop"
@@ -3204,6 +3310,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="fashion"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Haute Couture"
             subtitle="Sartorial Excellence"
             heroImg="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1600&h=800&fit=crop"
@@ -3218,6 +3327,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="home"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Home & Living"
             subtitle="Curated Interiors"
             heroImg="https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=1600&h=800&fit=crop"
@@ -3232,6 +3344,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="beauty"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Fragrances & Beauty"
             subtitle="Olfactory Masterpieces"
             heroImg="https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=1600&h=800&fit=crop"
@@ -3246,6 +3361,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="sports"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Sports & Recreation"
             subtitle="Athletic Excellence"
             heroImg="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1600&h=800&fit=crop"
@@ -3260,6 +3378,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="books"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Rare Books & Manuscripts"
             subtitle="Literary Treasures"
             heroImg="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1600&h=800&fit=crop"
@@ -3274,6 +3395,9 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            activeCategory="toys"
+            onCategorySelect={openShopCategory}
+            onProductSelect={openProductDetail}
             title="Collectible Toys"
             subtitle="Timeless Companions"
             heroImg="https://images.unsplash.com/photo-1594545514411-854a028e7195?w=1600&h=800&fit=crop"
@@ -3303,6 +3427,7 @@ export default function App() {
             <CategoryBar 
               view={view} 
               setView={setView} 
+              onCategorySelect={openShopCategory}
             />
 
             <main className="flex-grow">
@@ -3329,7 +3454,7 @@ export default function App() {
                     </p>
                     <div className="flex flex-wrap gap-6">
                       <button 
-                        onClick={() => setView('shop')}
+                        onClick={() => openShopCategory('all')}
                         className="px-10 py-4 bg-primary text-on-primary font-bold rounded-lg shadow-[0_20px_40px_rgba(230,195,100,0.2)] hover:scale-105 transition-transform uppercase tracking-widest text-xs"
                       >
                         Shop Now
@@ -3384,35 +3509,29 @@ export default function App() {
                     <h2 className="text-4xl font-headline text-on-surface">Curated Categories</h2>
                     <p className="text-on-surface-variant mt-2 font-body">Precision filtered by The Obsidian Curator</p>
                   </div>
-                  <button className="text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform uppercase tracking-widest text-xs">
+                  <button
+                    onClick={() => openShopCategory('all')}
+                    className="text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform uppercase tracking-widest text-xs"
+                  >
                     View All <ArrowRight size={16} />
                   </button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {[
-                    { name: 'Timepieces', icon: Watch, count: '42', view: 'category-timepieces' },
-                    { name: 'Fashion', icon: Shirt, count: '842' },
-                    { name: 'Home', icon: Armchair, count: '450' },
-                    { name: 'Beauty', icon: Sparkles, count: '312' },
-                    { name: 'Sports', icon: Dumbbell, count: '210' },
-                    { name: 'Books', icon: BookOpen, count: '1,029' },
-                    { name: 'Toys', icon: Gamepad2, count: '560' },
-                    { name: 'Jewelry', icon: Diamond, count: '150' },
-                  ].map((cat, i) => (
+                  {shopCategoryOptions.map((cat, i) => (
                     <motion.div 
-                      key={cat.name}
+                      key={cat.id}
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.1 }}
-                      onClick={() => cat.view ? setView(cat.view as View) : setView('shop')}
+                      onClick={() => openShopCategory(cat.id)}
                       className="group bg-surface-container-low p-8 rounded-xl hover:bg-surface-container-highest transition-all duration-500 cursor-pointer border border-outline-variant/5 hover:border-primary/20"
                     >
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
                         <cat.icon size={24} />
                       </div>
-                      <h4 className="text-xl font-headline mb-2">{cat.name}</h4>
-                      <span className="text-[10px] text-on-surface-variant/60 uppercase tracking-widest font-bold">{cat.count} Items</span>
+                      <h4 className="text-xl font-headline mb-2">{cat.label}</h4>
+                      <span className="text-[10px] text-on-surface-variant/60 uppercase tracking-widest font-bold">{cat.count}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -3687,11 +3806,11 @@ export default function App() {
                     <span className="text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-2 inline-block">
                       {selectedProduct?.brand || 'Chronos Noir'}
                     </span>
-                    <button
-                      className="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant hover:text-primary transition-colors mb-2"
-                      onClick={() => setView(getCategoryForBrand(selectedProduct?.brand))}
-                    >
-                      View matching collection
+                      <button
+                        className="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant hover:text-primary transition-colors mb-2"
+                        onClick={openSelectedProductCollection}
+                      >
+                        View matching collection
                     </button>
                     <h1 className="text-5xl font-headline text-on-surface font-light leading-tight mb-4 tracking-tight">
                       {selectedProduct?.name || 'The Midnight Eclipse Perpetual'}
@@ -3825,10 +3944,10 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      className="text-[10px] font-bold text-primary uppercase border-b border-primary/30 hover:border-primary transition-all tracking-widest"
-                      onClick={() => setView(getCategoryForBrand(selectedProduct?.brand))}
-                    >
+                      <button
+                        className="text-[10px] font-bold text-primary uppercase border-b border-primary/30 hover:border-primary transition-all tracking-widest"
+                        onClick={openSelectedProductCollection}
+                      >
                       Visit Store
                     </button>
                   </div>
@@ -4022,6 +4141,8 @@ export default function App() {
             <CategoryBar 
               view={view} 
               setView={setView} 
+              activeCategory={selectedShopCategory}
+              onCategorySelect={openShopCategory}
             />
 
             <div className="flex flex-1 max-w-[1920px] mx-auto w-full">
@@ -4035,11 +4156,11 @@ export default function App() {
                 <div className="space-y-4">
                   <button
                     type="button"
-                    onClick={() => setShopMaxPrice('all')}
+                    onClick={() => setSelectedShopCategory('all')}
                     className="w-full text-primary bg-surface-variant/30 rounded-lg flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
                   >
                     <LayoutGrid size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">Categories</span>
+                    <span className="font-label uppercase tracking-widest text-xs font-bold">{getShopCategoryLabel(selectedShopCategory)}</span>
                   </button>
                   <button
                     type="button"
@@ -4072,19 +4193,18 @@ export default function App() {
                 </div>
 
                 <div className="mt-auto pt-8 border-t border-outline-variant/10">
-                  <button className="w-full py-4 bg-primary text-on-primary rounded-lg font-bold tracking-widest text-xs uppercase hover:opacity-90 transition-opacity mb-4">
-                    Apply Filters
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShopMaxPrice('all');
-                      setShopMinRating(0);
-                      setShopSortBy('relevance');
-                      setSearchTerm('');
-                    }}
-                    className="w-full text-on-surface-variant/40 hover:text-primary flex items-center justify-center gap-2 p-3 cursor-pointer text-xs font-bold uppercase tracking-widest"
-                  >
+                    <button
+                      type="button"
+                      onClick={() => setView('shop')}
+                      className="w-full py-4 bg-primary text-on-primary rounded-lg font-bold tracking-widest text-xs uppercase hover:opacity-90 transition-opacity mb-4"
+                    >
+                      Apply Filters
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearShopFilters}
+                      className="w-full text-on-surface-variant/40 hover:text-primary flex items-center justify-center gap-2 p-3 cursor-pointer text-xs font-bold uppercase tracking-widest"
+                    >
                     <RotateCcw size={14} />
                     <span>Clear All</span>
                   </button>
@@ -4106,33 +4226,74 @@ export default function App() {
                   </div>
 
                   {/* Controls */}
-                  <div className="mt-12 flex flex-wrap items-center justify-between gap-4 py-6 border-y border-outline-variant/10">
-                    <div className="flex items-center gap-3">
-                      {/* Applied Filters */}
-                      <div 
-                        className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={() => setView('category-timepieces')}
-                      >
-                        <span className="text-primary">Watchmaking</span>
-                        <button className="hover:text-primary transition-colors">
-                          <X size={12} />
-                        </button>
+                    <div className="mt-12 flex flex-wrap items-center justify-between gap-4 py-6 border-y border-outline-variant/10">
+                      <div className="flex items-center gap-3">
+                        {/* Applied Filters */}
+                        {selectedShopCategory === 'all' && shopMaxPrice === 'all' && shopMinRating === 0 && shopSortBy === 'relevance' && !searchTerm.trim() ? (
+                          <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-bold">No filters applied</span>
+                        ) : (
+                          <>
+                            {selectedShopCategory !== 'all' && (
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold hover:border-primary/50 transition-colors"
+                                onClick={() => setSelectedShopCategory('all')}
+                              >
+                                <span className="text-primary">{getShopCategoryLabel(selectedShopCategory)}</span>
+                                <X size={12} />
+                              </button>
+                            )}
+                            {searchTerm.trim() && (
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold hover:border-primary/50 transition-colors"
+                                onClick={() => setSearchTerm('')}
+                              >
+                                <span className="text-primary">Search: {searchTerm}</span>
+                                <X size={12} />
+                              </button>
+                            )}
+                            {shopMaxPrice !== 'all' && (
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold hover:border-primary/50 transition-colors"
+                                onClick={() => setShopMaxPrice('all')}
+                              >
+                                <span className="text-primary">{getShopPriceLabel(shopMaxPrice)}</span>
+                                <X size={12} />
+                              </button>
+                            )}
+                            {shopMinRating > 0 && (
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold hover:border-primary/50 transition-colors"
+                                onClick={() => setShopMinRating(0)}
+                              >
+                                <span className="text-primary">{shopMinRating === 5 ? '5 Star Only' : 'Designer Brands'}</span>
+                                <X size={12} />
+                              </button>
+                            )}
+                            {shopSortBy !== 'relevance' && (
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold hover:border-primary/50 transition-colors"
+                                onClick={() => setShopSortBy('relevance')}
+                              >
+                                <span className="text-primary">{getShopSortLabel(shopSortBy)}</span>
+                                <X size={12} />
+                              </button>
+                            )}
+                          </>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold">
-                        <span className="text-primary">Newest</span>
-                        <button className="hover:text-primary transition-colors">
-                          <X size={12} />
-                        </button>
-                      </div>
-                    </div>
 
                     <div className="flex items-center gap-8">
                       <div className="flex items-center gap-4">
                         <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Sort By</label>
                         <select
-                          className="bg-transparent border-none text-sm text-on-surface focus:ring-0 cursor-pointer font-bold pr-8 outline-none"
-                          value={shopSortBy}
-                          onChange={(e) => setShopSortBy(e.target.value as 'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated')}
+                            className="bg-transparent border-none text-sm text-on-surface focus:ring-0 cursor-pointer font-bold pr-8 outline-none"
+                            value={shopSortBy}
+                            onChange={(e) => setShopSortBy(e.target.value as ShopSortBy)}
                         >
                           <option className="bg-background" value="relevance">Relevance</option>
                           <option className="bg-background" value="low-to-high">Price: Low to High</option>
@@ -4157,16 +4318,13 @@ export default function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-12 gap-y-20">
                   {filteredShopProducts.map((product, i) => (
                     <motion.div 
-                      key={i}
+                      key={product.id}
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: (i % 3) * 0.1 }}
-                      className="group flex flex-col cursor-pointer"
-                      onClick={() => {
-                        setSelectedProduct(product);
-                        setView('product-detail');
-                      }}
+                        className="group flex flex-col cursor-pointer"
+                        onClick={() => openProductDetail(product)}
                     >
                       <div className="relative aspect-[4/3] overflow-hidden bg-surface-container-low mb-8 rounded-xl">
                         <img 

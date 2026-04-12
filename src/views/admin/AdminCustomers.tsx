@@ -1,7 +1,4 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-
-export default function AdminCustomers({ setView }: { setView: (view: any) => void }) {
+export default function AdminCustomers({ setView: _setView }: { setView: (view: any) => void }) {
   return (
     <div className="animate-in fade-in">
 <header className="docked full-width top-0 sticky z-50 bg-[#131317]/80 backdrop-blur-xl flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
@@ -23,7 +20,7 @@ export default function AdminCustomers({ setView }: { setView: (view: any) => vo
 </div>
 </header>
 <section className="p-12 space-y-12">
-<!-- Stat Grid -->
+{/* Stat Grid */}
 <div className="grid grid-cols-4 gap-8">
 <div className="p-6 bg-surface-container-lowest rounded-xl border border-outline-variant/10 group hover:border-primary/30 transition-all duration-500">
 <p className="text-xs font-headline uppercase tracking-[0.2em] text-outline mb-4">Total Clientele</p>
@@ -54,7 +51,7 @@ export default function AdminCustomers({ setView }: { setView: (view: any) => vo
 </div>
 </div>
 </div>
-<!-- Customer Table (Editorial Exhibit) -->
+{/* Customer Table (Editorial Exhibit) */}
 <div className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-2xl border border-outline-variant/5">
 <div className="p-8 flex justify-between items-center border-b border-outline-variant/5">
 <h3 className="font-headline text-xl text-on-surface">Client Directory</h3>
@@ -78,7 +75,7 @@ export default function AdminCustomers({ setView }: { setView: (view: any) => vo
 </tr>
 </thead>
 <tbody className="divide-y divide-outline-variant/5">
-<!-- Row 1 -->
+{/* Row 1 */}
 <tr className="group hover:bg-[#353439]/20 transition-colors cursor-pointer">
 <td className="px-8 py-6">
 <div className="flex items-center gap-4">
@@ -112,7 +109,7 @@ export default function AdminCustomers({ setView }: { setView: (view: any) => vo
 <button className="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
 </td>
 </tr>
-<!-- Row 2 -->
+{/* Row 2 */}
 <tr className="group hover:bg-[#353439]/20 transition-colors cursor-pointer">
 <td className="px-8 py-6">
 <div className="flex items-center gap-4">
@@ -146,7 +143,7 @@ export default function AdminCustomers({ setView }: { setView: (view: any) => vo
 <button className="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
 </td>
 </tr>
-<!-- Row 3 -->
+{/* Row 3 */}
 <tr className="group hover:bg-[#353439]/20 transition-colors cursor-pointer">
 <td className="px-8 py-6">
 <div className="flex items-center gap-4">
@@ -197,7 +194,7 @@ export default function AdminCustomers({ setView }: { setView: (view: any) => vo
 </div>
 </div>
 </div>
-<!-- Bento Activity Preview -->
+{/* Bento Activity Preview */}
 <div className="grid grid-cols-3 gap-8">
 <div className="col-span-2 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10">
 <h4 className="font-headline text-lg text-on-surface mb-8 uppercase tracking-widest">Recent Activity Log</h4>
