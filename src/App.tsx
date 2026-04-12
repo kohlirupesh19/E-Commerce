@@ -1,3 +1,10 @@
+import AdminLayout from './views/admin/AdminLayout';
+import AdminDashboard from './views/admin/AdminDashboard';
+import AdminProducts from './views/admin/AdminProducts';
+import AdminOrders from './views/admin/AdminOrders';
+import AdminCustomers from './views/admin/AdminCustomers';
+import AdminCustomerProfile from './views/admin/AdminCustomerProfile';
+import AdminCoupons from './views/admin/AdminCoupons';
 import React, { useState, useContext } from 'react';
 import { 
   Eye, EyeOff, Check, User, Mail, Phone, Lock, ArrowRight, Diamond, 
@@ -13,7 +20,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help';
+type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons';
 
 type SearchContextValue = {
   searchTerm: string;
@@ -126,7 +133,20 @@ const TopNavBar = ({
                     onClose={() => setShowProfileDropdown(false)} 
                   />
                 )}
-              </AnimatePresence>
+        
+        {['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(view) && (
+          <motion.div key="admin-layout" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="w-full relative z-50">
+            <AdminLayout activeView={view} setView={setView}>
+            {view === 'admin-dashboard' && <AdminDashboard setView={setView} />}
+            {view === 'admin-products' && <AdminProducts setView={setView} />}
+            {view === 'admin-orders' && <AdminOrders setView={setView} />}
+            {view === 'admin-customers' && <AdminCustomers setView={setView} />}
+            {view === 'admin-customer-profile' && <AdminCustomerProfile setView={setView} />}
+            {view === 'admin-coupons' && <AdminCoupons setView={setView} />}
+          </AdminLayout>
+          </motion.div>
+        )}
+      </AnimatePresence>
             </div>
           </div>
         </div>
@@ -628,6 +648,25 @@ const ProfileDropdown = ({ setView, onClose }: { setView: (v: View) => void, onC
 
 export default function App() {
   const [view, setView] = useState<View>('home');
+
+  React.useEffect(() => {
+    (window as any).__setView = setView;
+    const handlePath = () => {
+      let path = window.location.pathname.replace('/', '');
+      if (['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(path)) {
+        setView(path as any);
+      } else if (path === '') {
+        // Default
+      }
+    };
+    window.addEventListener('popstate', handlePath);
+    handlePath();
+    return () => window.removeEventListener('popstate', handlePath);
+  }, []);
+
+
+  
+
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [cartItems, setCartItems] = useState([

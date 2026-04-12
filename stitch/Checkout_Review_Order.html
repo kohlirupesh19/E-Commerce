@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Review | The Obsidian Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@300;400;600;800&amp;family=JetBrains+Mono&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#ffe084",
+                        "surface-container-low": "#1b1b1f",
+                        "on-surface": "#e4e1e7",
+                        "primary-fixed": "#ffe08f",
+                        "error-container": "#93000a",
+                        "secondary-container": "#735c00",
+                        "background": "#131317",
+                        "on-primary-container": "#503d00",
+                        "on-primary": "#3d2e00",
+                        "surface-tint": "#e6c364",
+                        "on-tertiary-fixed": "#041451",
+                        "outline": "#99907e",
+                        "on-secondary-fixed-variant": "#574500",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#1e2b66",
+                        "surface-container": "#1f1f23",
+                        "on-primary-fixed-variant": "#584400",
+                        "on-tertiary-container": "#2e3b77",
+                        "on-surface-variant": "#d0c5b2",
+                        "primary": "#e6c364",
+                        "inverse-primary": "#755b00",
+                        "outline-variant": "#4d4637",
+                        "on-primary-fixed": "#241a00",
+                        "primary-container": "#c9a84c",
+                        "inverse-on-surface": "#303034",
+                        "tertiary": "#b9c4ff",
+                        "surface-container-lowest": "#0e0e12",
+                        "on-secondary": "#3c2f00",
+                        "on-tertiary-fixed-variant": "#35437e",
+                        "tertiary-container": "#9ba8eb",
+                        "surface-container-highest": "#353439",
+                        "on-secondary-fixed": "#231b00",
+                        "on-background": "#e4e1e7",
+                        "surface-dim": "#131317",
+                        "inverse-surface": "#e4e1e7",
+                        "surface-container-high": "#2a292e",
+                        "surface": "#131317",
+                        "secondary-fixed-dim": "#e3c466",
+                        "secondary": "#e3c466",
+                        "tertiary-fixed": "#dde1ff",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#e6c364",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#f6d675",
+                        "surface-bright": "#39393d",
+                        "tertiary-fixed-dim": "#b9c3ff",
+                        "surface-variant": "#353439"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #131317;
+            color: #F5F5F0;
+            font-family: 'Manrope', sans-serif;
+        }
+        .editorial-shadow {
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.5);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar -->
+<header class="bg-[#131317]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-[#e6c364] font-['Noto_Serif']">
+                The Obsidian Curator
+            </div>
+<nav class="hidden md:flex items-center gap-8 font-['Noto_Serif'] tracking-tight">
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Collections</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Admin Dashboard</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full text-[#e6c364]">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full text-[#e6c364]">
+<span class="material-symbols-outlined">shopping_bag</span>
+</button>
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full text-[#e6c364]">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-6 md:px-12 py-12 md:py-20">
+<!-- Progress Indicator -->
+<div class="mb-16 max-w-2xl mx-auto">
+<div class="flex justify-between items-center relative">
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant -z-10"></div>
+<div class="flex flex-col items-center gap-3 bg-background px-4">
+<span class="w-8 h-8 rounded-full border border-primary text-primary flex items-center justify-center text-xs font-mono">01</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Shipping</span>
+</div>
+<div class="flex flex-col items-center gap-3 bg-background px-4">
+<span class="w-8 h-8 rounded-full border border-primary text-primary flex items-center justify-center text-xs font-mono">02</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Payment</span>
+</div>
+<div class="flex flex-col items-center gap-3 bg-background px-4">
+<span class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-mono shadow-[0_0_20px_rgba(230,195,100,0.3)]">03</span>
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold">Review</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+<!-- Left Column: Order Details -->
+<div class="lg:col-span-8 space-y-16">
+<section>
+<h1 class="font-headline text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8 tracking-tight">Final Acquisition Review</h1>
+<p class="font-body text-on-surface-variant max-w-xl leading-relaxed">
+                        Please review the details of your curated selection before finalizing the transaction. Every piece is handled with exceptional care and discretion.
+                    </p>
+</section>
+<!-- Items List -->
+<section class="space-y-8">
+<div class="flex items-center justify-between border-b border-outline-variant/20 pb-4">
+<h2 class="font-headline text-2xl text-primary">Your Curation</h2>
+<span class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">3 Items Total</span>
+</div>
+<div class="space-y-6">
+<!-- Item 1 -->
+<div class="flex gap-6 items-center p-4 rounded-xl surface-container-low hover:bg-surface-container-high transition-colors group">
+<div class="w-24 h-24 rounded-lg overflow-hidden bg-surface-container-highest flex-shrink-0">
+<img alt="Luxury Watch" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Close-up of a high-end mechanical watch with gold accents and black leather strap on a dark velvet background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1TVGMlkYumgzJV5uRhXQK3oylbJspJObOGOMiL13BnlfYNaWnefOs31ZVCftqEAla_vptGv0vNmDjhMKaZUbSv3caKNRP8XI6ivpc2N2EBgqolLVPIIDnQkTR6V9mhRrd9_XyshJOfqdPd1WDdoEBpBtusUSyDLFcLQ8mXmC1nQe_v0D-BFTZsP_CF5qoAXnsM5r-Fzku_akq84dCKPojhrQM0UN-sClB7H_gMn5rkk40fZk9cJBFZM_fqUIeP-Zpu6Lgf8PUe2c"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline text-lg text-on-surface">Obsidian Chronograph III</h3>
+<p class="text-sm text-on-surface-variant font-body">Limited Edition â¢ Nightshade Black</p>
+<p class="text-xs font-mono mt-2 text-primary">SKU: OC-WATCH-003</p>
+</div>
+<div class="text-right">
+<p class="font-headline text-xl text-on-surface">$12,400.00</p>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Qty: 01</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-6 items-center p-4 rounded-xl surface-container-low hover:bg-surface-container-high transition-colors group">
+<div class="w-24 h-24 rounded-lg overflow-hidden bg-surface-container-highest flex-shrink-0">
+<img alt="Luxury Fragrance" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Elegant black perfume bottle with gold cap placed on a reflective obsidian surface with atmospheric smoke" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsxNQCxRN_nJd9KoNChgXAUtuQkod7rarDNMoju1_jMEw2Bg7nkLTIqKgyFDB7S1isWRJaVxDKuqk5IicHIXR4Sf8Uor0SY4bYs_sxiLmL3GceT4C4JHT0HE38X8RzU1whb5BMLxI7O6s1xNRz_2kfnu3sXtbVYX7ig0wd3qKRv5fcmzDZnaTAZcP6eSai87zHHTdo02Cbes2xOwhINNJA7OhCzq1X1WAdlXbkVKCdv-b81LvyQDtHhLcqrbcUT3_9udpc2pfg1_8"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline text-lg text-on-surface">Vantablack Oud Essence</h3>
+<p class="text-sm text-on-surface-variant font-body">Private Reserve â¢ 100ml</p>
+<p class="text-xs font-mono mt-2 text-primary">SKU: OC-PARFUM-92</p>
+</div>
+<div class="text-right">
+<p class="font-headline text-xl text-on-surface">$850.00</p>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Qty: 01</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Logistics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Delivery Address -->
+<div class="p-8 rounded-xl bg-surface-container-lowest border border-outline-variant/10 space-y-6 relative group overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">distance</span>
+<h3 class="font-headline text-xl text-on-surface">Delivery Suite</h3>
+</div>
+<a class="text-xs uppercase tracking-widest text-primary border-b border-primary/20 hover:border-primary transition-all" href="#">Edit</a>
+</div>
+<div class="space-y-1 font-body text-on-surface-variant text-sm leading-relaxed">
+<p class="text-on-surface font-semibold">Julian Sterling</p>
+<p>Penthouse 4B, The Glass Tower</p>
+<p>722 Luxury Row, Manhattan</p>
+<p>New York, NY 10019</p>
+<p>+1 (212) 555-0198</p>
+</div>
+</div>
+<!-- Payment Method -->
+<div class="p-8 rounded-xl bg-surface-container-lowest border border-outline-variant/10 space-y-6 relative group overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+<h3 class="font-headline text-xl text-on-surface">Payment Method</h3>
+</div>
+<a class="text-xs uppercase tracking-widest text-primary border-b border-primary/20 hover:border-primary transition-all" href="#">Edit</a>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg border border-outline-variant/5">
+<span class="material-symbols-outlined text-3xl opacity-60">credit_card</span>
+<div>
+<p class="text-sm font-mono text-on-surface">â¢â¢â¢â¢ â¢â¢â¢â¢ â¢â¢â¢â¢ 9901</p>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant">Expires 09/27</p>
+</div>
+</div>
+<p class="text-xs font-body text-on-surface-variant italic">Billed to the Manhattan address above.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sticky Summary -->
+<aside class="lg:col-span-4 lg:sticky lg:top-28">
+<div class="glass-panel p-8 rounded-2xl border border-outline-variant/10 editorial-shadow space-y-10">
+<div class="space-y-6">
+<h2 class="font-headline text-2xl text-on-surface border-b border-outline-variant/10 pb-4">Financial Summary</h2>
+<div class="space-y-4 font-body">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">Acquisition Subtotal</span>
+<span class="text-on-surface font-mono">$13,250.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">White-Glove Delivery</span>
+<span class="text-on-surface font-mono">$125.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">Estimated Luxury Surcharge</span>
+<span class="text-on-surface font-mono">$1,093.12</span>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant/10 flex justify-between items-baseline">
+<span class="font-headline text-xl text-on-surface">Grand Total</span>
+<span class="font-headline text-3xl text-primary tracking-tighter">$14,468.12</span>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-start gap-3">
+<div class="flex items-center h-5">
+<input class="h-4 w-4 rounded border-outline-variant bg-surface-container-highest text-primary focus:ring-primary focus:ring-offset-background" id="terms" name="terms" type="checkbox"/>
+</div>
+<div class="text-xs text-on-surface-variant leading-relaxed">
+<label class="font-body" for="terms">I accept the <a class="text-primary hover:underline" href="#">Terms of Service</a> and the <a class="text-primary hover:underline" href="#">Authenticity Guarantee</a> protocol.</label>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary py-5 rounded-lg font-headline text-lg tracking-wide shadow-[0_12px_24px_rgba(230,195,100,0.15)] transition-all active:scale-[0.98]">
+                            Finalize Acquisition
+                        </button>
+<div class="flex items-center justify-center gap-2 text-[10px] text-on-surface-variant uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">lock</span>
+                            Secure Encrypted Transaction
+                        </div>
+</div>
+</div>
+<div class="mt-8 p-6 rounded-xl border border-primary/10 bg-primary/5">
+<p class="text-xs font-body text-primary leading-relaxed text-center">
+<span class="font-bold">Concierge Note:</span> Your order includes complimentary insurance and personal tracking by our specialist team.
+                    </p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0e0e12] w-full mt-20 border-t border-[#F5F5F0]/5 pt-16">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<div class="space-y-4">
+<div class="text-lg font-bold text-[#e6c364] mb-4 font-['Noto_Serif']">The Obsidian Curator</div>
+<p class="text-[#F5F5F0]/40 text-xs leading-relaxed font-['Noto_Serif']">
+                    A destination for the world's most exquisite and rare acquisitions. Curated with precision, delivered with discretion.
+                </p>
+</div>
+<div class="space-y-6">
+<h4 class="text-[10px] uppercase tracking-widest text-[#e6c364] font-bold">Services</h4>
+<ul class="space-y-3">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] text-xs font-['Noto_Serif'] transition-colors" href="#">Private Suite</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] text-xs font-['Noto_Serif'] transition-colors" href="#">Shipping Etiquette</a></li>
+</ul>
+</div>
+<div class="space-y-6">
+<h4 class="text-[10px] uppercase tracking-widest text-[#e6c364] font-bold">Information</h4>
+<ul class="space-y-3">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] text-xs font-['Noto_Serif'] transition-colors" href="#">Terms of Service</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] text-xs font-['Noto_Serif'] transition-colors" href="#">Authenticity Guarantee</a></li>
+</ul>
+</div>
+<div class="space-y-6">
+<h4 class="text-[10px] uppercase tracking-widest text-[#e6c364] font-bold">Legal</h4>
+<p class="text-[#F5F5F0]/40 text-xs leading-relaxed font-['Noto_Serif']">
+                    Â© 2024 The Obsidian Curator. All Rights Reserved.
+                </p>
+</div>
+</div>
+</footer>
+</body></html>

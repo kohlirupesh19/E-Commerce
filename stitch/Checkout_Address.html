@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,800&amp;family=Manrope:wght@300;400;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#ffe084",
+            "surface-container-low": "#1b1b1f",
+            "on-surface": "#e4e1e7",
+            "primary-fixed": "#ffe08f",
+            "error-container": "#93000a",
+            "secondary-container": "#735c00",
+            "background": "#131317",
+            "on-primary-container": "#503d00",
+            "on-primary": "#3d2e00",
+            "surface-tint": "#e6c364",
+            "on-tertiary-fixed": "#041451",
+            "outline": "#99907e",
+            "on-secondary-fixed-variant": "#574500",
+            "on-error-container": "#ffdad6",
+            "on-tertiary": "#1e2b66",
+            "surface-container": "#1f1f23",
+            "on-primary-fixed-variant": "#584400",
+            "on-tertiary-container": "#2e3b77",
+            "on-surface-variant": "#d0c5b2",
+            "primary": "#e6c364",
+            "inverse-primary": "#755b00",
+            "outline-variant": "#4d4637",
+            "on-primary-fixed": "#241a00",
+            "primary-container": "#c9a84c",
+            "inverse-on-surface": "#303034",
+            "tertiary": "#b9c4ff",
+            "surface-container-lowest": "#0e0e12",
+            "on-secondary": "#3c2f00",
+            "on-tertiary-fixed-variant": "#35437e",
+            "tertiary-container": "#9ba8eb",
+            "surface-container-highest": "#353439",
+            "on-secondary-fixed": "#231b00",
+            "on-background": "#e4e1e7",
+            "surface-dim": "#131317",
+            "inverse-surface": "#e4e1e7",
+            "surface-container-high": "#2a292e",
+            "surface": "#131317",
+            "secondary-fixed-dim": "#e3c466",
+            "secondary": "#e3c466",
+            "tertiary-fixed": "#dde1ff",
+            "on-error": "#690005",
+            "primary-fixed-dim": "#e6c364",
+            "error": "#ffb4ab",
+            "on-secondary-container": "#f6d675",
+            "surface-bright": "#39393d",
+            "tertiary-fixed-dim": "#b9c3ff",
+            "surface-variant": "#353439"
+          },
+          fontFamily: {
+            "headline": ["Fraunces", "serif"],
+            "body": ["Manrope", "sans-serif"],
+            "label": ["Manrope", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(53, 52, 57, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .text-gold-shimmer {
+      background: linear-gradient(135deg, #e6c364 0%, #ffe08f 50%, #e6c364 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen">
+<!-- Top Navigation (Shell Implementation) -->
+<header class="bg-[#131317]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-[#e6c364] font-headline">The Obsidian Curator</div>
+<nav class="hidden md:flex gap-12 font-headline tracking-tight">
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Collections</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Admin Dashboard</a>
+</nav>
+<div class="flex items-center gap-6 text-[#e6c364]">
+<span class="material-symbols-outlined cursor-pointer hover:scale-95 active:scale-90 transition-transform">favorite</span>
+<span class="material-symbols-outlined cursor-pointer hover:scale-95 active:scale-90 transition-transform">shopping_bag</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center overflow-hidden">
+<img alt="User Profile Avatar" data-alt="close-up portrait of an elegant person in a dark tailored suit with soft studio lighting and deep shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATIftuu9HIoCDSd_aDK5jFzMyMSUZsNck5alyMFZ7JK58b8yEB6fN-NFN0CcUJf-c5HEr652K2q6mCQfAhYdSsEdgmg0tOQ4hvJt-ALdjBXMX4MuUDJSXgMYmHoZ3SDt2QDMlFcTPtAEtfuWVbtXs-ttc6DQJYKubG_QMjfyfoJPCqNSFdrrjAmoD0niHO_CmMVwxn8fwVhzgfbwQgB9O30NqOkx4f35X2-tE2us76cUUmkYtZKQEzquEtdkmJsxf0jywl4NTK-N8"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-8 pt-12 pb-24">
+<!-- Progress Indicator -->
+<nav class="mb-20 flex justify-center">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-primary bg-primary text-on-primary flex items-center justify-center font-headline font-bold">1</div>
+<span class="font-headline text-[#e6c364] tracking-wide text-sm uppercase">Address</span>
+</div>
+<div class="w-16 h-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 opacity-40">
+<div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">2</div>
+<span class="font-headline tracking-wide text-sm uppercase">Payment</span>
+</div>
+<div class="w-16 h-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 opacity-40">
+<div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">3</div>
+<span class="font-headline tracking-wide text-sm uppercase">Review</span>
+</div>
+<div class="w-16 h-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 opacity-40">
+<div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">4</div>
+<span class="font-headline tracking-wide text-sm uppercase">Confirm</span>
+</div>
+</div>
+</nav>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+<!-- Left: Delivery Address Selection -->
+<section class="lg:col-span-8 space-y-12">
+<header>
+<h1 class="text-4xl font-headline text-on-surface mb-2 tracking-tight">Delivery Address</h1>
+<p class="text-on-surface-variant font-light tracking-wide">Select your curated destination for arrival.</p>
+</header>
+<!-- Saved Addresses Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Address Card Active -->
+<label class="relative group cursor-pointer">
+<input checked="" class="peer sr-only" name="address" type="radio"/>
+<div class="h-full p-6 glass-card border border-outline-variant/30 rounded-xl transition-all duration-500 peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-surface-container-high/40">
+<div class="flex justify-between items-start mb-4">
+<span class="px-3 py-1 bg-surface-container-highest text-primary text-[10px] font-headline uppercase tracking-[0.2em] rounded-full">Home</span>
+<div class="w-5 h-5 rounded-full border border-outline-variant peer-checked:bg-primary flex items-center justify-center transition-colors">
+<div class="w-2 h-2 rounded-full bg-on-primary opacity-0 peer-checked:opacity-100"></div>
+</div>
+</div>
+<h3 class="text-lg font-headline text-on-surface mb-1">Julian Thorne</h3>
+<p class="text-sm text-on-surface-variant mb-4">+1 (555) 012-3456</p>
+<p class="text-sm text-on-surface-variant leading-relaxed font-light">
+                427 Obsidian Avenue, Suite 900<br/>
+                Lower Manhattan, NY 10013<br/>
+                United States
+              </p>
+</div>
+</label>
+<!-- Address Card -->
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="address" type="radio"/>
+<div class="h-full p-6 glass-card border border-outline-variant/30 rounded-xl transition-all duration-500 peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-surface-container-high/40">
+<div class="flex justify-between items-start mb-4">
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-headline uppercase tracking-[0.2em] rounded-full">Work</span>
+<div class="w-5 h-5 rounded-full border border-outline-variant peer-checked:bg-primary flex items-center justify-center transition-colors"></div>
+</div>
+<h3 class="text-lg font-headline text-on-surface mb-1">Julian Thorne</h3>
+<p class="text-sm text-on-surface-variant mb-4">+1 (555) 987-6543</p>
+<p class="text-sm text-on-surface-variant leading-relaxed font-light">
+                Metropolitan Tower, Floor 54<br/>
+                Financial District, NY 10005<br/>
+                United States
+              </p>
+</div>
+</label>
+<!-- Add New Address Button -->
+<button class="h-full p-8 border border-dashed border-outline-variant/50 rounded-xl flex flex-col items-center justify-center gap-4 text-on-surface-variant hover:text-primary hover:border-primary transition-all duration-500 hover:bg-primary/5 group">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<span class="font-headline tracking-widest text-xs uppercase">Add New Address</span>
+</button>
+</div>
+<!-- Inline Form (Expanded State Concept) -->
+<div class="pt-8 border-t border-outline-variant/10">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Full Name</label>
+<input class="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light" placeholder="Enter full name" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Phone Number</label>
+<input class="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light" placeholder="+1 (000) 000-0000" type="tel"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Pincode</label>
+<input class="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light font-mono" placeholder="Zip / Postal Code" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Type</label>
+<div class="flex gap-4 py-1">
+<button class="px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary text-[10px] font-headline uppercase tracking-widest">Home</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant text-[10px] font-headline uppercase tracking-widest hover:border-on-surface transition-colors">Work</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant text-[10px] font-headline uppercase tracking-widest hover:border-on-surface transition-colors">Other</button>
+</div>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Line 1</label>
+<input class="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light" placeholder="Street name and house number" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">City</label>
+<input class="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light" type="text" value="New York"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">State</label>
+<input class="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light" type="text" value="NY"/>
+</div>
+</div>
+</div>
+<div class="flex justify-start">
+<button class="group flex items-center gap-4 bg-primary text-on-primary px-12 py-5 rounded-lg font-headline font-bold tracking-widest uppercase text-xs overflow-hidden relative transition-all hover:shadow-[0_0_30px_rgba(230,195,100,0.3)] active:scale-95">
+<span>Save &amp; Continue</span>
+<span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Right: Mini Order Summary -->
+<aside class="lg:col-span-4 sticky top-32">
+<div class="glass-card border border-outline-variant/20 rounded-xl p-8 overflow-hidden relative">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16"></div>
+<h2 class="text-xl font-headline text-on-surface mb-8 tracking-wide">Order Summary</h2>
+<!-- Summary Items -->
+<div class="space-y-6 mb-8">
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-4">
+<div class="w-16 h-20 bg-surface-container-highest rounded overflow-hidden">
+<img alt="Premium Artifact" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="close-up of luxury handcrafted black leather shoes with subtle gold stitching details on dark marble surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAC1xAM_TkYFLFF2lCO9yzzvLa0GXmibR_MqpaMQm4G65WeoDhC67RdQ8TscduuAEROvHG7jSRI2YZKK6kXIfoi8KmnNmrjEtg9EUgnyiEDvxCsdQFOJgdjxGQrbozVkAuq4cCQR5-IS3a2VWAqJi5GeRXKCNqNSW8yLUpcaGsb0hczViU4IBaUrmGsM0xwdPn0WuEezPONm_4JPCITmT_zjmea-2T8BZy8KnWww4kFAoYmXABnT8ELYy0AsoStuR5k40M2b3GjzdU"/>
+</div>
+<div>
+<p class="text-sm font-headline text-on-surface mb-1">Nocturne Brogues</p>
+<p class="text-[10px] font-mono text-on-surface-variant uppercase">SKU: OBS-4429</p>
+</div>
+</div>
+<span class="font-mono text-sm text-primary">$1,250</span>
+</div>
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-4">
+<div class="w-16 h-20 bg-surface-container-highest rounded overflow-hidden">
+<img alt="Luxury Timepiece" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="macro photography of a gold skeleton watch movement with intricate gears and rubies in soft ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbmZgn0eGcr8gubOZEdIJbg-HgF-4VZU-iDifZs9gI-3COt-KCG_A1APQsQdWFaoLHn4V4Z0zRcGGLARVRNB-HtY-Lf3l5QPLimnvulV7l1B0GosOwSDxoky3VJpqzmybrGPcq-KNHcSQOoxHP8_fwC0177qv3CKWm4E8vklU8KU8GzYJ1HoQuEdzUAjwZvVKQeeePLTwF9bZHtnIeweZvDdZAYxS8_ZIjbk-kG_f2dQFH2yZXQAY9SPxVxOIv5T2yqI5acHyPqv0"/>
+</div>
+<div>
+<p class="text-sm font-headline text-on-surface mb-1">Aurelian Skeleton</p>
+<p class="text-[10px] font-mono text-on-surface-variant uppercase">SKU: CLK-8812</p>
+</div>
+</div>
+<span class="font-mono text-sm text-primary">$4,800</span>
+</div>
+</div>
+<!-- Totals -->
+<div class="space-y-4 pt-6 border-t border-outline-variant/10">
+<div class="flex justify-between text-sm font-light">
+<span class="text-on-surface-variant">Subtotal (2 items)</span>
+<span class="text-on-surface font-mono">$6,050.00</span>
+</div>
+<div class="flex justify-between text-sm font-light">
+<span class="text-on-surface-variant">White Glove Shipping</span>
+<span class="text-on-surface font-mono">$120.00</span>
+</div>
+<div class="flex justify-between text-sm font-light">
+<span class="text-on-surface-variant">Insurance</span>
+<span class="text-on-surface font-mono">$45.00</span>
+</div>
+<div class="flex justify-between items-center pt-6 mt-4 border-t border-primary/20">
+<span class="font-headline text-on-surface uppercase tracking-[0.2em] text-xs">Total Amount</span>
+<span class="text-2xl font-mono text-gold-shimmer font-bold">$6,215.00</span>
+</div>
+</div>
+<!-- Trust Badge -->
+<div class="mt-8 flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low/50 rounded-lg border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-headline">Authenticity Guaranteed</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer (Shell Implementation) -->
+<footer class="bg-[#0e0e12] w-full mt-20 border-t border-[#F5F5F0]/5 pt-16">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto font-['Noto_Serif'] text-xs leading-relaxed">
+<div class="col-span-1 md:col-span-1">
+<div class="text-lg font-bold text-[#e6c364] mb-4">The Obsidian Curator</div>
+<p class="text-[#F5F5F0]/40 max-w-xs">An exclusive vault for the discerning collector. Every artifact tells a story of unmatched craftsmanship and heritage.</p>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Navigation</h4>
+<ul class="space-y-4">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Private Suite</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Boutique</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Collections</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Client Care</h4>
+<ul class="space-y-4">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Shipping Etiquette</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Authenticity Guarantee</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Terms of Service</a></li>
+</ul>
+</div>
+<div class="flex flex-col items-start md:items-end">
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Contact</h4>
+<p class="text-[#F5F5F0]/40 text-right">concierge@obsidiancurator.com</p>
+<div class="flex gap-4 mt-6">
+<div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary cursor-pointer transition-all">
+<span class="material-symbols-outlined text-sm">public</span>
+</div>
+<div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary cursor-pointer transition-all">
+<span class="material-symbols-outlined text-sm">mail</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-12 py-8 text-center border-t border-[#F5F5F0]/5">
+<p class="text-[#F5F5F0]/20 text-[10px] tracking-[0.3em] uppercase">Â© 2024 The Obsidian Curator. All Rights Reserved.</p>
+</div>
+</footer>
+</body></html>

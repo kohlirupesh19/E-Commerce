@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Tracking | The Obsidian Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&amp;family=Manrope:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#ffe084",
+                        "surface-container-low": "#1b1b1f",
+                        "on-surface": "#e4e1e7",
+                        "primary-fixed": "#ffe08f",
+                        "error-container": "#93000a",
+                        "secondary-container": "#735c00",
+                        "background": "#131317",
+                        "on-primary-container": "#503d00",
+                        "on-primary": "#3d2e00",
+                        "surface-tint": "#e6c364",
+                        "on-tertiary-fixed": "#041451",
+                        "outline": "#99907e",
+                        "on-secondary-fixed-variant": "#574500",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#1e2b66",
+                        "surface-container": "#1f1f23",
+                        "on-primary-fixed-variant": "#584400",
+                        "on-tertiary-container": "#2e3b77",
+                        "on-surface-variant": "#d0c5b2",
+                        "primary": "#e6c364",
+                        "inverse-primary": "#755b00",
+                        "outline-variant": "#4d4637",
+                        "on-primary-fixed": "#241a00",
+                        "primary-container": "#c9a84c",
+                        "inverse-on-surface": "#303034",
+                        "tertiary": "#b9c4ff",
+                        "surface-container-lowest": "#0e0e12",
+                        "on-secondary": "#3c2f00",
+                        "on-tertiary-fixed-variant": "#35437e",
+                        "tertiary-container": "#9ba8eb",
+                        "surface-container-highest": "#353439",
+                        "on-secondary-fixed": "#231b00",
+                        "on-background": "#e4e1e7",
+                        "surface-dim": "#131317",
+                        "inverse-surface": "#e4e1e7",
+                        "surface-container-high": "#2a292e",
+                        "surface": "#131317",
+                        "secondary-fixed-dim": "#e3c466",
+                        "secondary": "#e3c466",
+                        "tertiary-fixed": "#dde1ff",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#e6c364",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#f6d675",
+                        "surface-bright": "#39393d",
+                        "tertiary-fixed-dim": "#b9c3ff",
+                        "surface-variant": "#353439"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #131317;
+            color: #F5F5F0;
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(230, 195, 100, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-[#131317]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-[0_8px_32px_rgba(230,195,100,0.04)] no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent">
+<nav class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-[#e6c364] font-['Noto_Serif']">
+                The Obsidian Curator
+            </div>
+<div class="hidden md:flex items-center gap-10 font-['Noto_Serif'] tracking-tight">
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Collections</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Admin Dashboard</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#e6c364] hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="text-[#e6c364] hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90">
+<span class="material-symbols-outlined">shopping_bag</span>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border border-primary/20">
+<img alt="User Profile Avatar" class="h-full w-full object-cover" data-alt="Sophisticated male profile portrait in soft studio lighting with dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD77U4Wbgl6qwEEos5taBnopFgY1pe3YzEobhwCLihwzBFvuipM0VguT4jmlkmHQXoZVOS1TAxobsbOUd2INsEnFUSsNCDFZYJPDb3v2m4h1inLXHc8t2NFUwrr6md05k1bnYa44loyIRF7FnOdf5kOMnai3E-YFrqs4d5x2YguWCJjNuj2v8Vdk_h5WCq6o3vcfO1gFMgonOvd4Gc_XynaTaZ-VUzhifPVMp4RNgFo6WsevAwjD-2CEWUx6NVUUxKbEjDP7HBYAQ"/>
+</div>
+</div>
+</nav>
+</header>
+<main class="max-w-6xl mx-auto px-6 pt-12 pb-24">
+<!-- Header & Status -->
+<section class="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<p class="font-mono text-primary uppercase tracking-widest text-xs mb-2">Order Tracking</p>
+<h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tight mb-4">#OC-882941-LX</h1>
+<p class="text-on-surface-variant font-body">Placed on October 24, 2024 â¢ 2:14 PM</p>
+</div>
+<div class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/20">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+</span>
+<span class="font-headline font-semibold text-primary tracking-wide text-lg uppercase">Shipped</span>
+</div>
+</section>
+<!-- Visual Stepper -->
+<section class="mb-20">
+<div class="relative py-12">
+<!-- Progress Line -->
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant -translate-y-1/2"></div>
+<div class="absolute top-1/2 left-0 w-3/5 h-[1px] bg-primary -translate-y-1/2"></div>
+<div class="relative z-10 flex justify-between">
+<!-- Step 1: Placed -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary mb-4 shadow-[0_0_20px_rgba(230,195,100,0.3)]">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-headline text-sm font-semibold text-on-surface">Order Placed</span>
+<span class="font-mono text-[10px] text-on-surface-variant mt-1 italic">Oct 24</span>
+</div>
+<!-- Step 2: Confirmed -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary mb-4 shadow-[0_0_20px_rgba(230,195,100,0.3)]">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-headline text-sm font-semibold text-on-surface">Confirmed</span>
+<span class="font-mono text-[10px] text-on-surface-variant mt-1 italic">Oct 24</span>
+</div>
+<!-- Step 3: Packed -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary mb-4 shadow-[0_0_20px_rgba(230,195,100,0.3)]">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-headline text-sm font-semibold text-on-surface">Packed</span>
+<span class="font-mono text-[10px] text-on-surface-variant mt-1 italic">Oct 25</span>
+</div>
+<!-- Step 4: Shipped (ACTIVE) -->
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 -mt-2 rounded-full bg-primary flex items-center justify-center text-on-primary mb-2 shadow-[0_0_30px_rgba(230,195,100,0.5)] ring-4 ring-primary/20">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<span class="font-headline text-base font-bold text-primary tracking-tight">Shipped</span>
+<span class="font-mono text-[10px] text-primary/80 mt-1 italic">Oct 26</span>
+</div>
+<!-- Step 5: Out for Delivery -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center text-on-surface-variant mb-4">
+<span class="material-symbols-outlined text-xl">inventory_2</span>
+</div>
+<span class="font-headline text-sm font-semibold text-on-surface-variant">Out for Delivery</span>
+<span class="font-mono text-[10px] text-on-surface-variant/40 mt-1 italic">Expected Oct 28</span>
+</div>
+<!-- Step 6: Delivered -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center text-on-surface-variant mb-4">
+<span class="material-symbols-outlined text-xl">done_all</span>
+</div>
+<span class="font-headline text-sm font-semibold text-on-surface-variant">Delivered</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Details -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+<!-- Shipment Details Card -->
+<div class="lg:col-span-2 glass-panel p-10 rounded-xl">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl">route</span>
+<h2 class="font-headline text-2xl font-bold">Shipment Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="space-y-6">
+<div>
+<p class="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-1">Courier</p>
+<p class="font-body text-lg font-semibold">Excellence Logistique Prestige</p>
+</div>
+<div>
+<p class="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tracking Number</p>
+<a class="font-mono text-primary text-lg flex items-center gap-2 hover:underline" href="#">
+                                TRK-990-2184-XP
+                                <span class="material-symbols-outlined text-sm">open_in_new</span>
+</a>
+</div>
+</div>
+<div class="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/30">
+<div class="flex items-center gap-4 mb-4">
+<img class="w-12 h-12 rounded-full object-cover grayscale brightness-110" data-alt="Close-up portrait of a professional delivery concierge in a dark uniform with a friendly smile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANiWUQVAXT2mseIYESKYPqTOYmIInFyzgB7GybWRrvyxMEjNyXLOyUGilGLg3R8wgd1B_8BHiL0HgAB-h9UKandWii5N-Y-nBui-7Uut0AYFmXjw4jGH7OT5PoiXtRz3rH5_XWUSJP0Go9HWbN0RnHmgZZ6kfwkOKuJpEZtdy66bsYGey_xKfboJoPC0wZODIKeGsTxCpzcEA3tD0Y6PLQnY4YEfH-4j5lJtB5ksLsdDI7PtqlPYnq7GQ4t3sSCaojjgoIweijGpo"/>
+<div>
+<p class="font-label text-[10px] uppercase text-on-surface-variant">Designated Driver</p>
+<p class="font-body font-bold">Julien Vasseur</p>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 bg-primary text-on-primary py-2 px-4 rounded font-label text-xs font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">call</span> Contact
+                            </button>
+<button class="flex-1 bg-surface-container-highest text-on-surface py-2 px-4 rounded font-label text-xs font-bold hover:bg-surface-bright transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> Message
+                            </button>
+</div>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-outline-variant/20">
+<h3 class="font-headline text-lg font-semibold mb-6">Recent Activity</h3>
+<div class="space-y-8">
+<div class="flex gap-6">
+<div class="font-mono text-xs text-on-surface-variant pt-1 w-20">10:45 AM</div>
+<div>
+<p class="font-body font-semibold">Departed from Sorting Facility</p>
+<p class="text-xs text-on-surface-variant">Lyon, France Regional Hub</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="font-mono text-xs text-on-surface-variant pt-1 w-20">08:12 AM</div>
+<div>
+<p class="font-body font-semibold">Quality Inspection Completed</p>
+<p class="text-xs text-on-surface-variant">Passed 14-point luxury protocol</p>
+</div>
+</div>
+<div class="flex gap-6 opacity-60">
+<div class="font-mono text-xs text-on-surface-variant pt-1 w-20">Oct 25</div>
+<div>
+<p class="font-body font-semibold">Package Sanitized &amp; Sealed</p>
+<p class="text-xs text-on-surface-variant">Obsidian Signature Vault Packing</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Info: Address & Items -->
+<div class="space-y-8">
+<!-- Delivery Address -->
+<div class="glass-panel p-8 rounded-xl">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">location_on</span>
+<h2 class="font-headline text-xl font-bold">Delivery Destination</h2>
+</div>
+<div class="font-body space-y-1">
+<p class="font-bold text-on-surface">Victor Saint-Clair</p>
+<p class="text-on-surface-variant">Avenue Montaigne, 75</p>
+<p class="text-on-surface-variant">8th Arrondissement</p>
+<p class="text-on-surface-variant">Paris, 75008</p>
+<p class="text-on-surface-variant">France</p>
+</div>
+<div class="mt-6 aspect-video rounded-lg overflow-hidden grayscale brightness-50 contrast-125 border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="Minimalist dark monochromatic street map of central Paris district" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCETgRstAM0HrZBkWfOmkhLKzTxtROGgerIUjzUKoyXR2UgLc1jjD84BtJmV4HRzY9YR7FYSyx2OChoqd0vQ9yJ3jUdYLMSARtPqAT-fuN-DpOcer-SHrLB4lF3LOvRmDFhbDne9jxStsrQ4HFBeusOLdBZN11YT7Iw110SaJa5KQxIiYDMKrmevLKGexkfg494hp3H9fDdPdC1Cjk8McBHO9VYNuBrieKdVvxcmH6U8KGqm2YAHpSHaO-ykvJF7dJBSEQ7g2H9T-k"/>
+</div>
+</div>
+<!-- Items in Shipment -->
+<div class="glass-panel p-8 rounded-xl">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-xl font-bold">Your Selection</h2>
+<span class="font-mono text-xs px-2 py-1 bg-surface-container-highest rounded">3 Items</span>
+</div>
+<div class="space-y-6">
+<div class="flex gap-4 group">
+<div class="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
+<img class="w-full h-full object-cover transition-transform group-hover:scale-110" data-alt="Close-up of a luxury leather handbag in textured black leather with gold hardware" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVanmtsmbt0gH7LorH6TuYJEDEM_Z3Qk4lGvh4PIBAbkA7hba9bdDihvYhBWtK9m2_UnCB-_EETqqOAw-a-D4iy5KiWr5IcD8OsgG0_7Z7-_ZaIHZVTkxSUjIZ7vamAKS3rWBSkjd-TwjKKoimdjzMW3tymVbVo3NBm2o_BYiGM6Q3BwAIxQV9W-j63nKa-AXbVdf3GlOdrtnNbT4VQ2L0k6n_8GH9JuBlptKXokGn8IhFX0twf4xFU54U0PZ4y_YPErKx3FsQqu0"/>
+</div>
+<div class="flex flex-col justify-center">
+<p class="font-headline text-sm font-semibold leading-tight">Noire Saffiano Tote</p>
+<p class="font-mono text-[10px] text-on-surface-variant">SKU: OBS-7721</p>
+</div>
+</div>
+<div class="flex gap-4 group">
+<div class="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
+<img class="w-full h-full object-cover transition-transform group-hover:scale-110" data-alt="Luxury Swiss watch with a gold face and black leather strap on a velvet cushion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4IMP9xvc9vfj_82Z4AhX_2WQKLPXElmakGqZcwfNDpAEYy8SOvt-b4nXMrTehEjFtwoJGILWG7qV0bCXaMQpCX3Pd6_5WP4W1bZnzKbx6esio94_AEVcDB29Qcd5eFhSke-t2STghbwdK1oqBfoOx4HHyArs9kus0Ns21_tQ1tD0ujXWJ935_atkwLHGkNDqAc6RSfRiG-kFJy-zUTJ6cA3Unkcu4HbyOR0K4WtV7zz4L2edrnjPRoITgjtZCgKfXgnCkDEEtnVw"/>
+</div>
+<div class="flex flex-col justify-center">
+<p class="font-headline text-sm font-semibold leading-tight">Eclipse Chronometer</p>
+<p class="font-mono text-[10px] text-on-surface-variant">SKU: CLK-0094</p>
+</div>
+</div>
+<div class="flex gap-4 group opacity-50">
+<div class="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
+<img class="w-full h-full object-cover transition-transform group-hover:scale-110" data-alt="Minimalist designer sneakers in white and cream leather against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ80WVERTSqcG39j3RqBe2jz6cuJXg7OXKa3IZEYtmZeDGNxkQP8vK9dKSFG0JkahUsOZsX0Ajsx6uZ2AWNMRYYAjsJHORQdYujf7bulgCt9CFn-bFK1HwhJiGrOSuCpAVmzi0pDH1levb0D4xlZWFZsdAUt0W2Thy6gQoEWPZpQzJqyvGrdSkrUEoF8jgZeLJUxX1-kIrE4P5EDJb_Yka2LBX_EZNjdkSThqjTdlpA07WWDw9j0aHKqQZlojUs5kharrLdhslCEk"/>
+</div>
+<div class="flex flex-col justify-center">
+<p class="font-headline text-sm font-semibold leading-tight">Velvet Step Loafers</p>
+<p class="font-mono text-[10px] text-on-surface-variant">SKU: SHO-1105</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 border-t border-outline-variant/20 font-label text-xs uppercase tracking-widest text-primary hover:text-white transition-colors">
+                        View Order Details
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0e0e12] w-full mt-20 border-t border-[#F5F5F0]/5 pt-16">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto font-['Noto_Serif'] text-xs leading-relaxed">
+<div class="col-span-1">
+<div class="text-lg font-bold text-[#e6c364] mb-4">The Obsidian Curator</div>
+<p class="text-[#F5F5F0]/40 max-w-xs">Curating the world's finest artifacts for the discerning soul. Experience the pinnacle of digital luxury.</p>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Concierge</h4>
+<ul class="space-y-4">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Private Suite</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Shipping Etiquette</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Authenticity Guarantee</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Legal</h4>
+<ul class="space-y-4">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Terms of Service</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Cookie Policy</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Subscribe</h4>
+<p class="text-[#F5F5F0]/40 mb-4">Join our inner circle for exclusive curation drops.</p>
+<div class="flex">
+<input class="bg-[#1b1b1f] border-none text-[#F5F5F0] text-xs px-4 py-2 w-full focus:ring-1 focus:ring-[#e6c364]" placeholder="Email Address" type="email"/>
+<button class="bg-[#e6c364] text-[#3d2e00] px-4 font-bold uppercase tracking-tighter">Join</button>
+</div>
+</div>
+</div>
+<div class="border-t border-[#F5F5F0]/5 py-8 text-center text-[#F5F5F0]/20">
+            Â© 2024 The Obsidian Curator. All Rights Reserved.
+        </div>
+</footer>
+</body></html>

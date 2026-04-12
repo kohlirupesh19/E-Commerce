@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Profile | The Obsidian Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;600;900&amp;family=Manrope:wght@300;400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Noto+Serif:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-error-container": "#ffdad6",
+            "on-secondary": "#3c2f00",
+            "surface-dim": "#131317",
+            "error-container": "#93000a",
+            "tertiary-fixed": "#dde1ff",
+            "surface-container-highest": "#353439",
+            "surface-container": "#1f1f23",
+            "secondary-fixed-dim": "#e3c466",
+            "on-secondary-container": "#f6d675",
+            "primary-fixed": "#ffe08f",
+            "on-error": "#690005",
+            "on-primary-fixed": "#241a00",
+            "inverse-primary": "#755b00",
+            "on-secondary-fixed-variant": "#574500",
+            "on-surface-variant": "#d0c5b2",
+            "surface-container-high": "#2a292e",
+            "secondary": "#e3c466",
+            "on-primary": "#3d2e00",
+            "surface-tint": "#e6c364",
+            "error": "#ffb4ab",
+            "primary-fixed-dim": "#e6c364",
+            "on-background": "#e4e1e7",
+            "outline": "#99907e",
+            "background": "#131317",
+            "on-surface": "#e4e1e7",
+            "on-tertiary-fixed": "#041451",
+            "on-tertiary": "#1e2b66",
+            "primary": "#e6c364",
+            "on-tertiary-fixed-variant": "#35437e",
+            "surface-variant": "#353439",
+            "surface": "#131317",
+            "surface-container-lowest": "#0e0e12",
+            "inverse-surface": "#e4e1e7",
+            "tertiary-container": "#9ba8eb",
+            "surface-container-low": "#1b1b1f",
+            "secondary-fixed": "#ffe084",
+            "on-secondary-fixed": "#231b00",
+            "on-primary-fixed-variant": "#584400",
+            "on-tertiary-container": "#2e3b77",
+            "tertiary-fixed-dim": "#b9c3ff",
+            "surface-bright": "#39393d",
+            "on-primary-container": "#503d00",
+            "primary-container": "#c9a84c",
+            "inverse-on-surface": "#303034",
+            "tertiary": "#b9c4ff",
+            "outline-variant": "#4d4637",
+            "secondary-container": "#735c00"
+          },
+          fontFamily: {
+            "headline": ["Noto Serif", "serif"],
+            "body": ["Manrope", "sans-serif"],
+            "label": ["Manrope", "sans-serif"],
+            "serif": ["Fraunces", "serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    body {
+      background-color: #0e0e12;
+      color: #F5F5F0;
+    }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="font-body selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col py-8 px-6 bg-[#0e0e12] shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-50">
+<div class="mb-12">
+<h1 class="text-lg font-bold tracking-widest text-[#e6c364] uppercase font-serif">The Obsidian Curator</h1>
+<p class="text-[10px] tracking-[0.2em] text-[#F5F5F0]/40 uppercase mt-1">Elite Management</p>
+</div>
+<nav class="flex-1 space-y-4">
+<!-- Dashboard -->
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/60 hover:text-[#F5F5F0] hover:bg-[#353439]/20 transition-colors duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium tracking-wide">Dashboard</span>
+</a>
+<!-- Products -->
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/60 hover:text-[#F5F5F0] hover:bg-[#353439]/20 transition-colors duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-sm font-medium tracking-wide">Products</span>
+</a>
+<!-- Orders -->
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/60 hover:text-[#F5F5F0] hover:bg-[#353439]/20 transition-colors duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="text-sm font-medium tracking-wide">Orders</span>
+</a>
+<!-- Customers (ACTIVE) -->
+<a class="flex items-center gap-4 px-4 py-3 text-[#e6c364] font-bold border-r-2 border-[#e6c364] bg-[#353439]/10 transition-colors duration-300 rounded-l-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-sm tracking-wide">Customers</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 border-t border-[#353439]/20">
+<button class="w-full bg-primary text-on-primary py-3 px-4 rounded-lg font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+        New Collection
+      </button>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<main class="ml-64 min-h-screen pb-24">
+<!-- TopAppBar Component -->
+<header class="flex justify-between items-center w-full px-12 py-6 bg-[#131317]/80 backdrop-blur-xl sticky top-0 z-40">
+<div class="flex items-center gap-4 text-[#F5F5F0]/40 text-xs font-medium tracking-widest uppercase">
+<span>Admin</span>
+<span class="material-symbols-outlined text-[10px]" data-icon="chevron_right">chevron_right</span>
+<span>Customers</span>
+<span class="material-symbols-outlined text-[10px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary">Elena Valerius</span>
+</div>
+<div class="flex items-center gap-8">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#F5F5F0]/40 text-lg" data-icon="search">search</span>
+<input class="bg-surface-container-highest/30 border-none rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-primary/50 placeholder:text-[#F5F5F0]/20 transition-all" placeholder="Search Archives..." type="text"/>
+</div>
+<div class="flex items-center gap-6 text-[#F5F5F0]/60">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="settings">settings</span></button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20">
+<img alt="Elena Valerius Profile" class="w-full h-full object-cover" data-alt="Modern close-up portrait of a woman with sophisticated lighting against a dark neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIpRDfQUi0c7zJ38uHeA42Ji8t-e6cwvSh6rnWDM9JWPxnRCiwopHpbSYXgpTiKbMVtkob3mm1X4SnuPf6ELToeC1mSjeL1avwuPfDexCnXNzIxPVEnoCn3afSyVN0yaYbXlZMI2tSGCkc-TteF7K6pFkIImIkkkcDmyZObo39MgvI0QsOGAbATMLesQRPCtBF95cXrabZD3bzhinxXOv9sI1t9JObKDz2ceM_4rue4bS6qPlXlrWr-_Kk4riEbFXAnehZV2LP6V8"/>
+</div>
+</div>
+</div>
+</header>
+<div class="max-w-7xl mx-auto px-12 mt-12 space-y-12">
+<!-- Profile Hero Section -->
+<section class="grid grid-cols-12 gap-8 items-stretch">
+<!-- Main Profile Card -->
+<div class="col-span-8 glass-panel rounded-xl p-10 flex gap-10 items-start border-l border-primary/20 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-8">
+<span class="px-4 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-bold tracking-[0.2em] uppercase">Onyx Private</span>
+</div>
+<div class="relative group">
+<div class="w-40 h-52 rounded-lg overflow-hidden border border-outline-variant/30 transform transition-transform group-hover:scale-[1.02] duration-500">
+<img alt="Elena Valerius Profile" class="w-full h-full object-cover" data-alt="Editorial style portrait of an elegant woman with sharp features and thoughtful expression in dramatic dark studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUJWcbzvya2PQT6O7zYLUqtruH1oMpzf6a5ZXhm17PnNwwQWDCAUgXtFRyDY_Zh3uFfPVsbODxN0PvkjrIMwmnyyKhoRFbZla1xtNhlyWmT6Cyrorzl4byRS6eNlu4HNdKqRZfmcFbmE5axbV9Jq-z68o-E6ufAe14aAFOQTEQ58Uj8HFXDHQdiM60J-G7Ppe48dp3UFf19LyRXpVP4mF2PcvapGboJULe9lsDylBM6xZPdEdXR3XODXNRdAqn3ivotsixRq7m7OY"/>
+</div>
+<div class="absolute -bottom-4 -right-4 bg-background p-2 rounded-full border border-outline-variant/20">
+<div class="bg-green-500 w-4 h-4 rounded-full border-2 border-background"></div>
+</div>
+</div>
+<div class="flex-1 space-y-6">
+<div>
+<h2 class="text-5xl font-serif font-black tracking-tight text-on-surface">Elena Valerius</h2>
+<p class="font-mono text-primary text-sm mt-2 tracking-widest uppercase">#OB-9021</p>
+</div>
+<div class="grid grid-cols-3 gap-8 pt-6 border-t border-outline-variant/10">
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">Total Acquisitions</p>
+<p class="text-2xl font-serif text-primary">$124,500</p>
+</div>
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">Status</p>
+<p class="text-lg font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+                  Active
+                </p>
+</div>
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">Member Since</p>
+<p class="text-lg font-medium text-on-surface">Nov 12, 2023</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Client Preferences Card -->
+<div class="col-span-4 glass-panel rounded-xl p-8 flex flex-col justify-between border-t border-primary/10">
+<div>
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-primary" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<h3 class="font-serif text-xl font-bold italic tracking-wide">Client Preferences</h3>
+</div>
+<div class="space-y-6">
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-3">Preferred Ateliers</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-highest/50 rounded-full text-xs border border-outline-variant/10 hover:border-primary/40 transition-colors cursor-default">Patek Philippe</span>
+<span class="px-3 py-1 bg-surface-container-highest/50 rounded-full text-xs border border-outline-variant/10 hover:border-primary/40 transition-colors cursor-default">Maison Mara</span>
+<span class="px-3 py-1 bg-surface-container-highest/50 rounded-full text-xs border border-outline-variant/10 hover:border-primary/40 transition-colors cursor-default">Audemars Piguet</span>
+</div>
+</div>
+<div>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-3">Core Categories</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-primary/5 rounded-full text-[10px] font-bold text-primary border border-primary/20 uppercase tracking-tighter">Timepieces</span>
+<span class="px-3 py-1 bg-primary/5 rounded-full text-[10px] font-bold text-primary border border-primary/20 uppercase tracking-tighter">Leather Goods</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 border border-outline-variant/20 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary hover:border-primary transition-all duration-300">
+            Edit Curatorial Profile
+          </button>
+</div>
+</section>
+<!-- Detailed Content Grid -->
+<div class="grid grid-cols-12 gap-12">
+<!-- Acquisition Ledger -->
+<section class="col-span-8">
+<div class="flex items-baseline justify-between mb-8">
+<h3 class="font-serif text-2xl font-black tracking-tight">Acquisition Ledger</h3>
+<span class="font-mono text-[10px] text-on-surface-variant">24 ENTRIES FOUND</span>
+</div>
+<div class="glass-panel rounded-xl overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/10">
+<th class="px-8 py-6 text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Order ID</th>
+<th class="px-8 py-6 text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Date</th>
+<th class="px-8 py-6 text-[10px] font-label text-on-surface-variant uppercase tracking-widest text-center">Items</th>
+<th class="px-8 py-6 text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Amount</th>
+<th class="px-8 py-6 text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<tr class="hover:bg-primary/5 transition-colors group cursor-pointer">
+<td class="px-8 py-5 font-mono text-sm text-primary">#OB-28492</td>
+<td class="px-8 py-5 text-sm text-on-surface/80">Jan 14, 2024</td>
+<td class="px-8 py-5 text-sm text-on-surface/80 text-center">02</td>
+<td class="px-8 py-5 text-sm font-medium">$42,200.00</td>
+<td class="px-8 py-5">
+<span class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-green-400">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                      Shipped
+                    </span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group cursor-pointer">
+<td class="px-8 py-5 font-mono text-sm text-primary">#OB-28114</td>
+<td class="px-8 py-5 text-sm text-on-surface/80">Dec 28, 2023</td>
+<td class="px-8 py-5 text-sm text-on-surface/80 text-center">01</td>
+<td class="px-8 py-5 text-sm font-medium">$12,450.00</td>
+<td class="px-8 py-5">
+<span class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-green-400">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                      Shipped
+                    </span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group cursor-pointer">
+<td class="px-8 py-5 font-mono text-sm text-primary">#OB-27901</td>
+<td class="px-8 py-5 text-sm text-on-surface/80">Dec 05, 2023</td>
+<td class="px-8 py-5 text-sm text-on-surface/80 text-center">05</td>
+<td class="px-8 py-5 text-sm font-medium">$69,850.00</td>
+<td class="px-8 py-5">
+<span class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                      Processing
+                    </span>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-6 text-center border-t border-outline-variant/10">
+<button class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/60 hover:text-primary transition-colors">Load Full History</button>
+</div>
+</div>
+</section>
+<!-- Activity Logs (Vertical Timeline) -->
+<section class="col-span-4">
+<div class="flex items-baseline justify-between mb-8">
+<h3 class="font-serif text-2xl font-black tracking-tight">Activity Logs</h3>
+<button class="text-primary hover:underline text-[10px] font-bold tracking-widest uppercase">View All</button>
+</div>
+<div class="space-y-0 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px before:bg-outline-variant/20">
+<!-- Log Item -->
+<div class="relative pl-12 pb-10 group">
+<div class="absolute left-3 top-2 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(230,195,100,0.5)] z-10"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-mono text-on-surface-variant uppercase mb-1">Today â¢ 14:24</span>
+<p class="text-sm text-on-surface font-medium mb-1">Viewed <span class="text-primary italic">Obsidian Chronograph X1</span></p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Spent 4 minutes reviewing technical specifications and macro imagery.</p>
+</div>
+</div>
+<!-- Log Item -->
+<div class="relative pl-12 pb-10 group">
+<div class="absolute left-3 top-2 w-2 h-2 rounded-full bg-outline-variant/40 group-hover:bg-primary transition-colors z-10"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-mono text-on-surface-variant uppercase mb-1">Yesterday â¢ 09:12</span>
+<p class="text-sm text-on-surface font-medium mb-1">Added <span class="text-primary italic">Nebula Silk Wrap</span> to Wishlist</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">System triggered 'Low Stock' automated concierge notification.</p>
+</div>
+</div>
+<!-- Log Item -->
+<div class="relative pl-12 pb-10 group">
+<div class="absolute left-3 top-2 w-2 h-2 rounded-full bg-outline-variant/40 group-hover:bg-primary transition-colors z-10"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-mono text-on-surface-variant uppercase mb-1">Jan 12 â¢ 18:45</span>
+<p class="text-sm text-on-surface font-medium mb-1">Virtual Concierge Inquiry</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Requested sizing details for high-jewelry collection 'Aethelgard'.</p>
+</div>
+</div>
+<!-- Log Item -->
+<div class="relative pl-12 group">
+<div class="absolute left-3 top-2 w-2 h-2 rounded-full bg-outline-variant/40 group-hover:bg-primary transition-colors z-10"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-mono text-on-surface-variant uppercase mb-1">Jan 10 â¢ 11:20</span>
+<p class="text-sm text-on-surface font-medium mb-1">Profile Tier Upgrade</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">System automated promotion from Platinum to <span class="text-primary">Onyx Private</span> status.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only / Responsive Filter) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full glass-panel border-t border-primary/10 flex justify-around py-4 z-50">
+<button class="flex flex-col items-center gap-1 text-[#F5F5F0]/40">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Dash</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Client</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#F5F5F0]/40">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Orders</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#F5F5F0]/40">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Setup</span>
+</button>
+</nav>
+</body></html>

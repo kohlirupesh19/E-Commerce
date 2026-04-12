@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@300;400;600;800&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#ffe084",
+            "surface-container-low": "#1b1b1f",
+            "on-surface": "#e4e1e7",
+            "primary-fixed": "#ffe08f",
+            "error-container": "#93000a",
+            "secondary-container": "#735c00",
+            "background": "#131317",
+            "on-primary-container": "#503d00",
+            "on-primary": "#3d2e00",
+            "surface-tint": "#e6c364",
+            "on-tertiary-fixed": "#041451",
+            "outline": "#99907e",
+            "on-secondary-fixed-variant": "#574500",
+            "on-error-container": "#ffdad6",
+            "on-tertiary": "#1e2b66",
+            "surface-container": "#1f1f23",
+            "on-primary-fixed-variant": "#584400",
+            "on-tertiary-container": "#2e3b77",
+            "on-surface-variant": "#d0c5b2",
+            "primary": "#e6c364",
+            "inverse-primary": "#755b00",
+            "outline-variant": "#4d4637",
+            "on-primary-fixed": "#241a00",
+            "primary-container": "#c9a84c",
+            "inverse-on-surface": "#303034",
+            "tertiary": "#b9c4ff",
+            "surface-container-lowest": "#0e0e12",
+            "on-secondary": "#3c2f00",
+            "on-tertiary-fixed-variant": "#35437e",
+            "tertiary-container": "#9ba8eb",
+            "surface-container-highest": "#353439",
+            "on-secondary-fixed": "#231b00",
+            "on-background": "#e4e1e7",
+            "surface-dim": "#131317",
+            "inverse-surface": "#e4e1e7",
+            "surface-container-high": "#2a292e",
+            "surface": "#131317",
+            "secondary-fixed-dim": "#e3c466",
+            "secondary": "#e3c466",
+            "tertiary-fixed": "#dde1ff",
+            "on-error": "#690005",
+            "primary-fixed-dim": "#e6c364",
+            "error": "#ffb4ab",
+            "on-secondary-container": "#f6d675",
+            "surface-bright": "#39393d",
+            "tertiary-fixed-dim": "#b9c3ff",
+            "surface-variant": "#353439"
+          },
+          fontFamily: {
+            "headline": ["Noto Serif"],
+            "body": ["Manrope"],
+            "label": ["Manrope"],
+            "mono": ["JetBrains Mono"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(53, 52, 57, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .tonal-transition {
+      background: linear-gradient(180deg, #131317 0%, #0e0e12 100%);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-[#131317]/80 backdrop-blur-xl text-[#e6c364] font-['Noto_Serif'] tracking-tight docked full-width top-0 sticky z-50 no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-[#e6c364]">The Obsidian Curator</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Collections</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Admin Dashboard</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90 transition-transform text-[#e6c364] border-b border-[#e6c364] pb-1">
+<span class="material-symbols-outlined">shopping_bag</span>
+</button>
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="max-w-[1920px] mx-auto px-8 md:px-12 py-16">
+<header class="mb-16">
+<h1 class="font-headline text-5xl md:text-6xl text-on-background tracking-tight mb-4">Your Selection</h1>
+<p class="text-on-surface-variant max-w-xl text-lg font-light leading-relaxed">
+        Refined acquisitions awaiting your final confirmation. Curated items are held for a limited period in our digital vault.
+      </p>
+</header>
+<div class="flex flex-col lg:flex-row gap-16 items-start">
+<!-- Left (65%): Cart items list -->
+<section class="w-full lg:w-[65%] space-y-12">
+<!-- Item 1 -->
+<article class="group flex flex-col md:flex-row gap-8 pb-12 border-b border-outline-variant/20 transition-all">
+<div class="w-full md:w-48 h-64 overflow-hidden rounded-lg bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-700" data-alt="Close-up of a luxury gold watch with intricate mechanical movements on a dark velvet display case" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZLtyJY0T_xYQ4dgbHTpaT8jV1nkOFLQqS_YToxNdmgTku2pqHcrJolN4CFHsRz7ppEJ0sN5Q--XCQvvfJlh_x9Nv36FFUkSDbxyWxnwphIw7wgkfzaoMrKLmlfLc7z5xXfiWT9eJPhEY5P7RbLxgK6brX40apJpHfokciMlIplJJaFLfKcdaM4rNyQKcZeoEcnvUZatJLOi4beuNDipS3dMyUrsf_YlzlkaafGCy9GTQjcQs9hZ6MUW8r0Ed7KyLPYz1_o2awav4"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-2">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-2xl text-primary tracking-tight">Obsidian Chronograph MK II</h3>
+<span class="font-mono text-lg text-on-background">$14,500.00</span>
+</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest mb-4">Midnight Gold / Sapphire Glass</p>
+<div class="flex items-center gap-6 mt-6">
+<div class="flex items-center bg-surface-container-highest rounded-full px-4 py-1.5 border border-outline-variant/10">
+<button class="text-on-surface hover:text-primary transition-colors px-2">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="font-mono px-6 text-on-background">01</span>
+<button class="text-on-surface hover:text-primary transition-colors px-2">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface text-xs uppercase tracking-widest flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg">bookmark</span>
+                  Save for later
+                </button>
+</div>
+</div>
+<div class="flex justify-between items-end mt-8">
+<button class="text-error/60 hover:text-error transition-colors flex items-center gap-2 group/remove">
+<span class="material-symbols-outlined">delete</span>
+<span class="text-xs uppercase tracking-widest opacity-0 group-hover/remove:opacity-100 transition-opacity">Remove from collection</span>
+</button>
+<div class="text-right">
+<span class="text-[10px] uppercase tracking-tighter text-on-surface-variant block mb-1">Line Total</span>
+<span class="font-mono text-xl text-on-background">$14,500.00</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Item 2 (Out of stock warning) -->
+<article class="group flex flex-col md:flex-row gap-8 pb-12 border-b border-outline-variant/20 transition-all opacity-60">
+<div class="relative w-full md:w-48 h-64 overflow-hidden rounded-lg bg-surface-container-low">
+<div class="absolute inset-0 bg-background/60 z-10 flex items-center justify-center p-4 text-center">
+<span class="text-error font-headline text-lg italic">Reserve Unavailable</span>
+</div>
+<img class="w-full h-full object-cover grayscale" data-alt="A minimalist black artisanal chair with gold leaf accents on the legs against a moody studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW0D-rFr_LJooQnIVylTNYb5yC8Y2uxK9zE7D-TFkzqlr9p3S3ZjRy1R7uzxR6hLkhHSk_sclGoqHj_VU7mpzyYmpOr9tQABkHjvUWJajdcibj_DWuqf-YLaVXt19Z8g19ARvF7TSxx25O6LCId4uu0-ect4hD5iyv8lqq-iUCWhBniYXzbBEYUAkB2r_1_e-5G2Tihd46eSUzsI2sMQ6vopxL4qDnJW4glQy4JMcXNCRCY08PkFOMjljPXRReJDEKpFVnKWA69iw"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-2">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-2xl text-on-surface-variant tracking-tight">The Archon Lounge Chair</h3>
+<span class="font-mono text-lg text-on-surface-variant">$3,200.00</span>
+</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest mb-4">Hand-Carved Ebony / Gold Leaf</p>
+<div class="inline-flex items-center gap-2 bg-error-container/20 text-error px-3 py-1 rounded-full text-xs uppercase tracking-wider border border-error/20">
+<span class="material-symbols-outlined text-sm">error</span>
+                Current Stock Depleted
+              </div>
+</div>
+<div class="flex justify-between items-end mt-8">
+<button class="text-error/80 hover:text-error transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">delete</span>
+<span class="text-xs uppercase tracking-widest">Remove item</span>
+</button>
+<div class="text-right">
+<span class="text-[10px] uppercase tracking-tighter text-on-surface-variant block mb-1">Line Total</span>
+<span class="font-mono text-xl text-on-surface-variant">$0.00</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Item 3 -->
+<article class="group flex flex-col md:flex-row gap-8 pb-12 border-b border-outline-variant/20 transition-all">
+<div class="w-full md:w-48 h-64 overflow-hidden rounded-lg bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-700" data-alt="Exotic parfum bottle with gold engraved details and black liquid, standing on a reflective obsidian surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU8yjUAd9oPk5oNzuGEZYqp7tnvVQQ5CnF-ef6B1BDXwrzTEAd1_7dpF3yFsJFhO2yjGyS9RLnQW4eFnt1xlQTDj2-4Rg5ZaU4jMPmJgEdD6__euR-2bhFjwG9Rzrt8dDowTfmoca2mf_--8o3ggwcsel8yCPyRarEwOvmxBYCB8te-lKEyYPutCZCIMkF_c8U6lvB9jA8anCMhO4_ZQ2x6sp1s5RA7CbEbN0806uD_lIYC5Mcx34eyiQptX29iej5lDUatmURZww"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-2">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-2xl text-primary tracking-tight">Essence of Void (Limited Edition)</h3>
+<span class="font-mono text-lg text-on-background">$850.00</span>
+</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest mb-4">100ml Parfum / Collector Case</p>
+<div class="flex items-center gap-6 mt-6">
+<div class="flex items-center bg-surface-container-highest rounded-full px-4 py-1.5 border border-outline-variant/10">
+<button class="text-on-surface hover:text-primary transition-colors px-2">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="font-mono px-6 text-on-background">02</span>
+<button class="text-on-surface hover:text-primary transition-colors px-2">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface text-xs uppercase tracking-widest flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg">bookmark</span>
+                  Save for later
+                </button>
+</div>
+</div>
+<div class="flex justify-between items-end mt-8">
+<button class="text-error/60 hover:text-error transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">delete</span>
+<span class="text-xs uppercase tracking-widest">Remove from collection</span>
+</button>
+<div class="text-right">
+<span class="text-[10px] uppercase tracking-tighter text-on-surface-variant block mb-1">Line Total</span>
+<span class="font-mono text-xl text-on-background">$1,700.00</span>
+</div>
+</div>
+</div>
+</article>
+</section>
+<!-- Right (35%): Order Summary card (sticky) -->
+<aside class="w-full lg:w-[35%] lg:sticky lg:top-32">
+<div class="glass-card p-10 rounded-xl border border-outline-variant/10 shadow-[0_24px_64px_rgba(0,0,0,0.4)]">
+<h2 class="font-headline text-3xl mb-8 tracking-tight border-b border-outline-variant/10 pb-6">Summary</h2>
+<div class="space-y-6 mb-10">
+<div class="flex justify-between text-on-surface-variant font-light">
+<span>Subtotal</span>
+<span class="font-mono">$16,200.00</span>
+</div>
+<div class="flex justify-between text-primary font-light">
+<span>Discount</span>
+<span class="font-mono">-$200.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-light">
+<span>Vault Shipping</span>
+<span class="font-mono">Complimentary</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-light">
+<span>Estimated Tax</span>
+<span class="font-mono">$1,296.00</span>
+</div>
+</div>
+<div class="flex flex-col gap-4 mb-10">
+<label class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant">Promotional Code</label>
+<div class="flex gap-2">
+<input class="bg-surface-container-lowest border-b border-outline-variant/40 focus:border-primary focus:ring-0 transition-all w-full text-sm font-mono tracking-widest uppercase py-3 placeholder:opacity-30" placeholder="ENTROPY-2024" type="text"/>
+<button class="px-6 py-3 bg-surface-container-highest text-primary text-xs uppercase tracking-widest hover:bg-surface-container-high transition-all">Apply</button>
+</div>
+</div>
+<div class="border-t border-outline-variant/10 pt-8 mb-10">
+<div class="flex justify-between items-end">
+<span class="font-headline text-xl">Grand Total</span>
+<span class="font-mono text-3xl text-primary">$17,296.00</span>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-bold py-5 rounded-lg text-sm uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-[0_8px_24px_rgba(230,195,100,0.2)]">
+            Proceed to Checkout
+          </button>
+<div class="mt-8 flex items-center justify-center gap-4 text-[10px] text-on-surface-variant uppercase tracking-widest">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">lock</span>
+              Encrypted Checkout
+            </span>
+<span class="w-1 h-1 bg-outline-variant/30 rounded-full"></span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+              Authenticity Guaranteed
+            </span>
+</div>
+</div>
+</aside>
+</div>
+<!-- Below the fold: You might also like -->
+<section class="mt-32">
+<div class="flex justify-between items-end mb-12">
+<h2 class="font-headline text-4xl tracking-tight">You might also like</h2>
+<div class="flex gap-4">
+<button class="w-12 h-12 rounded-full border border-outline-variant/20 flex items-center justify-center hover:border-primary transition-colors text-on-surface">
+<span class="material-symbols-outlined">west</span>
+</button>
+<button class="w-12 h-12 rounded-full border border-outline-variant/20 flex items-center justify-center hover:border-primary transition-colors text-on-surface">
+<span class="material-symbols-outlined">east</span>
+</button>
+</div>
+</div>
+<div class="flex gap-8 overflow-x-auto no-scrollbar pb-12 snap-x">
+<!-- Suggestion 1 -->
+<div class="min-w-[320px] snap-start group cursor-pointer">
+<div class="h-96 w-full mb-6 overflow-hidden rounded-lg bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-700" data-alt="Modern high-end wristwatch with a black leather strap and brushed steel case on a dark stone surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9yKS7lKG6nzAZUnoDJ6Dh4KjMZ6Ely0t-BGuWCPkjnYystsMd5XPHD9qQDo7YNbTamm-xwpbCCJdRsdfUy1eY9WuJ7tDI_yF0h7Vae6ZPdOhBB506Zy5C704pC8CD5Nrw_aB1yCG2ey7N9GWpn6GW6RH5G0o5HJtH4lHaHdmYJMFVeq4-qb4SC8dvIl3E0i6d8jo_PoZwMch-V5c5GbLzzbM9FSFpQRbDc7ajeUPqtLNvFqDnl0yoNhXy60XbCqpl9rh3gniMUwQ"/>
+</div>
+<h4 class="font-headline text-xl mb-1 text-on-background group-hover:text-primary transition-colors">Vanguard Titanium VII</h4>
+<span class="font-mono text-on-surface-variant">$8,900.00</span>
+</div>
+<!-- Suggestion 2 -->
+<div class="min-w-[320px] snap-start group cursor-pointer">
+<div class="h-96 w-full mb-6 overflow-hidden rounded-lg bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-700" data-alt="Premium black leather designer tote bag with discreet gold hardware in a moody luxury boutique setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh8RXwoI94VQ9T1jx_0iszg3N6y6tbEw-f8AL59q6dxVPjsuNs8BMorQmNs5odRgAH0fHo2r2epFT_Q2a6IPXhkp-3Bz42e5-m1NIsa_ooV3wWV8dm5K8peLnubr_8wrNYgyVs7hrbMoDVCg-uZ7hd7em6P99GaDNrXokpV3fU-1kMIeMChCA2iXJLKd_Ylhu4ExeCorMuMOnn9z20yYGKbsCGVOx4gBex94dorYDRvY-dvySQCmDFJDMyF9qA5x8ur6KUswc1cug"/>
+</div>
+<h4 class="font-headline text-xl mb-1 text-on-background group-hover:text-primary transition-colors">Nomad Leather Holdall</h4>
+<span class="font-mono text-on-surface-variant">$2,450.00</span>
+</div>
+<!-- Suggestion 3 -->
+<div class="min-w-[320px] snap-start group cursor-pointer">
+<div class="h-96 w-full mb-6 overflow-hidden rounded-lg bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-700" data-alt="Elegant pointed-toe black high heels with gold stiletto heels on a textured dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWt0sgrctWUgrBdPIupTTjZHXJP9zIV3u2BcoqUEtMyAyvLaFSZdHtiA61pP1v0WgjrdJi10Djh4P1OlqftEogqVs88IRt4JC9CBt4zKxn0GpsyjD972YJw-y6vK_nG4X_83ZuQ6ehIgSCcyd8ljMg9_m6Rwxcq1pyjpyccevxBkybSgw5ixbgbPJm2nRsYWh4lNHAbyV64TCPwyKyklMznanXMTA2wuuVDL22GCe2MZi45k-Uax3mMDHjc36PdNk6YMrRNcYwHwo"/>
+</div>
+<h4 class="font-headline text-xl mb-1 text-on-background group-hover:text-primary transition-colors">Stiletto Noir '24</h4>
+<span class="font-mono text-on-surface-variant">$1,150.00</span>
+</div>
+<!-- Suggestion 4 -->
+<div class="min-w-[320px] snap-start group cursor-pointer">
+<div class="h-96 w-full mb-6 overflow-hidden rounded-lg bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-700" data-alt="Luxury tortoiseshell sunglasses with gold logo detailing on the temples, resting on a velvet pillow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn6xOKVfISdW3SWOCKl1KZOEXBbN8sBYrxfkDSberFqHHrky9W8k1RVEMH4qIeVUgIB_l8bI-WBUF5sJwNbDx_44HYFKKT8W_g4TiBefO7qDGNTW_Bt5DXNChEt2tNlikHqzIaQGYt7HL-zXetgGX53jwcYIGfPiPuHdtt2oiqZIyqPG2Jfk5p-vtYUH4bOr8pypKyndQunYGIwxFcjsOIjXzLhs4wRbPd7SPBJ-a23Oj3U-BIHXs8mpjqODLi4IVSnNAq8zzipJA"/>
+</div>
+<h4 class="font-headline text-xl mb-1 text-on-background group-hover:text-primary transition-colors">Eclipse Shades</h4>
+<span class="font-mono text-on-surface-variant">$620.00</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16 font-['Noto_Serif'] text-xs leading-relaxed">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<div class="col-span-1 md:col-span-1">
+<div class="text-lg font-bold text-[#e6c364] mb-4">The Obsidian Curator</div>
+<p class="text-[#F5F5F0]/40 max-w-[200px]">The definitive destination for the rarest acquisitions and bespoke luxury items.</p>
+</div>
+<div>
+<h5 class="text-[#e6c364] uppercase tracking-widest mb-6 text-[10px]">Concierge</h5>
+<ul class="space-y-4">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Private Suite</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Shipping Etiquette</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Authenticity Guarantee</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-[#e6c364] uppercase tracking-widest mb-6 text-[10px]">Legal</h5>
+<ul class="space-y-4">
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Terms of Service</a></li>
+<li><a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-colors" href="#">Privacy Policy</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-[#e6c364] uppercase tracking-widest mb-6 text-[10px]">Newsletter</h5>
+<div class="flex border-b border-outline-variant/30 pb-2">
+<input class="bg-transparent border-none focus:ring-0 text-[10px] uppercase tracking-widest placeholder:text-on-surface-variant/30 w-full" placeholder="YOUR EMAIL" type="email"/>
+<button class="text-[#e6c364] hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="px-12 py-10 border-t border-outline-variant/5 text-center md:text-left text-[#F5F5F0]/40 uppercase tracking-[0.2em] text-[8px]">
+      Â© 2024 The Obsidian Curator. All Rights Reserved.
+    </div>
+</footer>
+</body></html>

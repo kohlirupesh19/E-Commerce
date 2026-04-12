@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile Settings | The Obsidian Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@300;400;600;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#ffe084",
+              "surface-container-low": "#1b1b1f",
+              "on-surface": "#e4e1e7",
+              "primary-fixed": "#ffe08f",
+              "error-container": "#93000a",
+              "secondary-container": "#735c00",
+              "background": "#131317",
+              "on-primary-container": "#503d00",
+              "on-primary": "#3d2e00",
+              "surface-tint": "#e6c364",
+              "on-tertiary-fixed": "#041451",
+              "outline": "#99907e",
+              "on-secondary-fixed-variant": "#574500",
+              "on-error-container": "#ffdad6",
+              "on-tertiary": "#1e2b66",
+              "surface-container": "#1f1f23",
+              "on-primary-fixed-variant": "#584400",
+              "on-tertiary-container": "#2e3b77",
+              "on-surface-variant": "#d0c5b2",
+              "primary": "#e6c364",
+              "inverse-primary": "#755b00",
+              "outline-variant": "#4d4637",
+              "on-primary-fixed": "#241a00",
+              "primary-container": "#c9a84c",
+              "inverse-on-surface": "#303034",
+              "tertiary": "#b9c4ff",
+              "surface-container-lowest": "#0e0e12",
+              "on-secondary": "#3c2f00",
+              "on-tertiary-fixed-variant": "#35437e",
+              "tertiary-container": "#9ba8eb",
+              "surface-container-highest": "#353439",
+              "on-secondary-fixed": "#231b00",
+              "on-background": "#e4e1e7",
+              "surface-dim": "#131317",
+              "surface-bright": "#39393d",
+              "tertiary-fixed-dim": "#b9c3ff",
+              "surface-variant": "#353439"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar -->
+<nav class="sticky top-0 z-50 bg-[#131317]/80 backdrop-blur-xl docked full-width shadow-[0_8px_32px_rgba(230,195,100,0.04)] no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-[#e6c364] font-['Noto_Serif'] tracking-tight">The Obsidian Curator</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors font-['Noto_Serif'] tracking-tight" href="#">Collections</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors font-['Noto_Serif'] tracking-tight" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors font-['Noto_Serif'] tracking-tight" href="#">Admin Dashboard</a>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-[#e6c364] cursor-pointer scale-95 active:scale-90 transition-transform">favorite</span>
+<span class="material-symbols-outlined text-[#e6c364] cursor-pointer scale-95 active:scale-90 transition-transform">shopping_bag</span>
+<div class="w-8 h-8 rounded-full border border-primary/30 overflow-hidden scale-95 active:scale-90 transition-transform cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="Close-up portrait of an elegant man in a tailored dark suit with soft cinematic studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyHJMLaMAhTBVjafiCFt_qK75G3xw5mix6NABtrkLlHV6AjwAJhxLi92PiPuMMWWxc-K5dGTU9HfJVjQFzcfEEXmFo5_4fqyBmh1Lhs-UEh_0dtTnQoW4J1nxK1uPo2NHyYjczdshMmHe5iOoOUSHppaGXesv_I3SMHHV6r3gAAiuva_RRfHZqe4HFYwZtpAd_TSbHxEC-46XSNYK5xzIuQILpXhxihJnXA2HZTncn-wTOZaSFDZlYcMADQteLE-uTegwCoz5j_AI"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-[1920px] mx-auto flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col p-6 gap-8 w-80 bg-[#131317] border-r border-[#F5F5F0]/10 flex flex-col p-6 gap-8">
+<div class="mb-4">
+<h2 class="text-[#e6c364] font-black font-['Noto_Serif'] text-sm uppercase tracking-widest">Filter Gallery</h2>
+<p class="text-[#F5F5F0]/40 text-xs mt-1">Refine your selection</p>
+</div>
+<nav class="flex flex-col gap-2">
+<!-- Profile is active based on page intent -->
+<a class="flex items-center gap-4 px-4 py-3 text-[#e6c364] bg-[#353439]/30 rounded-lg font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span>Profile</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">location_on</span>
+<span>Addresses</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Payment Methods</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span>Wishlist</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span>Notifications</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span>Security</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Help</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 border-t border-[#F5F5F0]/5">
+<button class="flex items-center gap-4 px-4 py-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] font-['Noto_Serif'] text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200">
+<span class="material-symbols-outlined">refresh</span>
+<span>Clear All</span>
+</button>
+</div>
+</aside>
+<!-- Content Canvas -->
+<section class="flex-1 p-8 md:p-16 lg:p-20 overflow-y-auto">
+<header class="mb-16">
+<h1 class="text-5xl md:text-6xl font-headline font-bold text-on-surface tracking-tighter mb-4">Personal Vault</h1>
+<p class="text-on-surface-variant max-w-xl font-light leading-relaxed">Refine your curatorial identity. Manage your private profile details and shipping preferences for an unparalleled boutique experience.</p>
+</header>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-12">
+<!-- Profile Main Section -->
+<div class="xl:col-span-8 flex flex-col gap-12">
+<div class="glass-card p-10 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px] text-primary">fingerprint</span>
+</div>
+<div class="flex flex-col md:flex-row gap-10 items-start md:items-center relative z-10">
+<div class="relative group/avatar">
+<div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-primary/20 p-1">
+<img class="w-full h-full object-cover rounded-full" data-alt="Portrait of a sophisticated male with striking features, wearing dark luxury apparel, cinematic moody lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOb_-CF6n0kU_BRR35D8QXnZfNWMZ0hZBDDCGrrF4q_UOqszPvINYF_XpBq3nxGn2j5-OD7mY1v6nrW9mb-sGJGLvEP1hxYjHw273WYP7DYSqdZ-Wa22GdoGAIIgGnsLjs1Na4o8IlWizQSlVKvJbEB5A5NALojxA511bCbJ0CzNHv-c8jarzZ6VUKLFcmiSiMhtgjxXI0DA0uPBjGYccoxMyKrYKyw5lORzHJ7i_MUdEO6ydcokJpiY3Hm6NCJZr14qir068t3bQ"/>
+</div>
+<button class="absolute bottom-2 right-2 bg-primary text-on-primary p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">photo_camera</span>
+</button>
+</div>
+<div class="flex-1 space-y-2">
+<h3 class="text-2xl font-headline text-on-surface">Curator Identity</h3>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest">Member since Oct 2023</p>
+<div class="flex gap-3 mt-4">
+<span class="px-4 py-1.5 bg-surface-container-highest/50 border border-outline-variant/30 text-primary text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                        Verified Account
+                                    </span>
+<span class="px-4 py-1.5 bg-primary/10 border border-primary/30 text-primary text-[10px] uppercase tracking-widest rounded-full">
+                                        Elite Collector
+                                    </span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mt-12">
+<div class="space-y-2">
+<label class="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Full Name</label>
+<input class="w-full bg-surface-container-highest/30 border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg bg-transparent" type="text" value="Alexander Vance"/>
+</div>
+<div class="space-y-2">
+<label class="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Private Email</label>
+<div class="relative">
+<input class="w-full bg-surface-container-highest/30 border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg bg-transparent" type="email" value="a.vance@obsidian-curator.com"/>
+<span class="absolute right-0 top-1/2 -translate-y-1/2 material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Phone Connection</label>
+<input class="w-full bg-surface-container-highest/30 border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg bg-transparent" type="tel" value="+1 (555) 001-2834"/>
+</div>
+<div class="space-y-2">
+<label class="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Date of Origin</label>
+<input class="w-full bg-surface-container-highest/30 border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg bg-transparent" placeholder="MM/DD/YYYY" type="text" value="05/12/1988"/>
+</div>
+<div class="space-y-2">
+<label class="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Identity Preference</label>
+<select class="w-full bg-surface-container-highest/30 border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg bg-transparent appearance-none">
+<option>Prefer not to state</option>
+<option selected="">Masculine</option>
+<option>Feminine</option>
+<option>Non-binary</option>
+</select>
+</div>
+</div>
+<div class="mt-16 flex justify-end">
+<button class="px-10 py-4 bg-primary text-on-primary rounded-lg font-headline font-bold uppercase tracking-widest hover:bg-secondary-fixed transition-all shadow-[0_4px_24px_rgba(230,195,100,0.15)] active:scale-95">
+                                Save Manifest
+                            </button>
+</div>
+</div>
+</div>
+<!-- Secondary Column -->
+<div class="xl:col-span-4 flex flex-col gap-12">
+<!-- Addresses Preview -->
+<div class="glass-card p-8 rounded-xl">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-headline text-xl text-on-surface">Private Residences</h3>
+<button class="text-primary text-xs uppercase tracking-widest font-bold hover:underline">Add New</button>
+</div>
+<div class="space-y-6">
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/20 flex gap-4">
+<span class="material-symbols-outlined text-primary-container">home</span>
+<div class="flex-1">
+<div class="flex justify-between">
+<p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Primary Estate</p>
+<div class="flex gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-xs cursor-pointer hover:text-primary">edit</span>
+<span class="material-symbols-outlined text-xs cursor-pointer hover:text-error">delete</span>
+</div>
+</div>
+<p class="text-on-surface text-sm">742 Evergreen Terrace</p>
+<p class="text-on-surface/60 text-xs">Springfield, OR 97403</p>
+</div>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low/40 border border-outline-variant/10 flex gap-4 opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant">apartment</span>
+<div class="flex-1">
+<div class="flex justify-between">
+<p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Metropolitan Suite</p>
+<div class="flex gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-xs cursor-pointer hover:text-primary">edit</span>
+<span class="material-symbols-outlined text-xs cursor-pointer hover:text-error">delete</span>
+</div>
+</div>
+<p class="text-on-surface text-sm">350 5th Ave, Floor 81</p>
+<p class="text-on-surface/60 text-xs">New York, NY 10118</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Security Highlight -->
+<div class="bg-gradient-to-br from-surface-container-highest to-surface-container-low p-8 rounded-xl border border-primary/10">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">lock</span>
+</div>
+<h4 class="font-headline text-lg">Vault Protection</h4>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Two-factor authentication is active on your account. Your personal data is encrypted with 256-bit protocol.</p>
+<button class="w-full py-3 border border-outline-variant rounded-lg text-xs uppercase tracking-[0.2em] font-bold hover:bg-surface-container-highest transition-colors">Manage Credentials</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<div class="col-span-1 md:col-span-1">
+<div class="text-lg font-bold text-[#e6c364] mb-4 font-['Noto_Serif'] tracking-tight">The Obsidian Curator</div>
+<p class="text-[#F5F5F0]/40 font-['Noto_Serif'] text-xs leading-relaxed max-w-xs">An exclusive sanctuary for the world's most distinguished collectors and curators of fine luxury goods.</p>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="text-[#e6c364] text-[10px] uppercase tracking-[0.3em] font-bold mb-2">Concierge</h4>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] font-['Noto_Serif'] text-xs transition-colors" href="#">Private Suite</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] font-['Noto_Serif'] text-xs transition-colors" href="#">Shipping Etiquette</a>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="text-[#e6c364] text-[10px] uppercase tracking-[0.3em] font-bold mb-2">Legal</h4>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] font-['Noto_Serif'] text-xs transition-colors" href="#">Terms of Service</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] font-['Noto_Serif'] text-xs transition-colors" href="#">Authenticity Guarantee</a>
+</div>
+<div class="flex flex-col gap-6">
+<h4 class="text-[#e6c364] text-[10px] uppercase tracking-[0.3em] font-bold mb-2">The Newsletter</h4>
+<div class="relative">
+<input class="w-full bg-transparent border-b border-outline-variant focus:border-primary transition-colors py-2 text-xs text-on-surface" placeholder="Email Address" type="email"/>
+<button class="absolute right-0 bottom-2 text-primary">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<p class="text-[10px] text-on-surface-variant/50">Â© 2024 The Obsidian Curator. All Rights Reserved.</p>
+</div>
+</div>
+</footer>
+</body></html>

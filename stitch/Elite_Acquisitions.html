@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&amp;family=Manrope:wght@300;500;700&amp;family=JetBrains+Mono:wght@400&amp;family=Noto+Serif:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#2e3b77",
+              "on-secondary-fixed": "#231b00",
+              "tertiary-fixed-dim": "#b9c3ff",
+              "inverse-on-surface": "#303034",
+              "inverse-primary": "#755b00",
+              "on-secondary-container": "#f6d675",
+              "surface-bright": "#39393d",
+              "primary-fixed": "#ffe08f",
+              "surface-container-highest": "#353439",
+              "surface-variant": "#353439",
+              "primary": "#e6c364",
+              "on-secondary-fixed-variant": "#574500",
+              "background": "#131317",
+              "surface-dim": "#131317",
+              "outline": "#99907e",
+              "on-error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#35437e",
+              "on-background": "#e4e1e7",
+              "on-surface-variant": "#d0c5b2",
+              "secondary": "#e3c466",
+              "error-container": "#93000a",
+              "secondary-container": "#735c00",
+              "on-surface": "#e4e1e7",
+              "tertiary": "#b9c4ff",
+              "secondary-fixed-dim": "#e3c466",
+              "secondary-fixed": "#ffe084",
+              "surface-container-low": "#1b1b1f",
+              "on-primary-container": "#503d00",
+              "on-primary-fixed-variant": "#584400",
+              "primary-container": "#c9a84c",
+              "on-primary-fixed": "#241a00",
+              "tertiary-fixed": "#dde1ff",
+              "inverse-surface": "#e4e1e7",
+              "on-error": "#690005",
+              "error": "#ffb4ab",
+              "outline-variant": "#4d4637",
+              "surface-tint": "#e6c364",
+              "surface-container-high": "#2a292e",
+              "on-tertiary-fixed": "#041451",
+              "on-tertiary": "#1e2b66",
+              "on-primary": "#3d2e00",
+              "surface": "#131317",
+              "on-secondary": "#3c2f00",
+              "tertiary-container": "#9ba8eb",
+              "surface-container": "#1f1f23",
+              "primary-container": "#c9a84c",
+              "surface-container-lowest": "#0e0e12"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "serif": ["Fraunces", "serif"],
+              "mono": ["JetBrains Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        font-size: 20px;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(20px);
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full flex justify-between items-center px-8 py-6 bg-[#131317]/80 backdrop-blur-xl z-50">
+<div class="text-2xl font-bold tracking-[0.2em] text-[#e6c364] uppercase font-serif">
+            ELITE ACQUISITIONS
+        </div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#e6c364] font-bold transition-colors duration-300" href="#">The Vault</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#e6c364] transition-colors duration-300" href="#">Exclusive Tier</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#e6c364] transition-colors duration-300" href="#">Gallery</a>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-[#e6c364] cursor-pointer">shopping_bag</span>
+<span class="material-symbols-outlined text-[#e6c364] cursor-pointer">account_circle</span>
+</div>
+</nav>
+<!-- SideNavBar (Hidden on Mobile) -->
+<aside class="fixed left-0 top-0 h-full hidden md:flex flex-col py-12 bg-[#0e0e12] w-64 z-40">
+<div class="px-8 mt-16 mb-12">
+<p class="text-[#e6c364] font-black font-sans text-xs uppercase tracking-widest mb-1">Member Status</p>
+<p class="text-[#F5F5F0]/40 text-[10px] uppercase tracking-widest">Tier: Obsidian</p>
+</div>
+<nav class="flex flex-col gap-2">
+<div class="flex items-center gap-4 py-3 text-[#e6c364] border-l-2 border-[#e6c364] pl-4 font-sans text-xs uppercase tracking-widest cursor-pointer active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span>The Vault</span>
+</div>
+<div class="flex items-center gap-4 py-3 text-[#F5F5F0]/40 pl-4 hover:bg-[#353439]/20 hover:text-[#F5F5F0] transition-all font-sans text-xs uppercase tracking-widest cursor-pointer active:scale-[0.98]">
+<span class="material-symbols-outlined">star</span>
+<span>Exclusive Tier</span>
+</div>
+<div class="flex items-center gap-4 py-3 text-[#F5F5F0]/40 pl-4 hover:bg-[#353439]/20 hover:text-[#F5F5F0] transition-all font-sans text-xs uppercase tracking-widest cursor-pointer active:scale-[0.98]">
+<span class="material-symbols-outlined">bolt</span>
+<span>Flash Acquisitions</span>
+</div>
+<div class="flex items-center gap-4 py-3 text-[#F5F5F0]/40 pl-4 hover:bg-[#353439]/20 hover:text-[#F5F5F0] transition-all font-sans text-xs uppercase tracking-widest cursor-pointer active:scale-[0.98]">
+<span class="material-symbols-outlined">grid_view</span>
+<span>Private Gallery</span>
+</div>
+<div class="flex items-center gap-4 py-3 text-[#F5F5F0]/40 pl-4 hover:bg-[#353439]/20 hover:text-[#F5F5F0] transition-all font-sans text-xs uppercase tracking-widest cursor-pointer active:scale-[0.98]">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Order History</span>
+</div>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full py-4 rounded-lg bg-primary text-on-primary font-bold text-[10px] uppercase tracking-widest hover:opacity-90 transition-opacity">
+                Upgrade Membership
+            </button>
+</div>
+</aside>
+<main class="md:ml-64 pt-24 pb-24 px-4 md:px-12">
+<!-- Hero: The Obsidian Vault -->
+<section class="relative rounded-2xl overflow-hidden mb-20 aspect-[21/9] flex items-center">
+<img class="absolute inset-0 w-full h-full object-cover brightness-50" data-alt="cinematic wide shot of a dark luxury underground vault with golden light rays illuminating floating marble pedestals and dust motes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUwJ3DHzo8ouRA69227JR-PSfs4dfyD6gj6-NFWWRTIjINS22qrUPWg0lWKoXEtpHqCjsJJVPEW2r_PAxhuGmj7cPH2lYzxHLTOvo10kddFAvWmJFhj42UWO45bXHxxKw2TSUbs_wEL4x3eqZ7VBNQkK8PT-lMjqRapobQoESgggTmRXL9WKtYKCPVw4OHSbLHe61iGtJcEvGL6HwBSRpArJAvZvwd5lRZy_xOc10l1dr9x5WvRfAiwAZZ02gXcRY_fmptn1PaG1o"/>
+<div class="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent"></div>
+<div class="relative z-10 px-8 md:px-16 max-w-2xl">
+<span class="text-primary font-mono text-sm tracking-[0.3em] uppercase mb-4 block">Seasonal Release 04</span>
+<h1 class="text-5xl md:text-7xl font-serif text-on-surface leading-tight mb-8">The Obsidian Vault<br/><span class="text-primary italic">Private Acquisitions</span></h1>
+<div class="flex flex-wrap gap-12 items-center">
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<span class="text-3xl font-mono text-primary">02</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface/40">Hours</span>
+</div>
+<span class="text-3xl font-mono text-primary/40">:</span>
+<div class="flex flex-col items-center">
+<span class="text-3xl font-mono text-primary">48</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface/40">Minutes</span>
+</div>
+<span class="text-3xl font-mono text-primary/40">:</span>
+<div class="flex flex-col items-center">
+<span class="text-3xl font-mono text-primary">12</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface/40">Seconds</span>
+</div>
+</div>
+<button class="px-10 py-4 bg-primary text-on-primary font-bold rounded-lg uppercase tracking-widest hover:scale-105 transition-transform">
+                        Access Now
+                    </button>
+</div>
+</div>
+</section>
+<!-- Curated Deals Grid -->
+<section class="mb-24">
+<div class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-3xl font-serif text-on-surface mb-2">Curated Acquisitions</h2>
+<p class="text-on-surface/50 font-body max-w-md">Exceptional rarities sourced from private estates worldwide, available for a limited window.</p>
+</div>
+<div class="hidden md:block">
+<span class="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">Sort: Value High to Low</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+<!-- Card 1 -->
+<div class="group relative bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="luxury minimalist wrist watch with black leather strap and gold casing against a dark textured background with high contrast lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Ex-4u4NFR2eMAbKFuScmREI63UdOzwHHn1fEI7I_JhmRgBpPO1DcXMhHv8D2bZyi0LJ380LFfTFlC81U0bSuPlH72odYQpl4R_GPYKjxlocLUyOVAiJjTVkjw4ix0TEbBZZcd1fKfAGDKPKVyAs5MltoLEZDsJJzNimdaTj60b7uaUaRUO0d2cRnqlNyfBe6q0etgNiysVAmb5tHn2hdicB8NMNdPXVPlooyAv8pdi8Svq2WEX6cxJjweEtVLfVAKstwGI5KIoY"/>
+</div>
+<div class="absolute top-4 left-4 bg-primary-container/90 backdrop-blur px-3 py-1 rounded-full">
+<span class="text-[9px] font-bold text-on-primary-container uppercase tracking-widest">Limited Inventory</span>
+</div>
+<div class="p-6">
+<h3 class="font-serif text-xl mb-2 text-on-surface">The Meridian Chronograph</h3>
+<p class="font-mono text-xs text-on-surface/40 mb-4">SKU: MC-902-AUR</p>
+<div class="flex items-center gap-4">
+<span class="text-primary text-lg font-mono font-bold">$12,400</span>
+<span class="text-on-surface/30 text-sm font-mono line-through">$18,500</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="designer silk scarf with intricate geometric gold and black patterns draped over a velvet surface with soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbDzsUGTLxPHi2jzgy6Ge0VlNeay22ZBUTMLscvw9FbZdOXMTD5U5de6-swtVvukEq9osmS3VE9Ig6zxW05DlKbsXG2ENS4P3-NegOsuPuWhuPFsi5MwWQ3OkNmeI2TST8lJxhCh0PT6b1hbkW3J3BqrYyXu3ScpMtURschxxxbqlGvG15obeLLX0JWKXjEYXbT4fMzGe-iNcRBWDcCABungHDd2V-j9nrlINrkldPrCLhzRYlL303lOh4wxs-FMFPPutpYeGcBoY"/>
+</div>
+<div class="absolute top-4 left-4 bg-primary-container/90 backdrop-blur px-3 py-1 rounded-full">
+<span class="text-[9px] font-bold text-on-primary-container uppercase tracking-widest">3 Units Left</span>
+</div>
+<div class="p-6">
+<h3 class="font-serif text-xl mb-2 text-on-surface">Noir Silk Atelier Wrap</h3>
+<p class="font-mono text-xs text-on-surface/40 mb-4">SKU: SLK-22-BLK</p>
+<div class="flex items-center gap-4">
+<span class="text-primary text-lg font-mono font-bold">$1,250</span>
+<span class="text-on-surface/30 text-sm font-mono line-through">$2,100</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="exquisite artisan fountain pen with gold nib and emerald green marble body on a dark wooden desk with dramatic side lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiYhEm7VYv1xebH2xlJYKf1AShHdDlh1LxeZ8YCvEXm_KDeu5ZQmUV-cRPyboFbBE9FHLssb2wAe8a-1KPdVvxKFrqQgW2Jbk7utRv7vVomgX15_nB00jqcyzHxR2oU7pisToQMfbRuR9boeDrYHUlC7gHimjRTlrV0sLSGZuhjo-cKt_R7gza-ZjWkHNJQsDPrcUBrE6bZqOBdHTeTEHEC18UVXLz0rzoKuU3E53-zigiTncr18zteE6P3JaTR0xip146hkIjOQE"/>
+</div>
+<div class="p-6">
+<h3 class="font-serif text-xl mb-2 text-on-surface">Obsidian Fountain Pen</h3>
+<p class="font-mono text-xs text-on-surface/40 mb-4">SKU: PEN-04-EMR</p>
+<div class="flex items-center gap-4">
+<span class="text-primary text-lg font-mono font-bold">$3,800</span>
+<span class="text-on-surface/30 text-sm font-mono line-through">$5,200</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="high-end leather jacket on a minimalist stand in a dimly lit studio with subtle rim lighting highlighting the texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDX9nA0THsaT6Jte2SnuzJyuUeAsezXEz03hmKIAkELd6MGjiVJeGLE3V-fzBsYHdUaMIoYSziVx5F020FmOe2WVYogQEs5IxzZ5xgpe8d9N31WQtmhFG_4QJFp8kqciN3BbxBkyqLwO0np2TaDZxnPxqeO-uQWURHed-s3IiDrP_Ko5RFPo6-ShadqurnV3SsDK-NqWQrr1lOgSblcXiSXFd-UH_3FgV_hGcWB9xAZf2cz5gQ1aoY6j4zLHK_TWQvxO8Wh0u52iig"/>
+</div>
+<div class="p-6">
+<h3 class="font-serif text-xl mb-2 text-on-surface">Vanguard Leather Hauberk</h3>
+<p class="font-mono text-xs text-on-surface/40 mb-4">SKU: LEA-99-OBS</p>
+<div class="flex items-center gap-4">
+<span class="text-primary text-lg font-mono font-bold">$6,400</span>
+<span class="text-on-surface/30 text-sm font-mono line-through">$8,900</span>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group relative bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="ultra-rare vintage sunglasses with tortoise shell frames and gold details on a mirrored surface with bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2Qyi2A_UnVnbc5b0yMvLZCYG-ewfmIJ2-DFlx2Uw_JEL_IOTsM35jYfHnFD61NO0lNVfL5Ma4-wxUpg_VqLKiZ7F2wRak7vgAWqjt8OK2BAXhU9Q2esrWl_2NtpdygGKRShAsYhBkB0kQ6-dARNCKD0wt9k6FCR38qGf-RcjvlUCeW39K_83AvSS4g-4Xnk2nXWEWQpVflI7kEnE_jh-Be27RoMlYeW8Ik2Ph6FrDNL-JnFyy5X20RKQlMFGdoLJa_I7uQ4oMJd8"/>
+</div>
+<div class="absolute top-4 left-4 bg-primary-container/90 backdrop-blur px-3 py-1 rounded-full">
+<span class="text-[9px] font-bold text-on-primary-container uppercase tracking-widest">Reserve Only</span>
+</div>
+<div class="p-6">
+<h3 class="font-serif text-xl mb-2 text-on-surface">1974 Heritage Spec</h3>
+<p class="font-mono text-xs text-on-surface/40 mb-4">SKU: SUN-74-VNT</p>
+<div class="flex items-center gap-4">
+<span class="text-primary text-lg font-mono font-bold">$2,100</span>
+<span class="text-on-surface/30 text-sm font-mono line-through">$3,500</span>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group relative bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="abstract bronze sculpture with swirling patterns in a minimalist gallery setting with dramatic spotlighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDk_y9LSZHpWamZPHof7gLOnAb3Bi3gQiXxLQBEFC1Hw8e5UZfROeXQnX5xkd6sLWeCk7vVYFZPrQrGHMoPAS5yGtaPBfJt1ceooIYqgXGEH3XkdalQSjyQhsDvKQFuGtTkHxPI8jpn1a5ZWO1bBj7e_ONsFzkeIF6S5IcGcfpcdXc_xnt_19Im1P44pLpe3TJjI4qXBcMArd9dEZ3ZKRBmus9i0aj_7ccKLj-mNlxp89tBoobXy9mKu09eym7nRSeYblEc1iFac3Y"/>
+</div>
+<div class="p-6">
+<h3 class="font-serif text-xl mb-2 text-on-surface">Form No. 09 Bronze</h3>
+<p class="font-mono text-xs text-on-surface/40 mb-4">SKU: ART-SC-09</p>
+<div class="flex items-center gap-4">
+<span class="text-primary text-lg font-mono font-bold">$24,000</span>
+<span class="text-on-surface/30 text-sm font-mono line-through">$32,000</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Membership Tiers Section -->
+<section class="mb-24 py-20 rounded-3xl relative overflow-hidden bg-surface-container">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
+<img class="w-full h-full object-cover" data-alt="macro photograph of gold leaf texture with intricate cracks and rich metallic sheen in low light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2GWGULtYZpcYIJkPsh7Wx7KQ00SSxceaUFgyiEd_ULteV4TzNRTjmy2nHyLPM--60PDbs1vU_yxKV_ZmAszAtexs16Wb8xUssGmgZIfcVqC-5qq7g1teMJ7D5kMgNoF6rCGRXc3RhTxV5dqm07nQTdo4TgsTnwapJoLMfDLABUkm0rSt_chGokwkdjKXea-M41TM2r_EfYIuMk6aQ3zfDs7yPQ4VH9MqCUg1lgivWc_KAHvLjXP51Y_pYfvG05OuozzV5LCkND90"/>
+</div>
+<div class="relative z-10 px-8 md:px-16 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="text-4xl font-serif text-on-surface mb-6 italic">Obsidian Exclusive</h2>
+<p class="text-on-surface/70 text-lg mb-8 max-w-md">Our most prestigious tier offers more than just access. It offers a direct line to the world's most sought-after rarities before they ever reach the public eye.</p>
+<ul class="space-y-4 mb-10">
+<li class="flex items-center gap-4 text-on-surface/80">
+<span class="material-symbols-outlined text-primary">verified</span>
+<span>24-Hour early access to all Vault Drops</span>
+</li>
+<li class="flex items-center gap-4 text-on-surface/80">
+<span class="material-symbols-outlined text-primary">verified</span>
+<span>Personalized curation by Obsidian specialists</span>
+</li>
+<li class="flex items-center gap-4 text-on-surface/80">
+<span class="material-symbols-outlined text-primary">verified</span>
+<span>Complimentary insured worldwide courier delivery</span>
+</li>
+</ul>
+<button class="bg-primary text-on-primary font-bold px-12 py-5 rounded-lg uppercase tracking-widest hover:opacity-90 transition-opacity">
+                        Upgrade to Obsidian
+                    </button>
+</div>
+<div class="glass-card p-8 rounded-2xl border border-outline-variant/20">
+<div class="flex justify-between items-center mb-12">
+<span class="text-primary font-mono text-sm tracking-widest uppercase">Current Status</span>
+<div class="bg-primary/10 text-primary px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Member Since 2021</div>
+</div>
+<div class="space-y-6">
+<div class="flex justify-between border-b border-outline-variant/10 pb-4">
+<span class="text-on-surface/40 uppercase text-xs tracking-widest">Active Tier</span>
+<span class="text-on-surface font-serif text-lg">Elite Silver</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/10 pb-4">
+<span class="text-on-surface/40 uppercase text-xs tracking-widest">Vault Access</span>
+<span class="text-on-surface font-serif text-lg">Tier 2 Restricted</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface/40 uppercase text-xs tracking-widest">Global Rank</span>
+<span class="text-on-surface font-serif text-lg">#4,281</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Upcoming Drops: Horizontal Scroll -->
+<section class="mb-24">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-3xl font-serif text-on-surface">Upcoming Drops</h2>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex gap-8 overflow-x-auto no-scrollbar pb-8">
+<!-- Drop 1 -->
+<div class="min-w-[320px] group cursor-pointer">
+<div class="relative aspect-square rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-700" data-alt="rare prototype high-performance sneakers in a deep crimson with carbon fiber details in a futuristic dark setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5lkp4ysDSmLeWeNmaLtWeDIDhEtaC_cWHBgqQqNrB-xE9GzarW53VkEZYt6tCJcNdWEFOoaEg1meTAnwBueV3t79928fE4Nq0cG8mV5Ahof8GX6A_eA3wezdS6-wTPALrfnt_LP_gr1igXi-MVco_eoHh4fWwEswqvd13ZS1weINtLbh602uJENUCvewHD751DiEjcM5JMePU7OY5_xmfAdOMr9sdmxZfnUeWVy80dQYeh8kX2NZrxYyiFbCm3XZseJEcOI2vZp4"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="text-on-primary bg-primary px-6 py-2 rounded-full font-bold uppercase text-[10px] tracking-widest">Remind Me</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-serif text-lg text-on-surface">Velocity Red Prototypes</h4>
+<p class="text-primary font-mono text-xs">Launching in 4 Days</p>
+</div>
+<span class="text-on-surface/30 font-mono text-sm">$4,200</span>
+</div>
+</div>
+<!-- Drop 2 -->
+<div class="min-w-[320px] group cursor-pointer">
+<div class="relative aspect-square rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-700" data-alt="minimalist Japanese ink wash painting of a mountain landscape on textured paper in a simple black frame" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMafeDsmppYbg3jXYH74X91I7Qivp4uU08B2oasditmxRJN_jFWgNKSKuKz8IED9OlQTsN0LuADY3cXq5Iv64FtwozqXvlWPTM9SUZqBRt383s_2ik8PMA2AXgLVitPXlK5Amq2y4tspEDTihq1e0chd1ZuMUWcI9g_nXeAy-0Avn6HoxPHVNpapBQSBho7oxnbexB8AjHqxWvmeFFh86Sa4iX3x5Z9XAM_MvBKEZWH39-9TZdTnopEXIti0t6c8ASmOCdAV8tO3s"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="text-on-primary bg-primary px-6 py-2 rounded-full font-bold uppercase text-[10px] tracking-widest">Remind Me</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-serif text-lg text-on-surface">Sumi-e Series 01</h4>
+<p class="text-primary font-mono text-xs">Launching in 6 Days</p>
+</div>
+<span class="text-on-surface/30 font-mono text-sm">$15,800</span>
+</div>
+</div>
+<!-- Drop 3 -->
+<div class="min-w-[320px] group cursor-pointer">
+<div class="relative aspect-square rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-700" data-alt="close up detail of a high-end sportscar steering wheel with alcantara and carbon fiber finishes in a dark garage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzy5u_I0FpehO5XNazU_N0c1HeWDjxtQCozVn_hQ0jjxXoNvCZ14b_d9UchPfauPrWmz6sSPzXu8q2xrUOY5mNxdGXUzO8jWUNeAz9Jta_AqF8uwwfwdjWCeZsNhft4i6hOqDSXHm4jkbyUHZbbws_jYATHYvnEWQJhOrcOIX0MWRWm_m4sHAKCd8Q-cmSWdjY8DK_iRedm6xAu5bqUHxXZQV0rAAVvOrFczhgxLOHeE99pGfoRAbQGxPT6x7GGtUYtmKGfM2tI9Q"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="text-on-primary bg-primary px-6 py-2 rounded-full font-bold uppercase text-[10px] tracking-widest">Remind Me</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-serif text-lg text-on-surface">M-Tech Interior Kit</h4>
+<p class="text-primary font-mono text-xs">Launching in 12 Days</p>
+</div>
+<span class="text-on-surface/30 font-mono text-sm">$9,900</span>
+</div>
+</div>
+<!-- Drop 4 -->
+<div class="min-w-[320px] group cursor-pointer">
+<div class="relative aspect-square rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-700" data-alt="rare first edition hardbound book with leather cover and gold embossed lettering resting on a silk pillow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiRSgYk48-eVmalWSnoMNSaEovIoN4WwM5Xku2QOzvsqOvGKKVUSvn3ATNi_gFlvVN-_F9wiQKV-0T260cLHnYXF_I7GBYAd3HVOnSfdDAc1a05R1VmKd-xagjjMGBelgilFQs2ubs2sA6ZoAVMTZGs3Z7DvpQAjYhVDNXBpcJ7H3whztX1USb6myNcJ9I66WjX5Tgj3WCE0u0N5VBGLg-86USNWjxmKLgoZZ3Xd2A8SWP3lKvAtbC4gf8WbMvRo2THKodN2p0oNU"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="text-on-primary bg-primary px-6 py-2 rounded-full font-bold uppercase text-[10px] tracking-widest">Remind Me</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-serif text-lg text-on-surface">First Edition 'The Void'</h4>
+<p class="text-primary font-mono text-xs">Launching in 18 Days</p>
+</div>
+<span class="text-on-surface/30 font-mono text-sm">$1,800</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Visible on Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#131317]/90 backdrop-blur-lg z-50 shadow-[0_-8px_32px_rgba(230,195,100,0.05)]">
+<div class="flex flex-col items-center justify-center text-[#e6c364] scale-110 active:scale-90 duration-150 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-sans text-[10px] uppercase tracking-tighter mt-1">Acquisitions</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#F5F5F0]/30 active:scale-90 duration-150 transition-transform">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-sans text-[10px] uppercase tracking-tighter mt-1">Vault</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#F5F5F0]/30 active:scale-90 duration-150 transition-transform">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="font-sans text-[10px] uppercase tracking-tighter mt-1">Members</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#F5F5F0]/30 active:scale-90 duration-150 transition-transform">
+<span class="material-symbols-outlined">person</span>
+<span class="font-sans text-[10px] uppercase tracking-tighter mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

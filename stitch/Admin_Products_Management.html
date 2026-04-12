@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700;9..144,900&amp;family=Manrope:wght@300;400;500;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#ffe084",
+            "surface-container-low": "#1b1b1f",
+            "on-surface": "#e4e1e7",
+            "primary-fixed": "#ffe08f",
+            "error-container": "#93000a",
+            "secondary-container": "#735c00",
+            "background": "#131317",
+            "on-primary-container": "#503d00",
+            "on-primary": "#3d2e00",
+            "surface-tint": "#e6c364",
+            "on-tertiary-fixed": "#041451",
+            "outline": "#99907e",
+            "on-secondary-fixed-variant": "#574500",
+            "on-error-container": "#ffdad6",
+            "on-tertiary": "#1e2b66",
+            "surface-container": "#1f1f23",
+            "on-primary-fixed-variant": "#584400",
+            "on-tertiary-container": "#2e3b77",
+            "on-surface-variant": "#d0c5b2",
+            "primary": "#e6c364",
+            "inverse-primary": "#755b00",
+            "outline-variant": "#4d4637",
+            "on-primary-fixed": "#241a00",
+            "primary-container": "#c9a84c",
+            "inverse-on-surface": "#303034",
+            "tertiary": "#b9c4ff",
+            "surface-container-lowest": "#0e0e12",
+            "on-secondary": "#3c2f00",
+            "on-tertiary-fixed-variant": "#35437e",
+            "tertiary-container": "#9ba8eb",
+            "surface-container-highest": "#353439",
+            "on-secondary-fixed": "#231b00",
+            "on-background": "#e4e1e7",
+            "surface-dim": "#131317",
+            "surface-bright": "#39393d",
+            "tertiary-fixed": "#dde1ff",
+            "on-error": "#690005",
+            "primary-fixed-dim": "#e6c364",
+            "error": "#ffb4ab",
+            "on-secondary-container": "#f6d675",
+            "tertiary-fixed-dim": "#b9c3ff",
+            "surface-variant": "#353439"
+          },
+          fontFamily: {
+            "headline": ["Fraunces"],
+            "body": ["Manrope"],
+            "label": ["Manrope"],
+            "mono": ["JetBrains Mono"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-sidebar {
+      backdrop-filter: blur(20px);
+      background: rgba(14, 14, 18, 0.85);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .tonal-transition { background: linear-gradient(180deg, #131317 0%, #0e0e12 100%); }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-80 z-[60] bg-[#0e0e12] flex flex-col p-6 gap-8 border-r border-outline-variant/15 glass-sidebar">
+<div class="flex flex-col gap-1">
+<div class="text-primary font-['Fraunces'] text-2xl font-black tracking-tighter uppercase">Curator</div>
+<div class="flex items-center gap-3 mt-6 mb-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant/20">
+<img alt="Curator Brand Logo" data-alt="minimalist gold monogram logo on a deep black background, luxury branding aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7dKJ8ic9rAymd4XgGbdmFJbQh5I80FXpGGyCIZiKPbEV9IluXf23pdWOw945lnVN8IYH2yI-CVzBUVH9o_Lm9xoMyVMKxEB76-jJXijGY80g11AC0K8izIuDo1RhRvvamlCPAxxjxz_0wRIT2fG9TN4Ous-q99BmWPrX4z_TgpY3RHmftSDJ_aBglBvoyAQGAPI2fbklqFGicDlK-wkJ876JqwriwMCg_wLOlAlRIDdhNldbBHjD7jJi2_Kxp-MZGUyfgYJs3Qhk"/>
+</div>
+<div>
+<p class="font-headline text-sm uppercase tracking-widest text-primary">Filter Gallery</p>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Refine your selection</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Active state logic: Products is active -->
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+        Dashboard
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-primary bg-surface-container-highest/30 rounded-lg transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+        Products
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+        Orders
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">group</span>
+        Customers
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">category</span>
+        Categories
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+        Coupons
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+        Reports
+      </a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:translate-x-1 transition-all duration-200 font-['Noto_Serif'] text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">settings</span>
+        Settings
+      </a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/10 pt-6">
+<button class="flex items-center gap-4 px-4 py-3 w-full text-on-surface-variant hover:text-primary transition-colors font-['Noto_Serif'] text-sm uppercase tracking-widest">
+<span class="material-symbols-outlined">refresh</span>
+        Clear All
+      </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-80 flex-1 min-h-screen overflow-y-auto no-scrollbar pb-20">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 w-full px-8 py-4 bg-[#131317]/80 backdrop-blur-xl flex justify-between items-center no-line tonal-transition shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex items-center gap-6">
+<h1 class="font-headline text-2xl font-bold tracking-tighter text-primary">Collections</h1>
+<div class="hidden md:flex gap-8">
+<a class="text-primary border-b border-primary pb-1 font-headline tracking-tight text-sm" href="#">Products Management</a>
+<a class="text-on-surface/60 hover:text-on-surface transition-colors font-headline tracking-tight text-sm" href="#">Boutique</a>
+<a class="text-on-surface/60 hover:text-on-surface transition-colors font-headline tracking-tight text-sm" href="#">Admin Dashboard</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+<input class="bg-surface-container-highest/40 border-b border-outline-variant/30 focus:border-primary px-10 py-2 rounded-full text-sm w-64 outline-none transition-all placeholder:text-on-surface-variant/50" placeholder="Search the archive..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-transform active:scale-90"><span class="material-symbols-outlined">favorite</span></button>
+<button class="text-on-surface-variant hover:text-primary transition-transform active:scale-90"><span class="material-symbols-outlined">shopping_bag</span></button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20">
+<img alt="User Profile Avatar" data-alt="professional portrait of a curator in a dark suit, soft dramatic lighting, high-end editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVe3laUK9avZVVsXNf5xeheR0lRdB_n-55jQjs94zhtbk7apfpK6A_PJlRoq2rKvPpOp5ixjj-gWnXQTfjpiOp90OqsSv2KLXzThLJqm4zUYQ6jv4Hb4lU0sGReOEuECW3kr8MMJEnXilbCUQBZPhJH-pfSsDjsMPPH7pxyoKX0HwfeXn8cNHZ_K0j4ZIJgtXG7nIA1Zt4KcC2fFdV_YxJmIvDRlGPGDEmkr0Ak-9-Mb9crnXwU7WvF4WV2q2C3EVwwk_Yr6sS6QU"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Body -->
+<section class="p-12 max-w-[1600px] mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+<div>
+<span class="text-primary font-label text-[10px] uppercase tracking-[0.3em] block mb-2">Vault Administration</span>
+<h2 class="font-headline text-5xl font-light text-on-surface tracking-tight">Product Archive</h2>
+</div>
+<button class="bg-primary hover:bg-secondary-fixed text-on-primary px-8 py-4 rounded-lg font-bold flex items-center gap-3 transition-all duration-300 shadow-[0_12px_40px_rgba(230,195,100,0.15)] active:scale-95">
+<span class="material-symbols-outlined text-lg">add</span>
+          Add New Product
+        </button>
+</div>
+<!-- Action Bar (Glass Filter Layer) -->
+<div class="bg-surface-container-low/50 backdrop-blur-md p-6 rounded-2xl flex flex-wrap items-center justify-between gap-6 mb-8 border border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-4 py-2 bg-surface-container-highest rounded-lg border border-outline-variant/15 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+            Category: <span class="text-on-surface font-semibold">All Items</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-surface-container-highest rounded-lg border border-outline-variant/15 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">signal_cellular_alt</span>
+            Status: <span class="text-on-surface font-semibold">Active</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 text-xs text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">file_download</span>
+            Export CSV
+          </button>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<button class="flex items-center gap-2 text-xs text-error hover:opacity-80 transition-colors">
+<span class="material-symbols-outlined text-lg">delete_sweep</span>
+            Delete Selected
+          </button>
+</div>
+</div>
+<!-- Inventory Table (High-End Editorial Style) -->
+<div class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/5">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/20 text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-label border-b border-outline-variant/10">
+<th class="px-8 py-6 w-12 text-center">
+<input class="rounded bg-background border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</th>
+<th class="px-6 py-6">Exhibition / Product</th>
+<th class="px-6 py-6">Reference ID</th>
+<th class="px-6 py-6">Collection</th>
+<th class="px-6 py-6">Valuation</th>
+<th class="px-6 py-6">Acquisition</th>
+<th class="px-6 py-6">Availability</th>
+<th class="px-8 py-6 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<!-- Product Item 1 -->
+<tr class="group hover:bg-surface-container-highest/20 transition-colors">
+<td class="px-8 py-6 text-center">
+<input class="rounded bg-background border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-20 rounded bg-surface-container overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
+<img alt="Obsidian Watch" class="w-full h-full object-cover" data-alt="close-up of a luxury black watch with gold accents on a dark slate background, dramatic studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmh2t6o1K2_IYiCbGjvWapOgjHAQHi0wpIc0UXPEnOj-fqykkUtLptKeX8Pyn2v38_jJ-iT8sL2L4sgip-3tyJY8UhrhsqTLhoLjkMeUKY15IlZ5aJnEeIBN4PwbeGe4H1CSVR-MjJSTWD5Tx6wAEoUjpEx2A31OTES0en9eSkcQT_zbISNMWfHg-A2W1ulnx32FC94KqL0o64jNeyLJKMpwcRA9NLoKESHNjLapq9RrryNjovJrPj_XR8l7YxlqaZUtk05BPTHu8"/>
+</div>
+<div>
+<h4 class="font-headline text-lg text-on-surface group-hover:text-primary transition-colors">Nocturnal Meridian</h4>
+<p class="text-xs text-on-surface-variant">Limited Edition Horology</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-6 font-mono text-xs tracking-tighter">OC-WAT-9021</td>
+<td class="px-6 py-6"><span class="px-3 py-1 bg-surface-container rounded-full text-[10px] uppercase font-bold text-on-surface-variant border border-outline-variant/10">Boutique</span></td>
+<td class="px-6 py-6 font-headline text-primary">$12,450</td>
+<td class="px-6 py-6 text-xs">12 In Stock</td>
+<td class="px-6 py-6">
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-primary after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20"></div>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Item 2 -->
+<tr class="group hover:bg-surface-container-highest/20 transition-colors">
+<td class="px-8 py-6 text-center">
+<input class="rounded bg-background border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-20 rounded bg-surface-container overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
+<img alt="Minimalist Lamp" class="w-full h-full object-cover" data-alt="modern minimalist gold lamp on a dark marble table, soft ambient warm glow, luxury interior design aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUj4xZiVxerOwaUhCGWy9VZMDDOsTYfaorVqqOLOXV2YsAOvQdb8ftJLOjRwkEKsX7ayecsKXenYUf7N6RTMf_G5wL2xdymNyUwW_BzvYZ_VsPgDujkG2520mekU_WcH_Xn0xHxOkibhWhcJLosSDEGrpaaTTnxITo36maQgkYn3yIJO8kCKFlIWcx--rB_vNJRzia2119LFMbPndLRXC-mBuHaqYMlpzN9-gCB2yz7BFz3I-LWA2qGUSKXsrxieT1OafQe2WrvO8"/>
+</div>
+<div>
+<h4 class="font-headline text-lg text-on-surface group-hover:text-primary transition-colors">Aurelian Beacon</h4>
+<p class="text-xs text-on-surface-variant">Interior Statement Piece</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-6 font-mono text-xs tracking-tighter">OC-LIT-5542</td>
+<td class="px-6 py-6"><span class="px-3 py-1 bg-surface-container rounded-full text-[10px] uppercase font-bold text-on-surface-variant border border-outline-variant/10">Home Suite</span></td>
+<td class="px-6 py-6 font-headline text-primary">$4,800</td>
+<td class="px-6 py-6 text-xs text-error">2 In Stock</td>
+<td class="px-6 py-6">
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-primary after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20"></div>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Item 3 -->
+<tr class="group hover:bg-surface-container-highest/20 transition-colors">
+<td class="px-8 py-6 text-center">
+<input class="rounded bg-background border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-20 rounded bg-surface-container overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
+<img alt="Silk Fragment" class="w-full h-full object-cover" data-alt="macro texture of dark pleated silk fabric, shimmering gold threads, exquisite craftsmanship detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXkZaJSaZGZ6BRntOHwXYPlFFKLyAO6HCFLGeEL4WGT_RthgcKoPF2kJs8hkdbdUjFIblmRknG1B8w3C0ijaYQX6DefiLeC0LMiqTOQETbOdvEH1bUcYmht5oDMQY9h1iT3_PMO4EnIjJPFbGcqkA--gLrlWNPsbBROHgh9vsJw45sfSgvnt9ynaBzSVlxRmCGsL4aA85U-IyggO3BhpP5-jORiIylgo3BFeusKF6eTqMZnVpAXqLX_605AVPB0riPdOxzYBisulo"/>
+</div>
+<div>
+<h4 class="font-headline text-lg text-on-surface group-hover:text-primary transition-colors">Vesper Silk Scarf</h4>
+<p class="text-xs text-on-surface-variant">Hand-woven Textiles</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-6 font-mono text-xs tracking-tighter">OC-TEX-1108</td>
+<td class="px-6 py-6"><span class="px-3 py-1 bg-surface-container rounded-full text-[10px] uppercase font-bold text-on-surface-variant border border-outline-variant/10">Apparel</span></td>
+<td class="px-6 py-6 font-headline text-primary">$1,200</td>
+<td class="px-6 py-6 text-xs">Out of Stock</td>
+<td class="px-6 py-6">
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-primary after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20"></div>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-8 py-6 bg-surface-container-high/10 border-t border-outline-variant/10">
+<p class="text-xs text-on-surface-variant">Exhibiting <span class="text-on-surface font-bold">1-3</span> of <span class="text-on-surface font-bold">482</span> Masterpieces</p>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg flex items-center justify-center bg-surface-container-highest/50 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center bg-primary text-on-primary font-bold text-sm">1</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center bg-surface-container-highest/50 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors text-sm">2</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center bg-surface-container-highest/50 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors text-sm">3</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center bg-surface-container-highest/50 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full mt-20 border-t border-[#F5F5F0]/5 pt-16 bg-[#0e0e12] grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<div>
+<div class="text-lg font-bold text-primary mb-4 font-headline uppercase tracking-tighter">The Obsidian Curator</div>
+<p class="text-xs leading-relaxed text-on-surface-variant font-body">Curation is an art. Administration is a science. Elevating the standard of luxury inventory management through precise digital craftsmanship.</p>
+</div>
+<div>
+<h5 class="text-primary font-headline text-sm mb-6 uppercase tracking-widest">Internal Access</h5>
+<ul class="space-y-4">
+<li><a class="text-xs text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Private Suite</a></li>
+<li><a class="text-xs text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Shipping Etiquette</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-primary font-headline text-sm mb-6 uppercase tracking-widest">Protocol</h5>
+<ul class="space-y-4">
+<li><a class="text-xs text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Terms of Service</a></li>
+<li><a class="text-xs text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Authenticity Guarantee</a></li>
+</ul>
+</div>
+<div class="flex flex-col justify-between">
+<div class="text-xs text-[#F5F5F0]/40 font-body">Â© 2024 The Obsidian Curator. All Rights Reserved.</div>
+<div class="flex gap-4 mt-8">
+<div class="w-8 h-8 rounded-full border border-outline-variant/20 flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all duration-300">
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+<div class="w-8 h-8 rounded-full border border-outline-variant/20 flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all duration-300">
+<span class="material-symbols-outlined text-sm">shield</span>
+</div>
+</div>
+</div>
+</footer>
+</main>
+</body></html>

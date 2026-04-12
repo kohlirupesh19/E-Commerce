@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Obsidian Curator | Product Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@300;400;500;700&amp;family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#ffe084",
+            "surface-container-low": "#1b1b1f",
+            "on-surface": "#e4e1e7",
+            "primary-fixed": "#ffe08f",
+            "error-container": "#93000a",
+            "secondary-container": "#735c00",
+            "background": "#131317",
+            "on-primary-container": "#503d00",
+            "on-primary": "#3d2e00",
+            "surface-tint": "#e6c364",
+            "on-tertiary-fixed": "#041451",
+            "outline": "#99907e",
+            "on-secondary-fixed-variant": "#574500",
+            "on-error-container": "#ffdad6",
+            "on-tertiary": "#1e2b66",
+            "surface-container": "#1f1f23",
+            "on-primary-fixed-variant": "#584400",
+            "on-tertiary-container": "#2e3b77",
+            "on-surface-variant": "#d0c5b2",
+            "primary": "#e6c364",
+            "inverse-primary": "#755b00",
+            "outline-variant": "#4d4637",
+            "on-primary-fixed": "#241a00",
+            "primary-container": "#c9a84c",
+            "inverse-on-surface": "#303034",
+            "tertiary": "#b9c4ff",
+            "surface-container-lowest": "#0e0e12",
+            "on-secondary": "#3c2f00",
+            "on-tertiary-fixed-variant": "#35437e",
+            "tertiary-container": "#9ba8eb",
+            "surface-container-highest": "#353439",
+            "on-secondary-fixed": "#231b00",
+            "on-background": "#e4e1e7",
+            "surface-dim": "#131317",
+            "inverse-surface": "#e4e1e7",
+            "surface-container-high": "#2a292e",
+            "surface": "#131317",
+            "secondary-fixed-dim": "#e3c466",
+            "secondary": "#e3c466",
+            "tertiary-fixed": "#dde1ff",
+            "on-error": "#690005",
+            "primary-fixed-dim": "#e6c364",
+            "error": "#ffb4ab",
+            "on-secondary-container": "#f6d675",
+            "surface-bright": "#39393d",
+            "tertiary-fixed-dim": "#b9c3ff",
+            "surface-variant": "#353439"
+          },
+          fontFamily: {
+            "headline": ["Fraunces", "Noto Serif"],
+            "body": ["Manrope"],
+            "label": ["Manrope"],
+            "mono": ["JetBrains Mono"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px);
+    }
+    .no-line-transition {
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation Bar -->
+<header class="bg-[#131317]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-[#e6c364] font-headline">The Obsidian Curator</div>
+<nav class="hidden md:flex items-center gap-10 font-['Noto_Serif'] tracking-tight">
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Collections</a>
+<a class="text-[#e6c364] border-b border-[#e6c364] pb-1" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Admin Dashboard</a>
+</nav>
+<div class="flex items-center gap-6 text-[#e6c364]">
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90"><span class="material-symbols-outlined">favorite</span></button>
+<button class="hover:bg-[#353439]/50 transition-all duration-300 p-2 rounded-full scale-95 active:scale-90"><span class="material-symbols-outlined">shopping_bag</span></button>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq3tamC_V43JWJgfaoh82oxOy9sSoyE7lRqIigrGtRIJw1meo4f59ZJo_pQn-dptBVbz_7oFh9P3Mo1fqgTBCJT46O8dYznwMBKl_Ln6wMzu_-cZfC5HSpdxjxQicASak9sDL-uKWq_y-3XVcd8Wxa6vcVynEs57bnRDed0UrfFt0iTF0vl4ZAGPaVPCK4ALh7ajTXM6ArBc2E_lPnsV80qIii3Bl5dgQBlauHffBVhzZMbDgUGISRw3DvnbK7e5e6cRmzMk2OnHA"/>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-8 pt-12">
+<!-- Product Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-16 mb-24">
+<!-- Left Column: Gallery -->
+<section class="space-y-8">
+<div class="relative group aspect-square bg-surface-container-lowest rounded-xl overflow-hidden cursor-zoom-in">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close-up of a luxury mechanical watch with obsidian dial and gold hands, dramatic lighting, moody atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPODWNW7yoQlR40fXLLrKJmu00Ts5azOeRgAAe8l3NYn6OkugzT2xOJ4PjMzLpohaNC3APoDw4R1uxscE-gLT1nyjQlaKWhrgySEOtwVzq4RcLM000R3RVl109y271dZlxz_OItntjBih7CUfRiMVK413UWPkyrlY4dVkyIEPBQv1j_aVljKiR6lWrzu5DMHwQqyti1H8hoFT8jMDx_D27zo5pGzowndIumzaTY4vbUKG-XSYRsFvnmR4hFJdpdmS3hvfY9Yqt6O4"/>
+<div class="absolute top-6 left-6 bg-primary/90 text-on-primary px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase shadow-xl">
+            Sold 420+ units
+          </div>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg border-2 border-primary overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="Watch macro detail dial" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsciy6ogfhpGFJSwJKeZwPDLgbf2Ez9h9hXsBCpLxJ3y4GwUZWPKoSN8B370y3uzR43yPnN13y5LRaIFeqSskyt4arXjCiqC9NU5qAsJA7nFw_TTSd5FqQ4Masxptv-xS2l_HAEFr9_SeMjDE1mJnGkapj6JuP1ndmOvMnL0_b2DQ1LDuML05CNJo0n2D3wHwNA3w-vtybB7gsb8uq5PFYfIYJzabUkOIHHi7_uxY8vm54oWQlKpyakotY8OxMO0wR4yjSzm1Vo2o"/>
+</div>
+<div class="w-24 h-24 flex-shrink-0 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="Watch leather strap detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVDa50zIrIsIVhYaDcwL_epxPZZviFMSGA6ohAULhLwEP-07lTSKMIQicgnuXj5X0_Er6kHzqhbXb-bzhTzTTFGeE-xUIonBYMNAvDumdpCBA6lMvVdhvYCsxG_bNtgOtW6pYTmKZsis8QS3LK86SMY0L-clSPEdqBvWBC4WUcc1WNPra7l41yD6HymrFCYWH2UFMWdP2HoSmQLNz8xrNlYYTx9jlh6QIjicDUHifPu15V_rXdSnx5zYwmMtaR_tU0D8WB_Wx76nY"/>
+</div>
+<div class="w-24 h-24 flex-shrink-0 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="Watch movement back view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMCA4v18fQsX_6bNtTyoHBmQhUs1eUfd3_ln64B9NVmRLjw3Zojy6NFGbcwWl0Cro7mNhHJLP74CwFubAWG1yz9Fuwgl8XX3x_AK_kLcyj0P1f5E8V3XLbEuM08QKM2DEGNavqMNrdJ3dBCOHzudjAiEWAkNoMKsQ_ACydT4w4jC-7xtzpu0JXlVYjDf8migYpFszjDZ59DrYBHhqoOi0U1AjuY096IJivnTl7MLqTahUjaNY_Kd_dFNU6iz0sCAjT7F1xqsMJD1Y"/>
+</div>
+<div class="w-24 h-24 flex-shrink-0 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="Watch lifestyle on wrist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuZoKoyYssOkwfpLNs98hQNi43q8oUWRNxivaBv8rRRJlIolrRbnGgwdYZQx3w9PkJPEn3wisqi6MF8Kd1m9gIprk4lhZ4-IKjAaUQqLlq42qlAYUKAtKzTFdLkhHrltX8MKggaglecCd14Nr2oxqMkbIkNZWdG6acGjy2A5GK9-ccfP5puQ-T99iWx8FHv6G3PwXCuIOIB6C_ppKoYQNlbUKIbRS2CmAdNQG1u7Vo3kRZT3UymYawto3Zko40frUUqmKUL8sv4fc"/>
+</div>
+</div>
+</section>
+<!-- Right Column: Details -->
+<section class="flex flex-col gap-8">
+<div>
+<a class="text-primary font-label text-sm uppercase tracking-[0.2em] mb-2 inline-block" href="#">Chronos Noir</a>
+<h1 class="text-5xl font-headline text-on-surface font-light leading-tight mb-4">The Midnight Eclipse Perpetual</h1>
+<div class="flex items-center gap-4 text-xs font-mono text-outline uppercase tracking-wider">
+<span>SKU: CN-ECLIPSE-2024</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">grade</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">grade</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">grade</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">grade</span>
+<span class="material-symbols-outlined text-sm">grade</span>
+<span class="ml-1 text-on-surface-variant font-body">(128 Reviews)</span>
+</div>
+</div>
+</div>
+<div class="flex items-baseline gap-4">
+<span class="text-4xl font-headline text-primary">$4,250.00</span>
+<span class="text-xl text-outline line-through">$5,100.00</span>
+<span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full border border-primary/20">SAVE 15%</span>
+</div>
+<!-- Variants -->
+<div class="space-y-6">
+<div>
+<span class="block text-xs font-bold text-outline uppercase tracking-widest mb-4">Case Finish</span>
+<div class="flex gap-4">
+<button class="w-8 h-8 rounded-full bg-[#131317] border-2 border-primary ring-2 ring-primary/20 ring-offset-2 ring-offset-background"></button>
+<button class="w-8 h-8 rounded-full bg-[#E5E4E2] border-2 border-transparent hover:border-primary/50 transition-all"></button>
+<button class="w-8 h-8 rounded-full bg-[#B76E79] border-2 border-transparent hover:border-primary/50 transition-all"></button>
+</div>
+</div>
+<div>
+<span class="block text-xs font-bold text-outline uppercase tracking-widest mb-4">Strap Size</span>
+<div class="grid grid-cols-4 gap-2">
+<button class="py-3 px-4 rounded-lg bg-surface-container-highest border border-primary text-primary text-sm font-medium">40MM</button>
+<button class="py-3 px-4 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface-variant text-sm font-medium hover:border-primary transition-colors">42MM</button>
+<button class="py-3 px-4 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface-variant text-sm font-medium hover:border-primary transition-colors">44MM</button>
+<button class="py-3 px-4 rounded-lg bg-surface-container-lowest border border-outline-variant/30 text-outline/40 text-sm font-medium cursor-not-allowed opacity-50">46MM</button>
+</div>
+</div>
+</div>
+<!-- Quantity & Actions -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container rounded-lg border border-outline-variant overflow-hidden">
+<button class="p-4 text-on-surface hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">remove</span></button>
+<span class="w-12 text-center font-mono font-bold">1</span>
+<button class="p-4 text-on-surface hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">add</span></button>
+</div>
+<div class="flex gap-4 flex-grow">
+<button class="p-4 rounded-lg border border-outline-variant hover:text-primary transition-all"><span class="material-symbols-outlined">favorite</span></button>
+<button class="p-4 rounded-lg border border-outline-variant hover:text-primary transition-all"><span class="material-symbols-outlined">share</span></button>
+</div>
+</div>
+<div class="flex flex-col gap-3 mt-4">
+<button class="w-full bg-primary text-on-primary py-5 rounded-xl font-bold tracking-widest uppercase text-sm shadow-[0_12px_40px_rgba(230,195,100,0.2)] hover:scale-[1.02] active:scale-95 transition-all">Add to Shopping Bag</button>
+<button class="w-full bg-transparent border-2 border-outline-variant text-on-surface py-5 rounded-xl font-bold tracking-widest uppercase text-sm hover:bg-surface-container-highest transition-all">Immediate Acquisition</button>
+</div>
+</div>
+<!-- Delivery & Service -->
+<div class="pt-8 border-t border-outline-variant/30">
+<div class="flex flex-col gap-4 mb-8">
+<label class="text-xs font-bold text-outline uppercase tracking-widest">Delivery Estimator</label>
+<div class="flex gap-2">
+<input class="bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 text-sm focus:ring-1 focus:ring-primary focus:border-primary w-full transition-all" placeholder="Enter Pincode" type="text"/>
+<button class="text-primary font-bold text-xs uppercase px-4 border border-primary/20 rounded-lg hover:bg-primary/10">Check</button>
+</div>
+<p class="text-xs text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+              Estimated delivery by Oct 24th - Oct 27th
+            </p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<span class="text-xs font-medium">Free Express Shipping</span>
+</div>
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary">autorenew</span>
+<span class="text-xs font-medium">30-Day Returns</span>
+</div>
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary">workspace_premium</span>
+<span class="text-xs font-medium">Lifetime Warranty</span>
+</div>
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary">lock</span>
+<span class="text-xs font-medium">Secure Encryption</span>
+</div>
+</div>
+</div>
+<!-- Seller Info -->
+<div class="flex items-center justify-between p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-headline text-xl">A</div>
+<div>
+<p class="text-sm font-bold">Aurelian Horology</p>
+<div class="flex items-center gap-1 text-[10px] text-primary">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">grade</span>
+<span>4.9 Curator Rating</span>
+</div>
+</div>
+</div>
+<a class="text-xs font-bold text-primary uppercase border-b border-primary/30 hover:border-primary transition-all" href="#">Visit Store</a>
+</div>
+</section>
+</div>
+<!-- Tabs Section -->
+<section class="mb-32">
+<div class="flex border-b border-outline-variant/20 gap-12 mb-12">
+<button class="pb-6 border-b-2 border-primary text-primary font-headline text-lg">Detailed Narrative</button>
+<button class="pb-6 border-b-2 border-transparent text-outline hover:text-on-surface transition-colors font-headline text-lg">Technical Specifications</button>
+<button class="pb-6 border-b-2 border-transparent text-outline hover:text-on-surface transition-colors font-headline text-lg">Collector Reviews</button>
+<button class="pb-6 border-b-2 border-transparent text-outline hover:text-on-surface transition-colors font-headline text-lg">Inquiries (12)</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-20">
+<div class="prose prose-invert">
+<h3 class="font-headline text-2xl text-on-surface mb-6">A Masterpiece of Temporal Art</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6 font-light">
+            The Midnight Eclipse is not merely a timepiece; it is a manifestation of celestial mechanics captured within a 42mm obsidian vessel. Each component is hand-finished by master horologists in our private atelier, ensuring that every second is measured with unprecedented grace.
+          </p>
+<ul class="space-y-4 text-on-surface-variant font-light list-none p-0">
+<li class="flex items-center gap-4"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Hand-polished Grade 5 Obsidian glass dial</li>
+<li class="flex items-center gap-4"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> In-house Caliber-88 Perpetual Movement</li>
+<li class="flex items-center gap-4"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 72-hour power reserve with moon-phase display</li>
+</ul>
+</div>
+<div class="bg-surface-container-low p-10 rounded-3xl border border-outline-variant/10">
+<div class="flex justify-between items-center mb-8">
+<h4 class="font-headline text-xl">Ratings Overview</h4>
+<div class="text-center">
+<p class="text-4xl font-headline text-primary">4.8</p>
+<p class="text-[10px] uppercase tracking-widest text-outline">Out of 5 Stars</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono w-4">5</span>
+<div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%]"></div>
+</div>
+<span class="text-xs text-outline">85%</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono w-4">4</span>
+<div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[10%]"></div>
+</div>
+<span class="text-xs text-outline">10%</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono w-4">3</span>
+<div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[3%]"></div>
+</div>
+<span class="text-xs text-outline">3%</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono w-4">2</span>
+<div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[1%]"></div>
+</div>
+<span class="text-xs text-outline">1%</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono w-4">1</span>
+<div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[1%]"></div>
+</div>
+<span class="text-xs text-outline">1%</span>
+</div>
+</div>
+<button class="w-full mt-10 py-4 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary/5">Read All Reviews</button>
+</div>
+</div>
+</section>
+<!-- Frequently Bought Together -->
+<section class="mb-32">
+<h2 class="text-3xl font-headline mb-12 flex items-center gap-4">
+        Frequently Curated Together
+        <span class="h-[1px] flex-grow bg-gradient-to-r from-outline-variant/30 to-transparent"></span>
+</h2>
+<div class="bg-surface-container-low p-10 rounded-3xl flex flex-col lg:flex-row items-center gap-12 border border-outline-variant/10">
+<div class="flex items-center gap-8">
+<div class="relative group">
+<div class="w-40 h-40 rounded-2xl overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover" data-alt="Current watch" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9fkRIfaXffB46jLtFI5J5c01IBnnOBtsDEApeY80pHsmbazkPWScLdCitIqcFk63NTvxlhflEvwpHOSvCGLKw2oyPtax5oyZpHL2NtMdKOkCaG1wzr3Pq18GVB31Xg-EIP7NGUjADEciDbgIfn1nq_luKt4o82aRvgF7MgKVFcV8ciHRhwlTvS97jXLe3R-dDOEeAiWIT9cN3PmD6IsQfLVFyxxz7qtSbZ-p1FmIp2JlH71v_oy55kI6OBObtMjhUfiLd7zZkQxc"/>
+</div>
+<p class="mt-4 text-xs font-bold text-center">Midnight Eclipse</p>
+</div>
+<span class="material-symbols-outlined text-outline">add</span>
+<div class="relative group">
+<div class="w-40 h-40 rounded-2xl overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover" data-alt="Handcrafted leather watch roll case" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8GErgE6IgM4e0CxYDOxDhi1T8Q8ReNPQnAu5gP5x1v_ZhxIAFZtc2F4-GXChquLN53EyNccmAGy06J72YbaApp9-h-RjscBlAGyvk5Hoo8SaIQmfhukDWPxbHRiGyw5z4MNkk-6a3SZaEnhE3j-0dsJETbkRTVfQ3fiHeF_QhAVVeaUkuW538cCqRS7VQhkxOxTd9206lkenF4l1GIqyEBp3AcWsjcCQbwTMV3xrjTGF98-Rlkg46EtmBupgL0eBQ_w2z1dmimAc"/>
+</div>
+<p class="mt-4 text-xs font-bold text-center">Leather Watch Roll</p>
+</div>
+<span class="material-symbols-outlined text-outline">add</span>
+<div class="relative group">
+<div class="w-40 h-40 rounded-2xl overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover" data-alt="Mechanical watch winder box with glass lid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfLc80feKUxYjz9Tw65eY9a7t8QxIpwo_R3-FwYhz3SdaP6shawONx7aM5KiACt97UK6pP2hRrGGpeM8tD7b8ngEtqWESvMJE5K_QVVibKWgp40uPJY0BLdFIsGFbqA78X2EpSBnPwoprjadqOxb_FJk1mVohh61CLjB-kEX6JF3mqbYXJoyHvFepn8k4if0-vPZaKoNJ4w4H0nqEC0wPkgCe2TFz2kPGExPL-um1ZBrHTbgQ01urvngJUX0gjOVvk08UqG2vxwUc"/>
+</div>
+<p class="mt-4 text-xs font-bold text-center">Automatic Winder</p>
+</div>
+</div>
+<div class="lg:ml-auto text-center lg:text-right space-y-4">
+<p class="text-outline uppercase text-[10px] tracking-widest">Bundle Exclusive Price</p>
+<p class="text-3xl font-headline text-primary">$4,950.00</p>
+<button class="bg-primary text-on-primary px-10 py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Acquire Selection</button>
+</div>
+</div>
+</section>
+<!-- You May Also Like -->
+<section class="mb-32">
+<div class="flex justify-between items-end mb-12">
+<div>
+<span class="text-primary font-label text-xs uppercase tracking-[0.2em] block mb-2">Refined Selections</span>
+<h2 class="text-4xl font-headline">Other Curated Treasures</h2>
+</div>
+<div class="flex gap-4">
+<button class="p-3 rounded-full border border-outline-variant/30 text-outline hover:text-primary transition-all"><span class="material-symbols-outlined">arrow_back</span></button>
+<button class="p-3 rounded-full border border-primary text-primary transition-all"><span class="material-symbols-outlined">arrow_forward</span></button>
+</div>
+</div>
+<div class="flex gap-8 overflow-x-auto pb-12 scrollbar-hide">
+<!-- Product Card 1 -->
+<div class="w-72 flex-shrink-0 group">
+<div class="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Minimalist gold watch with white dial" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjVfG-U-x6uccoEhW4n4ieh5jAk9nSLt-ozUWCQtR3rPINvkCKHbB8o3yDnIvo5dFdC9ALXxCpQ6T7XSI6H4psLePfgPGPs_Ti1kQ2N2FAnYarY0r8KRXwmyyBqSo__PXR0K58Lcxo2bQ8BDk7v1vKXZrdG72VgWuIsjUVPq2XpWakXbFbi-D1Ayqc4dwt4K1TUQ9Iz-kcXZXRKxWgUpZzwjghgn0xzKrzL0F41N2H7RVxOMpZOBJ9c72pCI_0DQ0RCxEAqtL1fD8"/>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<p class="text-[10px] text-primary uppercase tracking-widest mb-1">Aurelian</p>
+<h3 class="font-headline text-lg mb-2 group-hover:text-primary transition-colors">The Solstice Gold</h3>
+<p class="text-primary font-headline">$3,800.00</p>
+</div>
+<!-- Product Card 2 -->
+<div class="w-72 flex-shrink-0 group">
+<div class="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern titanium smart watch with obsidian face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqDoP5CLAhd2EQZ7YeEwPMl_EUsT26QCsB8Pr848lbtDx2g1Nmivf8xUTduYCYFZFSD8PDbbv-1u5k3X2G_ckDn5vJ4UOyzXcvN2ML4lMIAyLN9RfMfw-m5p2pgsOJzxp_yCLKuUUjsWbiSwXD0GvFipceUKIgazAAiIcwHn3NrEjoLXvRvT99rvkQp_zM60-U0pd1ciLeDMqoPPmZ2V08hEnPLhN7DPsNxIh7QM-tSGFMrJ5XHUwOwN7F8OTa5AEF2XLhwDw6VNM"/>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<p class="text-[10px] text-primary uppercase tracking-widest mb-1">Techne</p>
+<h3 class="font-headline text-lg mb-2 group-hover:text-primary transition-colors">Vanguard Titanium</h3>
+<p class="text-primary font-headline">$2,450.00</p>
+</div>
+<!-- Product Card 3 -->
+<div class="w-72 flex-shrink-0 group">
+<div class="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Classic luxury leather chronograph" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJZKpUuXubYXQMTIC7_N2lPAEmuiDsoWSf7TnxAuukhaG3LEshpStlxCMEh52EJuJfcgLMsLxtkahWV7K5HqcouSm6pSW2-WdlFga9Y2WUzjgVnfa0a6HNKitLWXtxw6_vLVapBIgCqZP2vvtawMTG7FHqiIpz5gB7BEEJZQcf6_2vq4Z-3lBtMJ4LyMGOsucJAY3LISfNBOUS5y_T2MxnMIQIGT_i2vLJKSXygySm_avst3pb1vrWyMgELYft9P6aZguBQnHoKdE"/>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<p class="text-[10px] text-primary uppercase tracking-widest mb-1">Chronos</p>
+<h3 class="font-headline text-lg mb-2 group-hover:text-primary transition-colors">Aero Classic</h3>
+<p class="text-primary font-headline">$5,200.00</p>
+</div>
+<!-- Product Card 4 -->
+<div class="w-72 flex-shrink-0 group">
+<div class="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern minimal wall clock or desk accessory" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApTG5Tl4lOaRP8prNfeexzrPhgwAbWV10YUeGawD82oJ-LUs78on3xaA1yUdXbAJGVctiP8KI7FIP8vZyGa4QL-ShZNq-3RmvSsSUsdYllAyL-aKSzywya_pFnbVcrUDl8Y35MEjJ4rB7XN22uEh5W_m6p_gpblRvNAZGHXUh3dTeIfgA97ZOm9TQADEkUjjOADhAS-_j2J2Yep2GqWPEWVifpAzDeqvb-t-8SepAvm2hzp-X2wV7eJwdQYjqJP6xnyHAJPXn2n9I"/>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<p class="text-[10px] text-primary uppercase tracking-widest mb-1">Objets</p>
+<h3 class="font-headline text-lg mb-2 group-hover:text-primary transition-colors">Tonal Desk Chronometer</h3>
+<p class="text-primary font-headline">$950.00</p>
+</div>
+<!-- Product Card 5 -->
+<div class="w-72 flex-shrink-0 group">
+<div class="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Industrial style heavy steel watch" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChrdA9wum_tq-hgyHiGEwue543ZoZ0eBzmLOo8NDyoSPpf4fcPz_z_tQPyzHTUGOlnz4QyJUkF2uP9MJI8kkgeHjIARJHk5N-itBrtN59qavg5S8EWk-zO0VjOnHGOnP3q7rjxub6N0b_eSYmYoE_ecKU229JnUFSGo1R8OeadkU8o9rIUNsZGb-XGZFQHIUcr6v4O4Oj4C5aw4lWxfUBxb49NRumkM49xTEDOPrVfngyNQ6KbKm0fXcRZZ1FkDhFUbSJIWFQfSH8"/>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<p class="text-[10px] text-primary uppercase tracking-widest mb-1">Forge</p>
+<h3 class="font-headline text-lg mb-2 group-hover:text-primary transition-colors">The Ironclad GMT</h3>
+<p class="text-primary font-headline">$3,100.00</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0e0e12] w-full mt-20 border-t border-[#F5F5F0]/5 pt-16">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<div class="col-span-1">
+<div class="text-lg font-bold text-[#e6c364] mb-4 font-headline">The Obsidian Curator</div>
+<p class="font-['Noto_Serif'] text-xs leading-relaxed text-[#F5F5F0]/40 max-w-xs">
+          Refining the digital acquisition experience through intentional design and unparalleled quality.
+        </p>
+</div>
+<div>
+<h4 class="text-[#F5F5F0] font-bold text-sm uppercase tracking-widest mb-8">Navigation</h4>
+<div class="flex flex-col gap-4 font-['Noto_Serif'] text-xs">
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Private Suite</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Shipping Etiquette</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Terms of Service</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Authenticity Guarantee</a>
+</div>
+</div>
+<div>
+<h4 class="text-[#F5F5F0] font-bold text-sm uppercase tracking-widest mb-8">Concierge</h4>
+<div class="flex flex-col gap-4 font-['Noto_Serif'] text-xs">
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Support</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Wholesale</a>
+<a class="text-[#F5F5F0]/40 hover:text-[#e6c364] transition-opacity" href="#">Journal</a>
+</div>
+</div>
+<div>
+<h4 class="text-[#F5F5F0] font-bold text-sm uppercase tracking-widest mb-8">Newsletter</h4>
+<p class="font-['Noto_Serif'] text-xs text-[#F5F5F0]/40 mb-6">Join our private list for exclusive curations.</p>
+<div class="relative">
+<input class="bg-surface-container-highest border-b border-outline-variant w-full py-2 px-0 text-xs text-on-surface focus:outline-none focus:border-primary transition-colors" placeholder="Email address" type="email"/>
+<button class="absolute right-0 bottom-2 text-primary font-bold text-[10px] uppercase tracking-tighter">Submit</button>
+</div>
+</div>
+</div>
+<div class="px-12 py-8 border-t border-outline-variant/10 text-center">
+<p class="font-['Noto_Serif'] text-[10px] text-[#F5F5F0]/20 uppercase tracking-[0.3em]">Â© 2024 The Obsidian Curator. All Rights Reserved.</p>
+</div>
+</footer>
+</body></html>

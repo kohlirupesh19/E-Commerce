@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash ~/.claude/statusline-command.sh)",
+      "Bash(python C:/Users/zewan/.claude/statusline.py)",
+      "Bash(npm install:*)",
+      "Bash(npx --yes @playwright/mcp --version)",
+      "Bash(npm list:*)",
+      "Bash(claude mcp:*)",
+      "mcp__playwright__browser_navigate",
+      "Bash(npm run:*)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_snapshot"
+    ]
+  }
+}

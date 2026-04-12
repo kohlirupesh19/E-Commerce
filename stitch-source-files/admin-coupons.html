@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Promotional Vault | The Obsidian Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Noto+Serif:ital,wght@0,100..900;1,100..900&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary": "#b9c4ff",
+                        "surface-dim": "#131317",
+                        "surface": "#131317",
+                        "tertiary-container": "#9ba8eb",
+                        "primary-container": "#c9a84c",
+                        "surface-container-highest": "#353439",
+                        "surface-container-lowest": "#0e0e12",
+                        "outline-variant": "#4d4637",
+                        "on-primary-container": "#503d00",
+                        "primary-fixed-dim": "#e6c364",
+                        "on-background": "#e4e1e7",
+                        "primary-fixed": "#ffe08f",
+                        "surface-variant": "#353439",
+                        "on-secondary-container": "#f6d675",
+                        "secondary": "#e3c466",
+                        "surface-container": "#1f1f23",
+                        "secondary-fixed-dim": "#e3c466",
+                        "on-tertiary": "#1e2b66",
+                        "on-primary": "#3d2e00",
+                        "on-surface": "#e4e1e7",
+                        "on-tertiary-fixed": "#041451",
+                        "on-primary-fixed": "#241a00",
+                        "tertiary-fixed": "#dde1ff",
+                        "surface-bright": "#39393d",
+                        "tertiary-fixed-dim": "#b9c3ff",
+                        "on-surface-variant": "#d0c5b2",
+                        "primary": "#e6c364",
+                        "outline": "#99907e",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#2e3b77",
+                        "on-secondary-fixed": "#231b00",
+                        "on-secondary": "#3c2f00",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-container": "#735c00",
+                        "on-error": "#690005",
+                        "on-secondary-fixed-variant": "#574500",
+                        "inverse-on-surface": "#303034",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#35437e",
+                        "inverse-surface": "#e4e1e7",
+                        "background": "#131317",
+                        "surface-container-high": "#2a292e",
+                        "on-primary-fixed-variant": "#584400",
+                        "surface-tint": "#e6c364",
+                        "secondary-fixed": "#ffe084",
+                        "inverse-primary": "#755b00"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"],
+                        "fraunces": ["Fraunces"],
+                        "dmsans": ["DM Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .editorial-shadow {
+            box-shadow: 0 32px 64px -12px rgba(230, 195, 100, 0.06);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353439;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-full py-8 bg-[#0e0e12] w-64 border-r border-white/5 font-['DM_Sans'] text-sm tracking-wide">
+<div class="px-8 mb-12">
+<h1 class="font-['Fraunces'] text-xl italic text-[#e6c364]">Obsidian Admin</h1>
+<p class="text-gray-500 text-[10px] uppercase tracking-[0.2em] mt-1">Luxury Curator</p>
+</div>
+<nav class="flex-1 space-y-1 px-4">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">inventory_2</span>
+                    Products
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">shopping_bag</span>
+                    Orders
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">group</span>
+                    Customers
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">category</span>
+                    Categories
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#e6c364] font-bold border-r-2 border-[#e6c364] bg-white/5 transition-all duration-200 group active:scale-98" href="#">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
+                    Coupons
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">analytics</span>
+                    Reports
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+                    Settings
+                </a>
+</nav>
+<div class="px-8 mt-auto pt-8 border-t border-white/5 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="Store Manager Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional man in a tailored dark suit with soft atmospheric lighting in a high-end office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP9ovm0bKS-_1FT-xP807o_mKBDBc7i53cq0NrKRZ23o-qJX2fJgS7rAxUIu3s1PX413WVQHO9RlcX80sLv55EG7luHc1mCbTt85ylbAmVoVVr3-Z19fDGoLX1bPTXGZlZVDPPASl_D7pGji3I1LSwCDIB_ghVqWiteZXtrcThT_FL5kqoSigKLvQcq2Uq8KLhBqXTz8jSBpYinMKwgNoEhZ5zTc6P_bnJU22wKP-Y0qNx_aGX6bFxz_hZ6r-uJ8a43Jn5CO842zM"/>
+</div>
+<div>
+<p class="text-on-surface font-medium text-xs">Julian Vance</p>
+<p class="text-gray-500 text-[10px]">Head Curator</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-12 py-4 w-full bg-[#131317]/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(201,168,76,0.05)] sticky top-0 z-50">
+<div class="flex items-center gap-8 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+<input class="bg-surface-container-low border-none text-sm px-10 py-2 rounded-lg w-full focus:ring-1 focus:ring-primary text-on-surface placeholder:text-gray-600" placeholder="Search the archives..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-gray-400 hover:text-[#e6c364] transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="h-6 w-[1px] bg-white/10"></div>
+<div class="flex items-center gap-3">
+<span class="font-['Fraunces'] text-lg text-[#e6c364] font-semibold">The Obsidian Curator</span>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="flex-1 overflow-y-auto px-12 py-10">
+<!-- Page Header & Action -->
+<div class="flex justify-between items-end mb-12">
+<div>
+<h2 class="font-['Fraunces'] text-4xl text-on-surface mb-2">Promotional Vault</h2>
+<p class="font-dmsans text-gray-500 tracking-wide text-sm">Orchestrate exclusivity through curated incentives.</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-on-primary font-bold px-6 py-3 rounded-lg flex items-center gap-2 transition-all transform hover:-translate-y-1 editorial-shadow group">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-dmsans text-sm uppercase tracking-widest">Add New Coupon</span>
+</button>
+</div>
+<!-- KPI Bento Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<div class="bg-surface-container-low p-8 rounded-xl border border-white/5 relative overflow-hidden group hover:border-primary/20 transition-all">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl transition-opacity opacity-0 group-hover:opacity-100"></div>
+<p class="text-gray-500 font-dmsans text-xs uppercase tracking-widest mb-4">Total Active Coupons</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-fraunces text-on-surface">24</span>
+<span class="text-primary text-xs font-mono">+3 this month</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-xl border border-white/5 relative overflow-hidden group hover:border-primary/20 transition-all">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl transition-opacity opacity-0 group-hover:opacity-100"></div>
+<p class="text-gray-500 font-dmsans text-xs uppercase tracking-widest mb-4">Total Redemptions</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-fraunces text-on-surface">1,842</span>
+<span class="text-emerald-500 text-xs font-mono">↑ 12%</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-xl border border-white/5 relative overflow-hidden group hover:border-primary/20 transition-all">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl transition-opacity opacity-0 group-hover:opacity-100"></div>
+<p class="text-gray-500 font-dmsans text-xs uppercase tracking-widest mb-4">Revenue Impact</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-fraunces text-primary">$42,900</span>
+<span class="text-gray-500 text-xs font-mono tracking-tighter">Gross Attributed</span>
+</div>
+</div>
+</div>
+<!-- Main Data Table Container -->
+<div class="glass-panel rounded-2xl border border-white/5 editorial-shadow overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-white/5">
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Code</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Type</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Value</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Min. Order</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Usage Limit</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Expiry Date</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5">Status</th>
+<th class="px-8 py-5 font-fraunces text-primary/80 font-normal tracking-wide italic border-b border-white/5"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-6">
+<span class="font-mono text-primary bg-primary/10 px-3 py-1 rounded text-xs tracking-widest uppercase">OBSIDIAN25</span>
+</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm">Percentage</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm font-bold">25%</td>
+<td class="px-8 py-6 text-on-surface font-mono text-xs">$1,500.00</td>
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 75%;"></div>
+</div>
+<span class="text-xs text-gray-500 font-mono">75/100</span>
+</div>
+</td>
+<td class="px-8 py-6 text-gray-500 font-dmsans text-sm">Oct 24, 2024</td>
+<td class="px-8 py-6">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ml-3 text-xs font-dmsans uppercase tracking-tighter text-on-surface">Active</span>
+</label>
+</td>
+<td class="px-8 py-6 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-gray-400 hover:text-white"><span class="material-symbols-outlined text-lg">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-6">
+<span class="font-mono text-primary bg-primary/10 px-3 py-1 rounded text-xs tracking-widest uppercase">WELCOME100</span>
+</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm">Flat</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm font-bold">$100.00</td>
+<td class="px-8 py-6 text-on-surface font-mono text-xs">$500.00</td>
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 20%;"></div>
+</div>
+<span class="text-xs text-gray-500 font-mono">42/200</span>
+</div>
+</td>
+<td class="px-8 py-6 text-gray-500 font-dmsans text-sm">Dec 31, 2024</td>
+<td class="px-8 py-6">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ml-3 text-xs font-dmsans uppercase tracking-tighter text-on-surface">Active</span>
+</label>
+</td>
+<td class="px-8 py-6 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-gray-400 hover:text-white"><span class="material-symbols-outlined text-lg">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 transition-colors group opacity-60">
+<td class="px-8 py-6">
+<span class="font-mono text-gray-500 bg-white/5 px-3 py-1 rounded text-xs tracking-widest uppercase line-through">SUMMER24</span>
+</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm">Percentage</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm font-bold">15%</td>
+<td class="px-8 py-6 text-on-surface font-mono text-xs">$0.00</td>
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-gray-600 h-full" style="width: 100%;"></div>
+</div>
+<span class="text-xs text-gray-500 font-mono">500/500</span>
+</div>
+</td>
+<td class="px-8 py-6 text-gray-500 font-dmsans text-sm">Aug 31, 2024</td>
+<td class="px-8 py-6">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ml-3 text-xs font-dmsans uppercase tracking-tighter text-gray-500">Expired</span>
+</label>
+</td>
+<td class="px-8 py-6 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-gray-400 hover:text-white"><span class="material-symbols-outlined text-lg">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-6">
+<span class="font-mono text-primary bg-primary/10 px-3 py-1 rounded text-xs tracking-widest uppercase">VIPACCESS</span>
+</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm">Tiered</td>
+<td class="px-8 py-6 text-on-surface font-dmsans text-sm font-bold">Custom</td>
+<td class="px-8 py-6 text-on-surface font-mono text-xs">$5,000.00</td>
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 12%;"></div>
+</div>
+<span class="text-xs text-gray-500 font-mono">6/50</span>
+</div>
+</td>
+<td class="px-8 py-6 text-gray-500 font-dmsans text-sm">Jan 01, 2025</td>
+<td class="px-8 py-6">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+<span class="ml-3 text-xs font-dmsans uppercase tracking-tighter text-on-surface">Active</span>
+</label>
+</td>
+<td class="px-8 py-6 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-gray-400 hover:text-white"><span class="material-symbols-outlined text-lg">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination/Footer -->
+<div class="px-8 py-4 bg-white/5 flex justify-between items-center text-xs text-gray-500 font-dmsans uppercase tracking-widest">
+<span>Showing 4 of 24 curators-exclusive offers</span>
+<div class="flex items-center gap-4">
+<button class="hover:text-primary transition-colors cursor-not-allowed opacity-50"><span class="material-symbols-outlined">chevron_left</span></button>
+<span class="text-on-surface">Page 1 of 6</span>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Footer Narrative -->
+<div class="mt-20 text-center opacity-40">
+<p class="font-fraunces italic text-lg mb-1">“Style is a way to say who you are without having to speak.”</p>
+<p class="font-dmsans text-[10px] uppercase tracking-[0.3em]">Vault Management System v4.2.0</p>
+</div>
+</div>
+</main>
+</div>
+</body></html>

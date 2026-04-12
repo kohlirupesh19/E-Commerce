@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maison Mara | The Obsidian Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@300;400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#ffe084",
+            "surface-container-low": "#1b1b1f",
+            "on-surface": "#e4e1e7",
+            "primary-fixed": "#ffe08f",
+            "error-container": "#93000a",
+            "secondary-container": "#735c00",
+            "background": "#131317",
+            "on-primary-container": "#503d00",
+            "on-primary": "#3d2e00",
+            "surface-tint": "#e6c364",
+            "on-tertiary-fixed": "#041451",
+            "outline": "#99907e",
+            "on-secondary-fixed-variant": "#574500",
+            "on-error-container": "#ffdad6",
+            "on-tertiary": "#1e2b66",
+            "surface-container": "#1f1f23",
+            "on-primary-fixed-variant": "#584400",
+            "on-tertiary-container": "#2e3b77",
+            "on-surface-variant": "#d0c5b2",
+            "primary": "#e6c364",
+            "secondary": "#e3c466",
+            "tertiary": "#b9c4ff",
+            "surface-container-lowest": "#0e0e12",
+            "on-secondary": "#3c2f00",
+            "surface-container-highest": "#353439",
+            "on-background": "#e4e1e7",
+            "surface-dim": "#131317",
+            "surface-bright": "#39393d",
+            "surface-variant": "#353439"
+          },
+          fontFamily: {
+            "headline": ["Noto Serif", "serif"],
+            "body": ["Manrope", "sans-serif"],
+            "label": ["Manrope", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .tonal-transition {
+      background: linear-gradient(to bottom, #131317, transparent);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px);
+    }
+    .no-line { border: none !important; }
+    body { background-color: #131317; color: #F5F5F0; }
+  </style>
+</head>
+<body class="font-body selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar Component -->
+<nav class="docked full-width top-0 sticky z-50 bg-[#131317]/80 backdrop-blur-xl no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<div class="flex items-center gap-12">
+<span class="text-2xl font-bold tracking-tighter text-[#e6c364] font-headline">The Obsidian Curator</span>
+<div class="hidden md:flex items-center gap-8 font-headline tracking-tight">
+<a class="text-[#e6c364] border-b border-[#e6c364] pb-1" href="#">Collections</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Boutique</a>
+<a class="text-[#F5F5F0]/60 hover:text-[#F5F5F0] transition-colors" href="#">Admin Dashboard</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-[#e6c364] cursor-pointer hover:bg-[#353439]/50 p-2 rounded-full transition-all scale-95 active:scale-90" data-icon="favorite">favorite</span>
+<span class="material-symbols-outlined text-[#e6c364] cursor-pointer hover:bg-[#353439]/50 p-2 rounded-full transition-all scale-95 active:scale-90" data-icon="shopping_bag">shopping_bag</span>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-primary/20">
+<img alt="User Profile Avatar" data-alt="close-up portrait of a sophisticated man with a groomed beard looking confidently toward the camera in soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAukHbGjIPHEwy-FFXhf-8TQs-z7O5k92APt6g4D_Kjp8RVTpj4DejMWtxAqsX1lJ0i1OeLfmLTf-Ca30i0SnGugMoSGLSfyOW-JidTvptJD4lBboGJVxObu_K4laC82Zik9ObsLzDBuXW1KLGfsKPpxBqZd7muz-QXiBKhIA5SVxn9J7piyG_CUZNYNVSJrBsjFOrJKoIPRTJt-6Q5NbegGDvxsEv8AbeIJpU98IIgI9BQgJbajtB0MtKdkaDXvWfHCD-0MmLAu2c"/>
+</div>
+</div>
+</div>
+</nav>
+<div class="flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-full w-80 z-[60] bg-[#0e0e12] flex flex-col p-6 gap-8 bg-[#131317] border-r border-[#F5F5F0]/10 shadow-[20px_0_60px_rgba(0,0,0,0.5)] hidden lg:flex">
+<div class="mt-20">
+<div class="mb-8">
+<h2 class="text-[#e6c364] font-black font-headline text-lg uppercase tracking-widest">Filter Gallery</h2>
+<p class="text-[#F5F5F0]/40 text-xs uppercase tracking-widest mt-1">Refine your selection</p>
+</div>
+<div class="flex flex-col gap-2">
+<button class="flex items-center gap-4 p-3 text-[#e6c364] bg-[#353439]/30 rounded-lg hover:translate-x-1 transition-transform duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-headline text-sm uppercase tracking-widest">Categories</span>
+</button>
+<button class="flex items-center gap-4 p-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] hover:translate-x-1 transition-transform duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-headline text-sm uppercase tracking-widest">Price Range</span>
+</button>
+<button class="flex items-center gap-4 p-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] hover:translate-x-1 transition-transform duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="workspace_premium">workspace_premium</span>
+<span class="font-headline text-sm uppercase tracking-widest">Designer Brands</span>
+</button>
+<button class="flex items-center gap-4 p-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] hover:translate-x-1 transition-transform duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="grade">grade</span>
+<span class="font-headline text-sm uppercase tracking-widest">Client Ratings</span>
+</button>
+<button class="flex items-center gap-4 p-3 text-[#F5F5F0]/40 hover:text-[#F5F5F0] hover:translate-x-1 transition-transform duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-headline text-sm uppercase tracking-widest">Availability</span>
+</button>
+</div>
+<div class="mt-auto pt-8 border-t border-[#F5F5F0]/5">
+<button class="flex items-center gap-4 p-3 text-[#F5F5F0]/40 hover:text-[#e6c364] hover:translate-x-1 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+<span class="font-headline text-sm uppercase tracking-widest">Clear All</span>
+</button>
+<button class="w-full mt-6 bg-primary text-on-primary py-4 font-headline text-xs uppercase tracking-[0.2em] rounded-lg hover:brightness-110 transition-all">
+            Apply Filters
+          </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-80">
+<!-- Brand Hero Section -->
+<section class="relative w-full h-[614px] overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#131317]/40 to-[#131317] z-10"></div>
+<img alt="Brand Banner" class="w-full h-full object-cover" data-alt="expansive minimalist architectural interior with smooth concrete walls and dramatic shafts of golden sunlight creating long shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASwAKdkbieiLp85oLRh7JRE9Po5AyKuqAY7sKR_M7B8p6vN9caofx4WMBdWbHAGe7NG0f02FElqCOQJsCTi6Y7WKvI9c-ZtfEoDMv6ImwYbpuwukZwez8XqRP6rCFZCaBqhaoyI8XhUUpllNo8L5bvd8rbYY5tAPF4FiW8hZ8WzKy8yhd5y1aEnmPNN6xyHNqdb96MoXHeAfINEKaaBmWQAl2znL0qdFtqAk8exkqSOuyWS23P08IMN0R_qe4B2EJF2X3k-NJsbPk"/>
+<div class="absolute bottom-0 left-0 w-full p-12 z-20 flex flex-col items-start gap-6">
+<div class="flex items-center gap-8">
+<div class="w-24 h-24 bg-[#0e0e12] p-4 flex items-center justify-center border border-primary/20 shadow-2xl">
+<span class="text-primary font-headline font-black text-4xl tracking-tighter">MM</span>
+</div>
+<div>
+<h1 class="text-6xl md:text-8xl font-headline font-bold text-primary -ml-1 tracking-tighter">Maison Mara</h1>
+<p class="text-surface-variant font-mono text-sm tracking-widest mt-2">ESTABLISHED MCMLXXXIV â¢ PARIS</p>
+</div>
+</div>
+<p class="max-w-2xl text-on-surface/80 text-xl font-body leading-relaxed italic">
+            "A legacy of silent luxury. Maison Mara curates the ephemeral, transforming rare materials into timeless artifacts of personal expression and architectural grace."
+          </p>
+</div>
+</section>
+<!-- View Controls / Sub-header -->
+<div class="px-12 py-10 flex flex-wrap justify-between items-end gap-6 bg-background">
+<div class="flex flex-col gap-2">
+<span class="text-primary/60 font-mono text-xs uppercase tracking-widest">Current Selection</span>
+<h2 class="text-2xl font-headline text-on-surface">42 Curator's Pieces</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="group relative">
+<button class="flex items-center gap-4 bg-surface-container-highest/30 px-6 py-3 rounded-full hover:bg-surface-container-highest/50 transition-all border border-outline-variant/10">
+<span class="font-label text-xs uppercase tracking-widest">Sort By: Relevance</span>
+<span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<div class="flex bg-surface-container-highest/30 p-1 rounded-full border border-outline-variant/10">
+<button class="p-2 rounded-full bg-primary text-on-primary">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+<button class="p-2 rounded-full text-on-surface/40 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="view_agenda">view_agenda</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Bento Grid -->
+<section class="px-12 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+<!-- Product 1: Large Featured -->
+<div class="group relative col-span-1 md:col-span-2 row-span-2 flex flex-col gap-6">
+<div class="relative overflow-hidden aspect-[16/10] bg-surface-container-lowest">
+<img alt="Sculptural Vase" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-100 group-hover:scale-105" data-alt="matte black geometric sculptural vase sitting on a reflective obsidian surface with a single shaft of amber light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt4Frr8I3KC14IqTFG_vx6cas1vVDS43_Zzrsd-8VrosoBjrn7XGev5UiZYDdmfUBE8cC5UejHtgNnOxP6Iovmpp7ZjfpPJpdBf1it807uyIeWhwdC-9ya1x-2hQyXxKn4TSiunuzciDx5vvExg6IA36AS4PYUa8vXMRL8jatLL2G7opMpOqbNPtrrIaw-JpZNSA7IqAEZm4MAEER7979mh4fomOhcJqnNckSPJBsBBO77OMX630K_2kaWi6olTRg5wtZ4sXlujmI"/>
+<div class="absolute top-6 left-6 flex flex-col gap-2">
+<span class="bg-primary/90 text-on-primary px-3 py-1 font-mono text-[10px] uppercase tracking-tighter">Iconic Piece</span>
+</div>
+<div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+<button class="bg-primary text-on-primary px-8 py-3 rounded-lg font-headline text-xs uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-transform">Inquire Details</button>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-3xl font-headline text-on-surface group-hover:text-primary transition-colors">Obsidian Void Vessel</h3>
+<p class="text-on-surface/40 font-mono text-xs mt-1">REF. MM-204-VES</p>
+</div>
+<span class="text-2xl font-headline text-primary">$4,200</span>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="group flex flex-col gap-4">
+<div class="relative aspect-square overflow-hidden bg-surface-container-lowest">
+<img alt="Minimalist Timepiece" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="ultra-minimalist luxury wristwatch with a matte gold case and a black leather strap on a textured slate background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSarOKRQ1ZtPX00TxMSyrHxBzLAayt35JZY1rSmNM4ZS8Zza9UY-_xGYC1JRKGVb4daZ4HHn57Aub8KzDj5pZBCVuOMeotfZXgw7ZMAl0X7tqcS0Y8DqrQtZBgWPeOrAKEINsRfgV_3ZeVJMDpMhsdwAcCDl9TWLEYvKdQdnadNEWaMzrOTGEZ-bntgPjk117-6dXNg3rlH3v-UdsbE_S7xjP5sFor13E1QjgRQd_vI5oz0KtjWzH3ydGlTx_C4bdS7UqiNoAvuFQ"/>
+</div>
+<div class="flex justify-between">
+<div>
+<h4 class="text-lg font-headline">Aeon Chronograph</h4>
+<p class="text-surface-variant font-mono text-[10px]">LIMITED EDITION</p>
+</div>
+<span class="text-primary font-mono">$12,800</span>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="group flex flex-col gap-4">
+<div class="relative aspect-square overflow-hidden bg-surface-container-lowest">
+<img alt="Silk Scarf" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="luxurious heavy silk scarf with an abstract gold and charcoal pattern draped over a smooth white marble pedestal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbhsc157llPoxa5kiYC_ZOb9PpeoD9qWoeSaBrBN5L6LAIH6We33Mj0pnDwQJyra6atowM7EETpUdvAQ3u74hBRtfa1fXuYnqDwr-IEFpyC3Vtk9houBalhVK58uJL8lpkdAB11Fva6zeHn4iQSIOymK1IFrxp_l6uGtIoWxdnEuOxxyvucqEjOsvwyx5O9U1EkDXweAh4w-6QwLmCoc3SjajpHs1NzwGMZaLru4aIBNpEAz957vYcNt94emkTpc-agtN1oRjzaJ8"/>
+</div>
+<div class="flex justify-between">
+<div>
+<h4 class="text-lg font-headline">Nebula Silk Wrap</h4>
+<p class="text-surface-variant font-mono text-[10px]">HAND-WOVEN</p>
+</div>
+<span class="text-primary font-mono">$850</span>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="group flex flex-col gap-4">
+<div class="relative aspect-square overflow-hidden bg-surface-container-lowest">
+<img alt="Designer Fragrance" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="heavy glass perfume bottle with a textured gold cap standing in a dark reflective pool of water with gentle ripples" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADxiY_i3tosiMB5ZAGGzcgUvWZj5yDEEQB9V2Ey6mATdoDQXEm49AYQjK8rHWAdScaSos1KRGdxnVtV4Qbjbu5k-QD7y6DP_66D0PO_ymAc4QxlKg4CXS2V92rZ_OauH8B9vvjSd6a9qvCTWVG4nSgUrrydxbLsfJsqatabGn6BRClHbSxPo32V_XA2SJWQTQW19-XKOKgAHjSpJ4p17G1-bhraLtoKqVUoZLVxVBpVm8NYzqi6fhB8DiWwtQWsJGObZVNyoPrmkg"/>
+</div>
+<div class="flex justify-between">
+<div>
+<h4 class="text-lg font-headline">Oud d'Obsidienne</h4>
+<p class="text-surface-variant font-mono text-[10px]">100ML PARFUM</p>
+</div>
+<span class="text-primary font-mono">$320</span>
+</div>
+</div>
+<!-- Product 5 -->
+<div class="group flex flex-col gap-4">
+<div class="relative aspect-square overflow-hidden bg-surface-container-lowest">
+<img alt="Leather Portfolio" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="close-up of a fine-grain black leather portfolio with gold hardware and hand-stitched detailing on a library desk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAadWFRqMPYW6l0AZ6esI2K_0Y8sn6ht0gXcI0MOXShLoWRphvT0dGGJjuUahBXveqfzMHAPDx6oaiwCY9aSGRA_7C0LcYdeVqp9-zFIUimmGKLohVwhJQR_CWeUdfSKdsQqE175FWSlgzmP9qXiWNuixVs6Bfm76bZmFyc5yPerEQPs6AviwqqtHn2EVwgaopvKQh9k8DkSXeTMDyszokDs6Gi5dD1EO5YZXfqQkVKLvSKd6F18s4C8Z0KZvh5uFL6NuLd4b5DI4A"/>
+</div>
+<div class="flex justify-between">
+<div>
+<h4 class="text-lg font-headline">Curator's Folio</h4>
+<p class="text-surface-variant font-mono text-[10px]">NAPPA LEATHER</p>
+</div>
+<span class="text-primary font-mono">$1,150</span>
+</div>
+</div>
+<!-- Product 6 -->
+<div class="group flex flex-col gap-4">
+<div class="relative aspect-square overflow-hidden bg-surface-container-lowest">
+<img alt="Marble Lamp" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="architectural table lamp made of solid white marble and a brass frame glowing warmly in a dim contemporary room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7bZRVCqe4asui7UeBR29alWiCGJRggyaoKMu6cd1pGqNJr5XsQQY2FeMKJUmN8ltZQhtYGcxkHIkevCcph2Yx__rY3SKXQBjBaJHGqgtJ1XHW5KdgP-n-hkA29QrJVW6iceYE6YcZ1e0TNsw26ZooGte--EZ5BlPVqbuRiwHplfwaNUIzAxc9XwG8Sm_tjugKosDE_BPeMz3sv6AwQwJJGjMxx92jIHgupqQRQ5vJfvh9tq_GsTs5aRwhG89cx3wdBod5Ysu7jZA"/>
+</div>
+<div class="flex justify-between">
+<div>
+<h4 class="text-lg font-headline">Lumina Carrara</h4>
+<p class="text-surface-variant font-mono text-[10px]">SCULPTURAL LIGHTING</p>
+</div>
+<span class="text-primary font-mono">$2,400</span>
+</div>
+</div>
+</section>
+<!-- Footer Component -->
+<footer class="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16 font-headline text-xs leading-relaxed">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<div class="col-span-1 md:col-span-1">
+<h3 class="text-lg font-bold text-[#e6c364] mb-4">The Obsidian Curator</h3>
+<p class="text-[#F5F5F0]/40 max-w-xs">An exclusive portal for the world's most refined collections. Curating beauty for the discerning soul.</p>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Collections</h4>
+<ul class="flex flex-col gap-4 text-[#F5F5F0]/40">
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Private Suite</li>
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Shipping Etiquette</li>
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Terms of Service</li>
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Authenticity Guarantee</li>
+</ul>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">Connect</h4>
+<ul class="flex flex-col gap-4 text-[#F5F5F0]/40">
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Instagram</li>
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Concierge</li>
+<li class="hover:text-[#e6c364] transition-opacity cursor-pointer">Press Inquiry</li>
+</ul>
+</div>
+<div>
+<h4 class="text-[#e6c364] font-bold mb-6 uppercase tracking-widest">The Journal</h4>
+<div class="relative">
+<input class="w-full bg-surface-container-highest/30 border-b border-primary/20 py-3 text-on-surface focus:outline-none focus:border-primary transition-colors font-body text-sm italic" placeholder="Your digital address" type="email"/>
+<button class="absolute right-0 bottom-3 text-primary">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="px-12 py-8 border-t border-[#F5F5F0]/5 flex justify-between items-center text-[#F5F5F0]/20">
+<p>Â© 2024 The Obsidian Curator. All Rights Reserved.</p>
+<div class="flex gap-8">
+<span class="hover:text-primary cursor-pointer transition-colors">Privacy</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Cookies</span>
+</div>
+</div>
+</footer>
+</main>
+</div>
+</body></html>
