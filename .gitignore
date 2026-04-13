@@ -7,3 +7,12 @@ coverage/
 .env*
 !.env.example
 .claude/settings.local.json
+
+# Java/Maven backend
+backend/target/
+*.jar
+*.war
+*.class
+backend/.settings/
+backend/.classpath
+backend/.project
