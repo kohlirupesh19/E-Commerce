@@ -12,6 +12,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -56,7 +57,7 @@ class OrderControllerTest {
                 .thenReturn(Map.of("orderId", orderId.toString(), "status", "CONFIRMED"));
 
         mockMvc.perform(post("/api/orders/create")
-                        .principal(() -> "user@example.com")
+                        .principal(new UsernamePasswordAuthenticationToken("user@example.com", "N/A"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "addressId", UUID.randomUUID().toString(),
@@ -66,7 +67,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.status").value("PENDING_PAYMENT"));
 
         mockMvc.perform(post("/api/orders/verify-payment")
-                        .principal(() -> "user@example.com")
+                        .principal(new UsernamePasswordAuthenticationToken("user@example.com", "N/A"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "orderId", orderId.toString(),
@@ -88,12 +89,12 @@ class OrderControllerTest {
                 .thenReturn(Map.of("orderId", UUID.randomUUID().toString(), "status", "PENDING_PAYMENT"));
 
         mockMvc.perform(post("/api/orders/{id}/cancel", orderId)
-                        .principal(() -> "user@example.com"))
+                        .principal(new UsernamePasswordAuthenticationToken("user@example.com", "N/A")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
 
         mockMvc.perform(post("/api/orders/{id}/reorder", orderId)
-                        .principal(() -> "user@example.com"))
+                        .principal(new UsernamePasswordAuthenticationToken("user@example.com", "N/A")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("PENDING_PAYMENT"));
 
@@ -110,11 +111,11 @@ class OrderControllerTest {
                 .thenReturn(List.of(Map.of("orderId", orderId.toString(), "status", "CONFIRMED")));
         when(orderService.generateInvoice("user@example.com", orderId)).thenReturn(invoice);
 
-        mockMvc.perform(get("/api/orders/my").principal(() -> "user@example.com"))
+        mockMvc.perform(get("/api/orders/my").principal(new UsernamePasswordAuthenticationToken("user@example.com", "N/A")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("CONFIRMED"));
 
-        mockMvc.perform(get("/api/orders/{id}/invoice", orderId).principal(() -> "user@example.com"))
+        mockMvc.perform(get("/api/orders/{id}/invoice", orderId).principal(new UsernamePasswordAuthenticationToken("user@example.com", "N/A")))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Disposition", "attachment; filename=invoice-" + orderId + ".pdf"))
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF))
