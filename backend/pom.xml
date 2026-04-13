@@ -24,6 +24,7 @@
         <razorpay.version>1.4.8</razorpay.version>
         <modelmapper.version>3.2.1</modelmapper.version>
         <itext.version>8.0.5</itext.version>
+        <postgresql.version>42.7.10</postgresql.version>
         <lombok.version>1.18.40</lombok.version>
     </properties>
 
