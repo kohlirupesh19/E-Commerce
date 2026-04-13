@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev:api": "npm --prefix services/api run dev",
+    "dev:worker": "npm --prefix services/worker run dev",
+    "start:api": "npm --prefix services/api run start",
+    "start:worker": "npm --prefix services/worker run start",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",

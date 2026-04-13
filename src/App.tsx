@@ -12,8 +12,180 @@ import {
   CreditCard as CreditCardIcon, Star as StarIcon, Package as PackageIcon, Search as SearchIcon, Truck as TruckIcon, Eye as EyeIcon, Award as AwardIcon, LayoutGrid as LayoutGridIcon, DollarSign as DollarSignIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { subscribeToNewsletter } from './services/newsletter';
+import BrandMark from './components/BrandMark';
 
-type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons';
+type InfoView =
+  | 'private-suite'
+  | 'authenticity-guarantee'
+  | 'boutique-locations'
+  | 'client-care'
+  | 'shipping-etiquette'
+  | 'terms-of-service'
+  | 'curator-concierge';
+
+type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons' | InfoView;
+
+type InfoPageSection = {
+  heading: string;
+  body: string;
+};
+
+type InfoPageCopy = {
+  eyebrow: string;
+  title: string;
+  summary: string;
+  sections: InfoPageSection[];
+};
+
+const infoPageViews: InfoView[] = [
+  'private-suite',
+  'authenticity-guarantee',
+  'boutique-locations',
+  'client-care',
+  'shipping-etiquette',
+  'terms-of-service',
+  'curator-concierge'
+];
+
+const infoPageContent: Record<InfoView, InfoPageCopy> = {
+  'private-suite': {
+    eyebrow: 'The Experience',
+    title: 'Private Suite',
+    summary: 'A curated members-only lounge where early access drops, private pricing windows, and editorial buying notes are shared first.',
+    sections: [
+      {
+        heading: 'Access Policy',
+        body: 'Access is invitation-based. Qualified clients receive a secure invite link after their first verified order or by concierge recommendation.'
+      },
+      {
+        heading: 'Suite Benefits',
+        body: 'Members receive early access to capsule releases, pre-order reservation windows, and monthly private curation bundles.'
+      },
+      {
+        heading: 'Support Hours',
+        body: 'The suite desk is staffed Monday to Saturday, 08:00 to 20:00 UTC, with urgent fulfillment support available at all times.'
+      }
+    ]
+  },
+  'authenticity-guarantee': {
+    eyebrow: 'The Experience',
+    title: 'Authenticity Guarantee',
+    summary: 'Every listed object is checked against sourcing records and condition audits before it is made available for acquisition.',
+    sections: [
+      {
+        heading: 'Verification',
+        body: 'Items are reviewed through provenance records, serial checks, and material inspection before publication.'
+      },
+      {
+        heading: 'Guarantee Window',
+        body: 'You have 30 days from delivery to report a mismatch with listing claims for immediate remediation.'
+      },
+      {
+        heading: 'Remediation',
+        body: 'If authenticity criteria are not met, we provide a full refund and managed return shipping at no cost.'
+      }
+    ]
+  },
+  'boutique-locations': {
+    eyebrow: 'The Experience',
+    title: 'Boutique Locations',
+    summary: 'Visit our appointment-only boutiques for private fitting, inspection, and white-glove pickup.',
+    sections: [
+      {
+        heading: 'New York',
+        body: 'Hudson Yards Private Floor, Tue-Sat, 10:00-19:00. Walk-ins are not available.'
+      },
+      {
+        heading: 'London',
+        body: 'Mayfair Salon, Mon-Sat, 09:00-18:00. Priority slots are reserved for Suite members.'
+      },
+      {
+        heading: 'Tokyo',
+        body: 'Ginza Viewing Rooms, Wed-Mon, 11:00-20:00. Language support available in English and Japanese.'
+      }
+    ]
+  },
+  'client-care': {
+    eyebrow: 'Client Care',
+    title: 'Client Care',
+    summary: 'Dedicated assistance for order updates, delivery coordination, billing support, and post-purchase care.',
+    sections: [
+      {
+        heading: 'Live Support',
+        body: 'Chat and email support respond within one business hour for active order inquiries.'
+      },
+      {
+        heading: 'Priority Requests',
+        body: 'Urgent delivery or gift protocol requests can be escalated through Curator Concierge.'
+      },
+      {
+        heading: 'Aftercare',
+        body: 'We provide post-delivery assistance including exchanges, repair coordination, and warranty guidance.'
+      }
+    ]
+  },
+  'shipping-etiquette': {
+    eyebrow: 'Client Care',
+    title: 'Shipping Etiquette',
+    summary: 'Our fulfillment protocol is designed for discretion, reliability, and presentation quality.',
+    sections: [
+      {
+        heading: 'Processing',
+        body: 'Standard processing takes 1-2 business days after payment confirmation and verification.'
+      },
+      {
+        heading: 'Packaging',
+        body: 'All orders are packed in tamper-evident layers with discreet external labeling and branded interior presentation.'
+      },
+      {
+        heading: 'Delivery',
+        body: 'Signature confirmation is required for high-value orders. Courier windows are shared after dispatch.'
+      }
+    ]
+  },
+  'terms-of-service': {
+    eyebrow: 'Client Care',
+    title: 'Terms of Service',
+    summary: 'This demo page contains placeholder legal copy and should be replaced with your final legal document.',
+    sections: [
+      {
+        heading: 'Use of Service',
+        body: 'By using this service, clients agree to provide accurate account information and comply with all applicable laws.'
+      },
+      {
+        heading: 'Orders and Payments',
+        body: 'All orders are subject to availability, verification, and fraud controls. Payments must be authorized before fulfillment.'
+      },
+      {
+        heading: 'Returns and Liability',
+        body: 'Return policies and warranty terms vary by category. Liability is limited as permitted by applicable law.'
+      }
+    ]
+  },
+  'curator-concierge': {
+    eyebrow: 'Client Care',
+    title: 'Curator Concierge',
+    summary: 'A personal sourcing and support channel for rare requests, event curation, and white-glove coordination.',
+    sections: [
+      {
+        heading: 'Personal Sourcing',
+        body: 'Share your preferred makers, era, or target budget and our team will source options with verification notes.'
+      },
+      {
+        heading: 'Event Curation',
+        body: 'Concierge can curate private capsules for gifting, brand events, and executive hospitality.'
+      },
+      {
+        heading: 'Contact Route',
+        body: 'For this demo, email concierge@obsidiancurator.example and include order number when applicable.'
+      }
+    ]
+  }
+};
+
+const isInfoView = (value: View): value is InfoView =>
+  infoPageViews.includes(value as InfoView);
 
 const shopCategoryOptions = [
   { id: 'timepieces', view: 'category-timepieces', icon: Watch, label: 'Timepieces', count: '42 ITEMS' },
@@ -119,8 +291,8 @@ const TopNavBar = ({
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => setView('home')}
           >
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-on-primary shadow-[0_0_20px_rgba(230,195,100,0.3)] group-hover:scale-110 transition-transform">
-              <Diamond size={20} />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(230,195,100,0.3)] group-hover:scale-110 transition-transform">
+              <BrandMark className="w-full h-full rounded-xl" />
             </div>
             <span className="font-headline text-xl font-bold tracking-tighter text-on-surface hidden md:block">The Obsidian Curator</span>
           </div>
@@ -329,11 +501,12 @@ const ProfileSidebar = ({ currentView, setView }: { currentView: View, setView: 
   );
 };
 
-const Footer = () => {
+const Footer = ({ onNavigate }: { onNavigate?: (view: View) => void }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitNewsletter = (e: React.FormEvent) => {
+  const submitNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail.trim()) {
       setNewsletterStatus('Please enter your email address.');
@@ -345,8 +518,18 @@ const Footer = () => {
       return;
     }
 
-    setNewsletterStatus('Subscribed successfully.');
-    setNewsletterEmail('');
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    const normalizedEmail = newsletterEmail.trim().toLowerCase();
+    const result = await subscribeToNewsletter(normalizedEmail);
+    setNewsletterStatus(result.message);
+    if (result.ok) {
+      setNewsletterEmail('');
+    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -358,13 +541,13 @@ const Footer = () => {
         </div>
         <div className="flex flex-col gap-4">
           <h4 className="text-primary text-[10px] uppercase tracking-[0.3em] font-bold mb-2">Concierge</h4>
-          <a className="text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Private Suite</a>
-          <a className="text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Shipping Etiquette</a>
+          <button type="button" onClick={() => onNavigate?.('private-suite')} className="text-left text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Private Suite</button>
+          <button type="button" onClick={() => onNavigate?.('shipping-etiquette')} className="text-left text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Shipping Etiquette</button>
         </div>
         <div className="flex flex-col gap-4">
           <h4 className="text-primary text-[10px] uppercase tracking-[0.3em] font-bold mb-2">Legal</h4>
-          <a className="text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Terms of Service</a>
-          <a className="text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Authenticity Guarantee</a>
+          <button type="button" onClick={() => onNavigate?.('terms-of-service')} className="text-left text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Terms of Service</button>
+          <button type="button" onClick={() => onNavigate?.('authenticity-guarantee')} className="text-left text-on-surface-variant/40 hover:text-primary font-headline text-xs transition-colors cursor-pointer">Authenticity Guarantee</button>
         </div>
         <div className="flex flex-col gap-6">
           <h4 className="text-primary text-[10px] uppercase tracking-[0.3em] font-bold mb-2">The Newsletter</h4>
@@ -374,17 +557,88 @@ const Footer = () => {
               placeholder="Email Address"
               type="email"
               value={newsletterEmail}
+              disabled={isSubmitting}
               onChange={(e) => setNewsletterEmail(e.target.value)}
             />
-            <button type="submit" className="absolute right-0 bottom-2 text-primary">
+            <button type="submit" disabled={isSubmitting} className="absolute right-0 bottom-2 text-primary disabled:opacity-60">
               <ArrowRight size={16} />
             </button>
           </form>
           {newsletterStatus && <p className="text-[10px] text-primary/80">{newsletterStatus}</p>}
+          {isSubmitting && <p className="text-[10px] text-primary/70">Submitting...</p>}
           <p className="text-[10px] text-on-surface-variant/50">© 2024 The Obsidian Curator. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
+  );
+};
+
+const InfoPageLayout = ({
+  view,
+  setView,
+  cartItems,
+  showProfileDropdown,
+  setShowProfileDropdown,
+  content
+}: {
+  view: View;
+  setView: (v: View) => void;
+  cartItems: any[];
+  showProfileDropdown: boolean;
+  setShowProfileDropdown: (b: boolean) => void;
+  content: InfoPageCopy;
+}) => {
+  return (
+    <motion.div
+      key={view}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col min-h-screen bg-background"
+    >
+      <TopNavBar
+        view={view}
+        setView={setView}
+        cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+        showProfileDropdown={showProfileDropdown}
+        setShowProfileDropdown={setShowProfileDropdown}
+      />
+
+      <main className="flex-grow max-w-[1280px] mx-auto w-full px-6 md:px-12 py-16 md:py-24">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.location.pathname !== '/') {
+              window.history.pushState({}, '', '/');
+            }
+            setView('home');
+          }}
+          className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-primary mb-10"
+        >
+          <ArrowLeft size={14} />
+          Back To Home
+        </button>
+
+        <header className="mb-12 md:mb-16">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-primary/80 mb-4 font-bold">{content.eyebrow}</p>
+          <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface mb-6">{content.title}</h1>
+          <p className="text-on-surface-variant max-w-3xl leading-relaxed text-base md:text-lg">{content.summary}</p>
+        </header>
+
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          {content.sections.map((section) => (
+            <article key={section.heading} className="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-6 md:p-8">
+              <h2 className="text-primary text-xs uppercase tracking-widest font-bold mb-4">{section.heading}</h2>
+              <p className="text-on-surface-variant leading-relaxed text-sm">{section.body}</p>
+            </article>
+          ))}
+        </section>
+      </main>
+
+      <footer className="border-t border-outline-variant/10 py-10 px-6 md:px-12 text-on-surface-variant/40 text-xs uppercase tracking-widest">
+        © 2026 The Obsidian Curator. Placeholder informational copy for staging.
+      </footer>
+    </motion.div>
   );
 };
 
@@ -631,7 +885,7 @@ const CategoryLayout = ({
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer onNavigate={setView} />
     </motion.div>
   );
 };
@@ -697,7 +951,21 @@ export default function App() {
     (window as any).__setView = setView;
     const handlePath = () => {
       let path = window.location.pathname.replace('/', '');
-      if (['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(path)) {
+      if ([
+        'admin-dashboard',
+        'admin-products',
+        'admin-orders',
+        'admin-customers',
+        'admin-customer-profile',
+        'admin-coupons',
+        'private-suite',
+        'authenticity-guarantee',
+        'boutique-locations',
+        'client-care',
+        'shipping-etiquette',
+        'terms-of-service',
+        'curator-concierge'
+      ].includes(path)) {
         setView(path as any);
       } else if (path === '') {
         // Default
@@ -792,6 +1060,7 @@ export default function App() {
   const [otpError, setOtpError] = useState('');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
+  const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false);
 
   // Forgot Password states
   const [forgotStep, setForgotStep] = useState(1); // 1: Identify, 2: Verify, 3: Restore, 4: Success
@@ -822,6 +1091,15 @@ export default function App() {
 
   const openSelectedProductCollection = () => {
     openShopCategory(selectedProduct?.category || getShopCategoryForBrand(selectedProduct?.brand));
+  };
+
+  const openInfoPage = (target: InfoView) => {
+    const targetPath = `/${target}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
+    }
+    setView(target);
+    window.scrollTo(0, 0);
   };
 
   const addToWishlist = (product: any) => {
@@ -896,7 +1174,7 @@ export default function App() {
     }
   };
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail.trim()) {
       setNewsletterMessage('Please enter your email address.');
@@ -909,8 +1187,18 @@ export default function App() {
       return;
     }
 
-    setNewsletterMessage('Subscribed successfully. Invitations will arrive in your inbox.');
-    setNewsletterEmail('');
+    if (isSubmittingNewsletter) {
+      return;
+    }
+
+    setIsSubmittingNewsletter(true);
+    const normalizedEmail = newsletterEmail.trim().toLowerCase();
+    const result = await subscribeToNewsletter(normalizedEmail);
+    setNewsletterMessage(result.message);
+    if (result.ok) {
+      setNewsletterEmail('');
+    }
+    setIsSubmittingNewsletter(false);
   };
 
   const withShopMeta = (products: any[], category: ShopCategory, ratingBase: number) =>
@@ -1211,15 +1499,15 @@ export default function App() {
                 <div>
                   <h5 className="text-primary uppercase tracking-widest mb-6 text-[10px]">Concierge</h5>
                   <ul className="space-y-4">
-                    <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Private Suite</a></li>
-                    <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Shipping Etiquette</a></li>
-                    <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Authenticity Guarantee</a></li>
+                    <li><button type="button" onClick={() => openInfoPage('private-suite')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors">Private Suite</button></li>
+                    <li><button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors">Shipping Etiquette</button></li>
+                    <li><button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors">Authenticity Guarantee</button></li>
                   </ul>
                 </div>
                 <div>
                   <h5 className="text-primary uppercase tracking-widest mb-6 text-[10px]">Legal</h5>
                   <ul className="space-y-4">
-                    <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Terms of Service</a></li>
+                    <li><button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors">Terms of Service</button></li>
                     <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
                   </ul>
                 </div>
@@ -1458,15 +1746,15 @@ export default function App() {
                   <div>
                     <h5 className="text-primary text-[10px] uppercase tracking-widest font-bold mb-6">Concierge</h5>
                     <ul className="space-y-4">
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Private Suite</a></li>
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Shipping Etiquette</a></li>
+                      <li><button type="button" onClick={() => openInfoPage('private-suite')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Private Suite</button></li>
+                      <li><button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Shipping Etiquette</button></li>
                     </ul>
                   </div>
                   <div>
                     <h5 className="text-primary text-[10px] uppercase tracking-widest font-bold mb-6">Legal</h5>
                     <ul className="space-y-4">
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Terms of Service</a></li>
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Authenticity Guarantee</a></li>
+                      <li><button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Terms of Service</button></li>
+                      <li><button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Authenticity Guarantee</button></li>
                     </ul>
                   </div>
                 </div>
@@ -1785,15 +2073,15 @@ export default function App() {
                   <div>
                     <h5 className="text-primary text-[10px] uppercase tracking-widest font-bold mb-6">Concierge</h5>
                     <ul className="space-y-4">
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Private Suite</a></li>
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Shipping Etiquette</a></li>
+                      <li><button type="button" onClick={() => openInfoPage('private-suite')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Private Suite</button></li>
+                      <li><button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Shipping Etiquette</button></li>
                     </ul>
                   </div>
                   <div>
                     <h5 className="text-primary text-[10px] uppercase tracking-widest font-bold mb-6">Legal</h5>
                     <ul className="space-y-4">
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Terms of Service</a></li>
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Authenticity Guarantee</a></li>
+                      <li><button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Terms of Service</button></li>
+                      <li><button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Authenticity Guarantee</button></li>
                     </ul>
                   </div>
                 </div>
@@ -1983,7 +2271,15 @@ export default function App() {
                         </div>
                         <div className="text-xs text-on-surface-variant leading-relaxed font-light">
                           <label className="font-body" htmlFor="terms">
-                            I accept the <a className="text-primary hover:underline" href="#">Terms of Service</a> and the <a className="text-primary hover:underline" href="#">Authenticity Guarantee</a> protocol.
+                            I accept the{' '}
+                            <button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-primary hover:underline">
+                              Terms of Service
+                            </button>{' '}
+                            and the{' '}
+                            <button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-primary hover:underline">
+                              Authenticity Guarantee
+                            </button>{' '}
+                            protocol.
                           </label>
                         </div>
                       </div>
@@ -2030,15 +2326,15 @@ export default function App() {
                   <div>
                     <h5 className="text-primary text-[10px] uppercase tracking-widest font-bold mb-6">Concierge</h5>
                     <ul className="space-y-4">
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Private Suite</a></li>
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Shipping Etiquette</a></li>
+                      <li><button type="button" onClick={() => openInfoPage('private-suite')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Private Suite</button></li>
+                      <li><button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Shipping Etiquette</button></li>
                     </ul>
                   </div>
                   <div>
                     <h5 className="text-primary text-[10px] uppercase tracking-widest font-bold mb-6">Legal</h5>
                     <ul className="space-y-4">
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Terms of Service</a></li>
-                      <li><a className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline" href="#">Authenticity Guarantee</a></li>
+                      <li><button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Terms of Service</button></li>
+                      <li><button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-[#F5F5F0]/40 hover:text-primary transition-colors text-xs font-headline">Authenticity Guarantee</button></li>
                     </ul>
                   </div>
                 </div>
@@ -2250,9 +2546,9 @@ export default function App() {
                   © 2024 THE OBSIDIAN CURATOR
                 </div>
                 <div className="flex gap-12">
-                  <a className="text-xs text-on-surface-variant hover:text-primary uppercase tracking-widest font-label transition-colors" href="#">Private Suite</a>
-                  <a className="text-xs text-on-surface-variant hover:text-primary uppercase tracking-widest font-label transition-colors" href="#">Authenticity Guarantee</a>
-                  <a className="text-xs text-on-surface-variant hover:text-primary uppercase tracking-widest font-label transition-colors" href="#">Shipping Etiquette</a>
+                  <button type="button" onClick={() => openInfoPage('private-suite')} className="text-xs text-on-surface-variant hover:text-primary uppercase tracking-widest font-label transition-colors">Private Suite</button>
+                  <button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-xs text-on-surface-variant hover:text-primary uppercase tracking-widest font-label transition-colors">Authenticity Guarantee</button>
+                  <button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-xs text-on-surface-variant hover:text-primary uppercase tracking-widest font-label transition-colors">Shipping Etiquette</button>
                 </div>
               </div>
             </footer>
@@ -2361,16 +2657,17 @@ export default function App() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div className="space-y-6">
-                      <div>
-                        <p className="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-1">Courier</p>
-                        <p className="font-body text-lg font-semibold text-on-surface">Excellence Logistique Prestige</p>
-                      </div>
-                      <div>
-                        <p className="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tracking Number</p>
-                        <a className="font-mono text-primary text-lg flex items-center gap-2 hover:underline" href="#">
-                          TRK-990-2184-XP
-                          <ExternalLink size={16} />
-                        </a>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          <Truck size={24} />
+                        </div>
+                        <div>
+                          <p className="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tracking Number</p>
+                          <a className="font-mono text-primary text-lg flex items-center gap-2 hover:underline" href="#">
+                            TRK-990-2184-XP
+                            <ExternalLink size={16} />
+                          </a>
+                        </div>
                       </div>
                     </div>
                     <div className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/30">
@@ -2491,15 +2788,15 @@ export default function App() {
                 <div>
                   <h4 className="text-primary font-bold mb-6 uppercase tracking-widest">Concierge</h4>
                   <ul className="space-y-4">
-                    <li><button onClick={() => setView('home')} className="text-on-surface-variant hover:text-primary transition-colors">Private Suite</button></li>
-                    <li><button className="text-on-surface-variant hover:text-primary transition-colors">Shipping Etiquette</button></li>
-                    <li><button className="text-on-surface-variant hover:text-primary transition-colors">Authenticity Guarantee</button></li>
+                    <li><button onClick={() => openInfoPage('private-suite')} className="text-on-surface-variant hover:text-primary transition-colors">Private Suite</button></li>
+                    <li><button onClick={() => openInfoPage('shipping-etiquette')} className="text-on-surface-variant hover:text-primary transition-colors">Shipping Etiquette</button></li>
+                    <li><button onClick={() => openInfoPage('authenticity-guarantee')} className="text-on-surface-variant hover:text-primary transition-colors">Authenticity Guarantee</button></li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="text-primary font-bold mb-6 uppercase tracking-widest">Legal</h4>
                   <ul className="space-y-4">
-                    <li><button className="text-on-surface-variant hover:text-primary transition-colors">Terms of Service</button></li>
+                    <li><button onClick={() => openInfoPage('terms-of-service')} className="text-on-surface-variant hover:text-primary transition-colors">Terms of Service</button></li>
                     <li><button className="text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</button></li>
                     <li><button className="text-on-surface-variant hover:text-primary transition-colors">Cookie Policy</button></li>
                   </ul>
@@ -2719,15 +3016,15 @@ export default function App() {
                 <div>
                   <h4 className="text-primary text-xs uppercase tracking-widest font-bold mb-6 font-headline">Collection</h4>
                   <ul className="space-y-4">
-                    <li><button onClick={() => setView('home')} className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Private Suite</button></li>
-                    <li><button className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Authenticity Guarantee</button></li>
+                    <li><button onClick={() => openInfoPage('private-suite')} className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Private Suite</button></li>
+                    <li><button onClick={() => openInfoPage('authenticity-guarantee')} className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Authenticity Guarantee</button></li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="text-primary text-xs uppercase tracking-widest font-bold mb-6 font-headline">Service</h4>
                   <ul className="space-y-4">
-                    <li><button className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Shipping Etiquette</button></li>
-                    <li><button className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Terms of Service</button></li>
+                    <li><button onClick={() => openInfoPage('shipping-etiquette')} className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Shipping Etiquette</button></li>
+                    <li><button onClick={() => openInfoPage('terms-of-service')} className="text-on-surface-variant/40 hover:text-primary text-xs font-headline transition-opacity">Terms of Service</button></li>
                   </ul>
                 </div>
                 <div>
@@ -2738,13 +3035,15 @@ export default function App() {
                       placeholder="Concierge Email"
                       type="email"
                       value={newsletterEmail}
+                      disabled={isSubmittingNewsletter}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                     />
-                    <button type="submit" className="absolute right-0 top-1/2 -translate-y-1/2 text-primary">
+                    <button type="submit" disabled={isSubmittingNewsletter} className="absolute right-0 top-1/2 -translate-y-1/2 text-primary disabled:opacity-60">
                       <ArrowRight size={16} />
                     </button>
                   </form>
                   {newsletterMessage && <p className="text-[10px] text-primary/80 mt-2">{newsletterMessage}</p>}
+                  {isSubmittingNewsletter && <p className="text-[10px] text-primary/70 mt-2">Submitting...</p>}
                 </div>
               </div>
               <div className="px-12 pb-12">
@@ -3405,6 +3704,17 @@ export default function App() {
           />
         )}
 
+        {isInfoView(view) && (
+          <InfoPageLayout
+            view={view}
+            setView={setView}
+            cartItems={cartItems}
+            showProfileDropdown={showProfileDropdown}
+            setShowProfileDropdown={setShowProfileDropdown}
+            content={infoPageContent[view]}
+          />
+        )}
+
 
         {view === 'home' && (
           <motion.div
@@ -3705,15 +4015,15 @@ export default function App() {
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">The Experience</h4>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Private Suite</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Authenticity Guarantee</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Boutique Locations</a>
+                  <button type="button" onClick={() => openInfoPage('private-suite')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Private Suite</button>
+                  <button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Authenticity Guarantee</button>
+                  <button type="button" onClick={() => openInfoPage('boutique-locations')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Boutique Locations</button>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Client Care</h4>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Shipping Etiquette</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Terms of Service</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Curator Concierge</a>
+                  <button type="button" onClick={() => openInfoPage('client-care')} className="text-left text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Client Care</button>
+                  <button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Shipping Etiquette</button>
+                  <button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Terms of Service</button>
+                  <button type="button" onClick={() => openInfoPage('curator-concierge')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Curator Concierge</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Newsletter</h4>
@@ -3724,11 +4034,13 @@ export default function App() {
                       placeholder="Email Address"
                       type="email"
                       value={newsletterEmail}
+                      disabled={isSubmittingNewsletter}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                     />
-                    <button type="submit" className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
+                    <button type="submit" disabled={isSubmittingNewsletter} className="text-primary hover:translate-x-1 transition-transform disabled:opacity-60"><ArrowRight size={18} /></button>
                   </form>
                   {newsletterMessage && <p className="text-[10px] text-primary/80">{newsletterMessage}</p>}
+                  {isSubmittingNewsletter && <p className="text-[10px] text-primary/70">Submitting...</p>}
                 </div>
               </div>
               <div className="px-6 md:px-12 py-8 border-t border-outline-variant/5 text-center text-on-surface-variant/20 tracking-widest text-[10px] uppercase font-bold">
@@ -4087,10 +4399,10 @@ export default function App() {
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Navigation</h4>
-                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('home')}>Private Suite</button>
-                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('order-tracking')}>Shipping Etiquette</button>
-                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('checkout-review')}>Terms of Service</button>
-                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => setView('shop')}>Authenticity Guarantee</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => openInfoPage('private-suite')}>Private Suite</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => openInfoPage('shipping-etiquette')}>Shipping Etiquette</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => openInfoPage('terms-of-service')}>Terms of Service</button>
+                  <button className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" onClick={() => openInfoPage('authenticity-guarantee')}>Authenticity Guarantee</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Concierge</h4>
@@ -4107,11 +4419,13 @@ export default function App() {
                       placeholder="Email address"
                       type="email"
                       value={newsletterEmail}
+                      disabled={isSubmittingNewsletter}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                     />
-                    <button type="submit" className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
+                    <button type="submit" disabled={isSubmittingNewsletter} className="text-primary hover:translate-x-1 transition-transform disabled:opacity-60"><ArrowRight size={18} /></button>
                   </form>
                   {newsletterMessage && <p className="text-[10px] text-primary/80">{newsletterMessage}</p>}
+                  {isSubmittingNewsletter && <p className="text-[10px] text-primary/70">Submitting...</p>}
                 </div>
               </div>
               <div className="px-12 py-8 border-t border-outline-variant/5 text-center text-on-surface-variant/20 text-[10px] uppercase tracking-[0.3em] font-bold">
@@ -4394,13 +4708,13 @@ export default function App() {
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Concierge</h4>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Private Suite</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Shipping Etiquette</a>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Authenticity Guarantee</a>
+                  <button type="button" onClick={() => openInfoPage('private-suite')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Private Suite</button>
+                  <button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Shipping Etiquette</button>
+                  <button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Authenticity Guarantee</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-primary font-bold uppercase tracking-widest text-[10px] mb-2">Legal</h4>
-                  <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Terms of Service</a>
+                  <button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-left text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body">Terms of Service</button>
                   <a className="text-on-surface-variant/60 hover:text-primary transition-colors text-sm font-body" href="#">Privacy Policy</a>
                 </div>
                 <div className="flex flex-col gap-4">
@@ -4412,11 +4726,13 @@ export default function App() {
                       placeholder="Email Address"
                       type="email"
                       value={newsletterEmail}
+                      disabled={isSubmittingNewsletter}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                     />
-                    <button type="submit" className="text-primary hover:translate-x-1 transition-transform"><ArrowRight size={18} /></button>
+                    <button type="submit" disabled={isSubmittingNewsletter} className="text-primary hover:translate-x-1 transition-transform disabled:opacity-60"><ArrowRight size={18} /></button>
                   </form>
                   {newsletterMessage && <p className="text-[10px] text-primary/80">{newsletterMessage}</p>}
+                  {isSubmittingNewsletter && <p className="text-[10px] text-primary/70">Submitting...</p>}
                 </div>
               </div>
               <div className="px-12 py-8 border-t border-outline-variant/5 flex justify-between items-center text-on-surface-variant/20 text-[10px] uppercase font-bold tracking-widest">
@@ -4482,7 +4798,8 @@ export default function App() {
                 </motion.p>
               </div>
 
-              <div className="absolute top-12 left-12 z-20">
+              <div className="absolute top-12 left-12 z-20 flex items-center gap-3">
+                <BrandMark className="w-10 h-10 rounded-xl shadow-[0_0_20px_rgba(230,195,100,0.25)]" />
                 <span className="font-headline text-2xl font-bold tracking-tighter text-primary">The Obsidian Curator</span>
               </div>
             </section>
@@ -4491,7 +4808,8 @@ export default function App() {
             <section className="flex-1 flex flex-col justify-center items-center px-6 py-12 md:px-16 lg:px-24 bg-surface-container-lowest relative z-10">
               <div className="w-full max-w-md">
                 {/* Mobile Branding */}
-                <div className="md:hidden mb-12 text-center">
+                <div className="md:hidden mb-12 flex items-center justify-center gap-3">
+                  <BrandMark className="w-10 h-10 rounded-xl" />
                   <span className="font-headline text-3xl font-bold tracking-tighter text-primary">The Obsidian Curator</span>
                 </div>
 
@@ -4665,7 +4983,10 @@ export default function App() {
               <div className="absolute inset-0 bg-gradient-to-tr from-background via-transparent to-transparent"></div>
               <div className="relative z-10 px-16 max-w-2xl">
                 <span className="text-primary font-label tracking-[0.3em] uppercase text-xs mb-6 block">The Inner Circle</span>
-                <h1 className="font-headline text-6xl lg:text-7xl leading-tight mb-8 text-on-background gold-glow">The Obsidian Curator</h1>
+                <div className="flex items-center gap-4 mb-8">
+                  <BrandMark className="w-12 h-12 rounded-xl shadow-[0_0_28px_rgba(230,195,100,0.2)]" />
+                  <h1 className="font-headline text-6xl lg:text-7xl leading-tight text-on-background gold-glow">The Obsidian Curator</h1>
+                </div>
                 <p className="text-on-surface-variant text-lg font-light leading-relaxed mb-12">
                   Begin your journey into the world of uncompromised rarity. Join an elite collective of seekers, collectors, and visionaries.
                 </p>
@@ -4683,7 +5004,8 @@ export default function App() {
             {/* Right Side: Registration Form */}
             <section className="flex-1 flex flex-col items-center justify-center p-8 md:p-16 lg:p-24 relative overflow-y-auto">
               {/* Mobile Header Logo */}
-              <div className="md:hidden mb-12">
+              <div className="md:hidden mb-12 flex items-center justify-center gap-3">
+                <BrandMark className="w-10 h-10 rounded-xl" />
                 <span className="font-headline text-3xl font-bold tracking-tighter text-primary">The Obsidian Curator</span>
               </div>
               
@@ -4807,7 +5129,16 @@ export default function App() {
                       )}
                     </div>
                     <label className="text-sm text-on-surface-variant font-light leading-snug cursor-pointer" htmlFor="terms">
-                      I agree to the <a className="text-on-surface underline underline-offset-4 decoration-outline-variant hover:decoration-primary transition-colors" href="#">Terms of Service</a> and <a className="text-on-surface underline underline-offset-4 decoration-outline-variant hover:decoration-primary transition-colors" href="#">Privacy Etiquette</a>.
+                      I agree to the{' '}
+                      <button
+                        type="button"
+                        onClick={() => openInfoPage('terms-of-service')}
+                        className="text-on-surface underline underline-offset-4 decoration-outline-variant hover:decoration-primary transition-colors"
+                      >
+                        Terms of Service
+                      </button>{' '}
+                      and{' '}
+                      <a className="text-on-surface underline underline-offset-4 decoration-outline-variant hover:decoration-primary transition-colors" href="#">Privacy Etiquette</a>.
                     </label>
                   </div>
 
@@ -4884,9 +5215,12 @@ export default function App() {
 
             {/* Header Branding */}
             <div className="relative z-10 mb-12 text-center">
-              <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter text-primary">
-                The Obsidian Curator
-              </h1>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <BrandMark className="w-10 h-10 rounded-xl" />
+                <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter text-primary">
+                  The Obsidian Curator
+                </h1>
+              </div>
               <p className="font-body text-on-surface-variant text-sm tracking-widest uppercase mt-2">
                 Secure Access Recovery
               </p>
@@ -5114,15 +5448,15 @@ export default function App() {
                 <div className="space-y-4">
                   <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary mb-6">Concierge</div>
                   <nav className="flex flex-col gap-4">
-                    <a className="text-on-surface-variant text-xs hover:text-primary transition-colors" href="#">Private Suite</a>
-                    <a className="text-on-surface-variant text-xs hover:text-primary transition-colors" href="#">Shipping Etiquette</a>
-                    <a className="text-on-surface-variant text-xs hover:text-primary transition-colors" href="#">Authenticity Guarantee</a>
+                    <button type="button" onClick={() => openInfoPage('private-suite')} className="text-left text-on-surface-variant text-xs hover:text-primary transition-colors">Private Suite</button>
+                    <button type="button" onClick={() => openInfoPage('shipping-etiquette')} className="text-left text-on-surface-variant text-xs hover:text-primary transition-colors">Shipping Etiquette</button>
+                    <button type="button" onClick={() => openInfoPage('authenticity-guarantee')} className="text-left text-on-surface-variant text-xs hover:text-primary transition-colors">Authenticity Guarantee</button>
                   </nav>
                 </div>
                 <div className="space-y-4 text-right">
                   <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary mb-6">Legal</div>
                   <nav className="flex flex-col gap-4">
-                    <a className="text-on-surface-variant text-xs hover:text-primary transition-colors" href="#">Terms of Service</a>
+                    <button type="button" onClick={() => openInfoPage('terms-of-service')} className="text-right text-on-surface-variant text-xs hover:text-primary transition-colors">Terms of Service</button>
                     <a className="text-on-surface-variant text-xs hover:text-primary transition-colors" href="#">Privacy Policy</a>
                     <p className="text-on-surface-variant text-[10px] mt-8 opacity-40">© 2024 The Obsidian Curator. All Rights Reserved.</p>
                   </nav>

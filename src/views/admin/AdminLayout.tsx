@@ -1,13 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import BrandMark from '../../components/BrandMark';
 
 export default function AdminLayout({ children, activeView, setView }: { children: React.ReactNode, activeView: string, setView: (view: any) => void }) {
   return (
     <div className="flex min-h-screen bg-background text-on-surface font-body selection:bg-primary/30">
       <aside className="fixed left-0 top-0 h-full w-80 z-[60] bg-[#0e0e12] flex flex-col p-6 gap-8 border-r border-[#F5F5F0]/10 shadow-[20px_0_60px_rgba(0,0,0,0.5)] font-['Noto_Serif'] text-sm uppercase tracking-widest">
         <div className="flex items-center gap-4 mb-8">
-            <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center border border-primary/30">
-                <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>diamond</span>
+          <div className="w-10 h-10 rounded-lg overflow-hidden border border-primary/30 shadow-[0_0_20px_rgba(230,195,100,0.2)]">
+            <BrandMark className="w-full h-full rounded-lg" />
             </div>
             <div>
                 <h2 className="text-primary font-black tracking-tighter">The Obsidian</h2>

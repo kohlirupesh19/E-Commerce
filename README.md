@@ -49,6 +49,11 @@ A premium, secure e-commerce platform built with React, TypeScript, and Vite. Sp
      ```env
      VITE_GEMINI_API_KEY=your_api_key_here
      ```
+   - Add your Supabase anon API key for newsletter signup:
+      ```env
+      VITE_SUPABASE_API_KEY=your_supabase_anon_key_here
+      ```
+     `VITE_SUPABASE_URL` is optional. If left empty, the app derives project URL from the key.
 
 3. **Start development server:**
    ```bash
@@ -136,6 +141,37 @@ type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' |
 ```
 
 ## 🔧 Configuration
+
+### Newsletter (Supabase)
+
+Footer newsletter forms now post to Supabase REST at:
+
+`/rest/v1/newsletter_subscribers`
+
+Create the table in Supabase SQL editor:
+
+```sql
+create table if not exists public.newsletter_subscribers (
+  id bigserial primary key,
+  email text not null unique,
+  source text,
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists newsletter_subscribers_email_lower_idx
+on public.newsletter_subscribers (lower(email));
+
+alter table public.newsletter_subscribers enable row level security;
+
+create policy "Allow public insert newsletter"
+on public.newsletter_subscribers
+for insert
+to anon
+with check (
+  email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'
+  and source in ('website-footer')
+);
+```
 
 ### Vite Configuration
 - **Port:** 3000 (configurable via CLI)
