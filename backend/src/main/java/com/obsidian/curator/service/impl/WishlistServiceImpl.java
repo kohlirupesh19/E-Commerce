@@ -58,6 +58,40 @@ public class WishlistServiceImpl implements WishlistService {
         return wishlistItemRepository.findByUser(user).stream().map(this::mapItem).toList();
     }
 
+    @Override
+    @Transactional
+    public Map<String, Object> toggleWishlist(String email, UUID productId) {
+        User user = getUser(email);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        boolean inWishlist = wishlistItemRepository.findByUserAndProduct(user, product)
+                .map(item -> {
+                    wishlistItemRepository.delete(item);
+                    return false;
+                })
+                .orElseGet(() -> {
+                    WishlistItem item = new WishlistItem();
+                    item.setUser(user);
+                    item.setProduct(product);
+                    wishlistItemRepository.save(item);
+                    return true;
+                });
+
+        return Map.of(
+                "inWishlist", inWishlist,
+                "wishlist", wishlistItemRepository.findByUser(user).stream().map(this::mapItem).toList()
+        );
+    }
+
+    @Override
+    public Map<String, Object> shareWishlist(String email) {
+        return Map.of(
+                "items", getWishlist(email),
+                "count", getWishlist(email).size()
+        );
+    }
+
     private User getUser(String email) {
         return userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

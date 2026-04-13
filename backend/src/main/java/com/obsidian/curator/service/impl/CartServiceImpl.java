@@ -65,11 +65,12 @@ public class CartServiceImpl implements CartService {
             }
         }
 
-        CartItem item = cartItemRepository.findByCartAndProductAndVariant(cart, product, variant).orElseGet(() -> {
+        ProductVariant selectedVariant = variant;
+        CartItem item = cartItemRepository.findByCartAndProductAndVariant(cart, product, selectedVariant).orElseGet(() -> {
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setProduct(product);
-            newItem.setVariant(variant);
+            newItem.setVariant(selectedVariant);
             newItem.setQuantity(0);
             return newItem;
         });

@@ -8,4 +8,6 @@ public interface WishlistService {
     List<Map<String, Object>> getWishlist(String email);
     List<Map<String, Object>> addToWishlist(String email, UUID productId);
     List<Map<String, Object>> removeFromWishlist(String email, UUID productId);
+    Map<String, Object> toggleWishlist(String email, UUID productId);
+    Map<String, Object> shareWishlist(String email);
 }
