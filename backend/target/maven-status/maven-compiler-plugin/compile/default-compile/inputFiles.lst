@@ -5,6 +5,7 @@
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/config/RazorpayConfig.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/config/SecurityConfig.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/config/SwaggerConfig.java
+/Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/controller/AddressController.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/controller/AdminCatalogController.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/controller/AuthController.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/controller/CartController.java
@@ -17,6 +18,7 @@
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/CartUpdateByItemRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/CartUpdateItemRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/ChangePasswordRequest.java
+/Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/CreateAddressRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/CreateCategoryRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/CreateProductRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/ForgotPasswordRequest.java
@@ -27,6 +29,7 @@
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/ResendOtpRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/ResetPasswordRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/Toggle2FARequest.java
+/Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/UpdateAddressRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/UpdateCategoryRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/UpdateMeRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/UpdateProductRequest.java
@@ -34,6 +37,7 @@
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/VerifyOtpRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/request/WishlistToggleRequest.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/response/AccessTokenResponse.java
+/Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/response/AddressDto.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/response/AuthTokenResponse.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/response/AuthUserResponse.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/dto/response/MeResponse.java
@@ -93,11 +97,13 @@
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/security/JwtAuthFilter.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/security/JwtUtil.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/security/UserDetailsServiceImpl.java
+/Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/AddressService.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/AuthService.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/CartService.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/CatalogService.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/OrderService.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/WishlistService.java
+/Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/impl/AddressServiceImpl.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/impl/AuthServiceImpl.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/impl/CartServiceImpl.java
 /Users/rupeshkohli/Documents/Demo/E-Commerce/backend/src/main/java/com/obsidian/curator/service/impl/CatalogServiceImpl.java

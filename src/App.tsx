@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useContext } from 'react';
+import React, { Suspense, lazy, useState, useContext, useEffect, useRef, useMemo } from 'react';
 import { 
   Eye, EyeOff, Check, User, Mail, Phone, Lock, ArrowRight, Diamond, 
   ArrowLeft, ShieldCheck, KeyRound, Key, Search, Heart, ShoppingBag, 
@@ -12,26 +12,31 @@ import {
   CreditCard as CreditCardIcon, Star as StarIcon, Package as PackageIcon, Search as SearchIcon, Truck as TruckIcon, Eye as EyeIcon, Award as AwardIcon, LayoutGrid as LayoutGridIcon, DollarSign as DollarSignIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { authApi, addressApi } from './lib/api';
 
 type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons';
 
+/* FIX: category images mapping */
 const shopCategoryOptions = [
-  { id: 'timepieces', view: 'category-timepieces', icon: Watch, label: 'Timepieces', count: '42 ITEMS' },
-  { id: 'fashion', view: 'category-fashion', icon: Shirt, label: 'Fashion', count: '842 ITEMS' },
-  { id: 'leather', view: 'category-leather', icon: ShoppingBasket, label: 'Leather', count: '88 ITEMS' },
-  { id: 'home', view: 'category-home', icon: Armchair, label: 'Home', count: '450 ITEMS' },
-  { id: 'beauty', view: 'category-beauty', icon: Sparkles, label: 'Beauty', count: '312 ITEMS' },
-  { id: 'sports', view: 'category-sports', icon: Dumbbell, label: 'Sports', count: '210 ITEMS' },
-  { id: 'books', view: 'category-books', icon: BookOpen, label: 'Books', count: '1,029 ITEMS' },
-  { id: 'toys', view: 'category-toys', icon: Gamepad2, label: 'Toys', count: '560 ITEMS' },
-  { id: 'jewelry', view: 'category-jewelry', icon: Diamond, label: 'Jewelry', count: '150 ITEMS' },
+  { id: 'timepieces', view: 'category-timepieces', icon: Watch, label: 'Timepieces', count: '42 ITEMS', image: '/images/local/asset-0001.png' },
+  { id: 'fashion', view: 'category-fashion', icon: Shirt, label: 'Fashion', count: '842 ITEMS', image: '/images/local/asset-0002.png' },
+  { id: 'leather', view: 'category-leather', icon: ShoppingBasket, label: 'Leather', count: '88 ITEMS', image: '/images/local/asset-0003.png' },
+  { id: 'home', view: 'category-home', icon: Armchair, label: 'Home', count: '450 ITEMS', image: '/images/local/asset-0004.png' },
+  { id: 'beauty', view: 'category-beauty', icon: Sparkles, label: 'Beauty', count: '312 ITEMS', image: '/images/local/asset-0005.png' },
+  { id: 'sports', view: 'category-sports', icon: Dumbbell, label: 'Sports', count: '210 ITEMS', image: '/images/local/asset-0006.png' },
+  { id: 'books', view: 'category-books', icon: BookOpen, label: 'Books', count: '1,029 ITEMS', image: '/images/local/asset-0007.png' },
+  { id: 'toys', view: 'category-toys', icon: Gamepad2, label: 'Toys', count: '560 ITEMS', image: '/images/local/asset-0008.png' },
+  { id: 'jewelry', view: 'category-jewelry', icon: Diamond, label: 'Jewelry', count: '150 ITEMS', image: '/images/local/asset-0009.png' },
 ] as const;
 
 type ShopCategory = typeof shopCategoryOptions[number]['id'];
 type ShopCategoryFilter = 'all' | ShopCategory;
-type ShopSortBy = 'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated';
+type ShopSortBy = 'relevance' | 'low-to-high' | 'high-to-low' | 'top-rated' | 'newest' | 'most-popular';
 type ShopMaxPrice = 'all' | '5000' | '10000' | '20000';
 type ShopMinRating = 0 | 4 | 5;
+
+const IMAGE_FALLBACK_URL = '/images/local/asset-0010.png';
+const SHOP_PAGE_SIZE = 9;
 
 const AdminLayout = lazy(() => import('./views/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./views/admin/AdminDashboard'));
@@ -69,7 +74,38 @@ const getShopSortLabel = (sortBy: ShopSortBy) => {
   if (sortBy === 'low-to-high') return 'Price: Low to High';
   if (sortBy === 'high-to-low') return 'Price: High to Low';
   if (sortBy === 'top-rated') return 'Top Rated';
+  if (sortBy === 'newest') return 'Newest';
+  if (sortBy === 'most-popular') return 'Most Popular';
   return 'Relevance';
+};
+
+const renderHighlightedText = (text: string, query: string) => {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'ig');
+  const parts = text.split(regex);
+  const lower = query.toLowerCase();
+  return parts.map((part, index) =>
+    part.toLowerCase() === lower
+      ? <mark key={`${part}-${index}`} className="bg-primary/20 text-primary px-0.5 rounded">{part}</mark>
+      : <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>
+  );
+};
+
+/* FIX: back navigation */
+const BackButton = ({ onBack }: { onBack: () => void }) => {
+  return (
+    <button
+      type="button"
+      onClick={onBack}
+      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+      title="Go back"
+      aria-label="Go back"
+    >
+      <ArrowLeft size={18} />
+      <span className="text-[10px] uppercase tracking-widest font-bold">Back</span>
+    </button>
+  );
 };
 
 const getShopCategoryForBrand = (brand?: string): ShopCategoryFilter => {
@@ -89,31 +125,42 @@ const getShopCategoryForBrand = (brand?: string): ShopCategoryFilter => {
 const TopNavBar = ({ 
   view, 
   setView, 
+  onBack,
+  onOpenMobileMenu,
   cartCount, 
   showProfileDropdown, 
   setShowProfileDropdown 
 }: { 
   view: View, 
   setView: (v: View) => void, 
+  onBack?: () => void,
+  onOpenMobileMenu?: () => void,
   cartCount: number,
   showProfileDropdown: boolean,
   setShowProfileDropdown: (b: boolean) => void
 }) => {
   const { searchTerm, setSearchTerm } = useContext(SearchContext);
-  const isCategory = view.startsWith('category-');
+  const showBackButton = view !== 'home';
   
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-outline-variant/10 px-6 md:px-12 py-4">
       <div className="max-w-[1920px] mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {isCategory && (
-            <button
-              onClick={() => setView('home')}
-              className="p-2 hover:bg-surface-container-highest/30 rounded-lg transition-colors text-on-surface-variant hover:text-primary"
-              title="Go back"
-            >
-              <ArrowLeft size={20} />
-            </button>
+          {/* FIX: back navigation */}
+          {showBackButton && (
+            <BackButton
+              onBack={() => {
+                if (onBack) {
+                  onBack();
+                  return;
+                }
+                if (window.history.length > 1) {
+                  window.history.back();
+                  return;
+                }
+                setView('home');
+              }}
+            />
           )}
           <div 
             className="flex items-center gap-3 cursor-pointer group"
@@ -144,6 +191,17 @@ const TopNavBar = ({
           </div>
 
           <div className="flex items-center gap-4">
+            {/* FIX: mobile navigation (side menu trigger) */}
+            {onOpenMobileMenu && (
+              <button
+                type="button"
+                aria-label="Open menu"
+                onClick={onOpenMobileMenu}
+                className="lg:hidden p-2 text-on-surface-variant hover:text-primary transition-colors"
+              >
+                <Menu size={20} />
+              </button>
+            )}
             <button 
               onClick={() => setView('cart')}
               className="relative p-2 text-on-surface-variant hover:text-primary transition-colors"
@@ -197,7 +255,7 @@ const CategoryBar = ({
   onCategorySelect?: (category: ShopCategory) => void
 }) => {
   return (
-    <div className="w-full bg-background border-b border-outline-variant/10 sticky top-20 z-40">
+    <div className="hidden lg:block w-full bg-background border-b border-outline-variant/10 sticky top-20 z-40">
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
           {shopCategoryOptions.map((cat) => {
@@ -213,6 +271,15 @@ const CategoryBar = ({
                   : 'hover:bg-surface-container-highest/20 border border-outline-variant/10'
               }`}
             >
+              {/* FIX: home category strip uses icon-only cards */}
+              {view !== 'home' && (
+                <img
+                  src={cat.image}
+                  alt={cat.label}
+                  className="w-14 h-10 rounded object-cover border border-outline-variant/20"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
+                />
+              )}
               <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
                 isActive 
                   ? 'bg-primary/20 text-primary' 
@@ -389,76 +456,76 @@ const Footer = () => {
 };
 
 const timepieceProducts = [
-  { id: 1, brand: 'Vacheron Heritage', name: 'Patrimony Moon Phase', price: '$38,500', img: 'https://images.unsplash.com/photo-1523170335684-f042f1b8f374?w=500&h=500&fit=crop' },
-  { id: 2, brand: 'Audemars Piguet', name: 'Royal Oak Offshore', price: '$54,200', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
-  { id: 3, brand: 'Patek Philippe', name: 'Nautilus Skeleton', price: '$120,000', img: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&h=500&fit=crop' },
-  { id: 4, brand: 'Richard Mille', name: 'RM 011 Felipe Massa', price: '$185,000', img: 'https://images.unsplash.com/photo-1506084868230-bb8a9135be18?w=500&h=500&fit=crop' },
-  { id: 5, brand: 'Cartier', name: 'Tank Louis Cartier', price: '$14,800', img: 'https://images.unsplash.com/photo-1633114291692-bda994bb3334?w=500&h=500&fit=crop' },
-  { id: 6, brand: 'Omega', name: 'Speedmaster Moonphase', price: '$12,400', img: 'https://images.unsplash.com/photo-1489749798305-4fea3ba63d60?w=500&h=500&fit=crop' }
+  { id: 1, brand: 'Vacheron Heritage', name: 'Patrimony Moon Phase', price: '$38,500', img: '/images/local/asset-0011.png' },
+  { id: 2, brand: 'Audemars Piguet', name: 'Royal Oak Offshore', price: '$54,200', img: '/images/local/asset-0012.jpg' },
+  { id: 3, brand: 'Patek Philippe', name: 'Nautilus Skeleton', price: '$120,000', img: '/images/local/asset-0013.jpg' },
+  { id: 4, brand: 'Richard Mille', name: 'RM 011 Felipe Massa', price: '$185,000', img: '/images/local/asset-0014.png' },
+  { id: 5, brand: 'Cartier', name: 'Tank Louis Cartier', price: '$14,800', img: '/images/local/asset-0015.png' },
+  { id: 6, brand: 'Omega', name: 'Speedmaster Moonphase', price: '$12,400', img: '/images/local/asset-0016.png' }
 ];
 
 const jewelryProducts = [
-  { id: 7, brand: 'Cartier', name: 'Love Bracelet Diamond-Paved', price: '$42,100', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
-  { id: 8, brand: 'Tiffany & Co.', name: 'HardWear Graduated Link', price: '$18,500', img: 'https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=500&h=500&fit=crop' },
-  { id: 11, brand: 'Van Cleef & Arpels', name: 'Alhambra Necklace Gold', price: '$28,500', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
-  { id: 12, brand: 'Bvlgari', name: 'Serpenti Viper Ring', price: '$15,800', img: 'https://images.unsplash.com/photo-1599643478582-9969c1e0b06b?w=500&h=500&fit=crop' },
-  { id: 13, brand: 'Chopard', name: 'Happy Diamonds Moving', price: '$22,900', img: 'https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=500&h=500&fit=crop' },
-  { id: 14, brand: 'Graff Diamonds', name: 'Infinity Diamond Earrings', price: '$65,000', img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop' },
-  { id: 15, brand: 'Piaget', name: 'Possession Bracelet', price: '$34,500', img: 'https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=500&h=500&fit=crop' },
-  { id: 16, brand: 'Harry Winston', name: 'Emerald Cluster Pendant', price: '$78,500', img: 'https://images.unsplash.com/photo-1599643478582-9969c1e0b06b?w=500&h=500&fit=crop' }
+  { id: 7, brand: 'Cartier', name: 'Love Bracelet Diamond-Paved', price: '$42,100', img: '/images/local/asset-0012.jpg' },
+  { id: 8, brand: 'Tiffany & Co.', name: 'HardWear Graduated Link', price: '$18,500', img: '/images/local/asset-0017.png' },
+  { id: 11, brand: 'Van Cleef & Arpels', name: 'Alhambra Necklace Gold', price: '$28,500', img: '/images/local/asset-0012.jpg' },
+  { id: 12, brand: 'Bvlgari', name: 'Serpenti Viper Ring', price: '$15,800', img: '/images/local/asset-0018.png' },
+  { id: 13, brand: 'Chopard', name: 'Happy Diamonds Moving', price: '$22,900', img: '/images/local/asset-0017.png' },
+  { id: 14, brand: 'Graff Diamonds', name: 'Infinity Diamond Earrings', price: '$65,000', img: '/images/local/asset-0012.jpg' },
+  { id: 15, brand: 'Piaget', name: 'Possession Bracelet', price: '$34,500', img: '/images/local/asset-0017.png' },
+  { id: 16, brand: 'Harry Winston', name: 'Emerald Cluster Pendant', price: '$78,500', img: '/images/local/asset-0018.png' }
 ];
 
 const leatherProducts = [
-  { id: 9, brand: 'Hermès', name: 'Birkin 35 Togo', price: '$24,500', img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop' },
-  { id: 10, brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', price: '$3,200', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop' },
-  { id: 17, brand: 'Bottega Veneta', name: 'Intrecciato Woven Tote', price: '$5,900', img: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=500&h=500&fit=crop' },
-  { id: 18, brand: 'Prada', name: 'Saffiano Leather Briefcase', price: '$4,200', img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop' },
-  { id: 19, brand: 'Gucci', name: 'Marmont Leather Shoulder Bag', price: '$2,650', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop' },
-  { id: 20, brand: 'Celine', name: 'Classic Box Leather Bag', price: '$3,850', img: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=500&h=500&fit=crop' },
-  { id: 21, brand: 'Fendi', name: 'Baguette Leather Crossbody', price: '$2,200', img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop' },
-  { id: 22, brand: 'Dior', name: 'Book Tote Embroidered Bag', price: '$3,600', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop' }
+  { id: 9, brand: 'Hermès', name: 'Birkin 35 Togo', price: '$24,500', img: '/images/local/asset-0019.jpg' },
+  { id: 10, brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', price: '$3,200', img: '/images/local/asset-0020.jpg' },
+  { id: 17, brand: 'Bottega Veneta', name: 'Intrecciato Woven Tote', price: '$5,900', img: '/images/local/asset-0021.png' },
+  { id: 18, brand: 'Prada', name: 'Saffiano Leather Briefcase', price: '$4,200', img: '/images/local/asset-0019.jpg' },
+  { id: 19, brand: 'Gucci', name: 'Marmont Leather Shoulder Bag', price: '$2,650', img: '/images/local/asset-0020.jpg' },
+  { id: 20, brand: 'Celine', name: 'Classic Box Leather Bag', price: '$3,850', img: '/images/local/asset-0021.png' },
+  { id: 21, brand: 'Fendi', name: 'Baguette Leather Crossbody', price: '$2,200', img: '/images/local/asset-0019.jpg' },
+  { id: 22, brand: 'Dior', name: 'Book Tote Embroidered Bag', price: '$3,600', img: '/images/local/asset-0020.jpg' }
 ];
 
 const fashionProducts = [
-  { id: 23, brand: 'Gucci', name: 'Silk Double Breasted Blazer', price: '$4,200', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=500&fit=crop' },
-  { id: 24, brand: 'Saint Laurent', name: 'Le Smoking Tuxedo', price: '$5,800', img: 'https://images.unsplash.com/photo-1617021231846-42bd5ce3fcd5?w=500&h=500&fit=crop' },
-  { id: 25, brand: 'Hermès', name: 'Trench Coat Cashmere', price: '$6,500', img: 'https://images.unsplash.com/photo-1539613881-24b0fed0edd9?w=500&h=500&fit=crop' },
-  { id: 26, brand: 'Chanel', name: 'Tweed Jacket', price: '$7,200', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=500&fit=crop' },
+  { id: 23, brand: 'Gucci', name: 'Silk Double Breasted Blazer', price: '$4,200', img: '/images/local/asset-0022.jpg' },
+  { id: 24, brand: 'Saint Laurent', name: 'Le Smoking Tuxedo', price: '$5,800', img: '/images/local/asset-0023.png' },
+  { id: 25, brand: 'Hermès', name: 'Trench Coat Cashmere', price: '$6,500', img: '/images/local/asset-0024.png' },
+  { id: 26, brand: 'Chanel', name: 'Tweed Jacket', price: '$7,200', img: '/images/local/asset-0022.jpg' },
 ];
 
 const homeProducts = [
-  { id: 27, brand: 'Baccarat', name: 'Empire Chandelier Gold', price: '$8,500', img: 'https://images.unsplash.com/photo-1565636192335-14f0c6710223?w=500&h=500&fit=crop' },
-  { id: 28, brand: 'Medusa Art', name: 'Marble Sculpture', price: '$12,000', img: 'https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=500&h=500&fit=crop' },
-  { id: 29, brand: 'Heritage Design', name: 'Persian Rug 4x6', price: '$18,900', img: 'https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=500&h=500&fit=crop' },
-  { id: 30, brand: 'Restoration Hardware', name: 'Victorian Settee', price: '$9,800', img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&h=500&fit=crop' },
+  { id: 27, brand: 'Baccarat', name: 'Empire Chandelier Gold', price: '$8,500', img: '/images/local/asset-0025.png' },
+  { id: 28, brand: 'Medusa Art', name: 'Marble Sculpture', price: '$12,000', img: '/images/local/asset-0026.png' },
+  { id: 29, brand: 'Heritage Design', name: 'Persian Rug 4x6', price: '$18,900', img: '/images/local/asset-0026.png' },
+  { id: 30, brand: 'Restoration Hardware', name: 'Victorian Settee', price: '$9,800', img: '/images/local/asset-0027.jpg' },
 ];
 
 const beautyProducts = [
-  { id: 31, brand: 'Creed', name: 'Royal Oud Parfum', price: '$620', img: 'https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=500&h=500&fit=crop' },
-  { id: 32, brand: 'Heeley', name: 'Rose Helena Perfume', price: '$480', img: 'https://images.unsplash.com/photo-1599599810694-b3b2f5532d1c?w=500&h=500&fit=crop' },
-  { id: 33, brand: 'Penhaligons', name: 'Heritage Collection Set', price: '$850', img: 'https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=500&h=500&fit=crop' },
-  { id: 34, brand: 'Acqua di Parma', name: 'Blu Mediterraneo', price: '$220', img: 'https://images.unsplash.com/photo-1599599810694-b3b2f5532d1c?w=500&h=500&fit=crop' },
+  { id: 31, brand: 'Creed', name: 'Royal Oud Parfum', price: '$620', img: '/images/local/asset-0028.png' },
+  { id: 32, brand: 'Heeley', name: 'Rose Helena Perfume', price: '$480', img: '/images/local/asset-0029.png' },
+  { id: 33, brand: 'Penhaligons', name: 'Heritage Collection Set', price: '$850', img: '/images/local/asset-0028.png' },
+  { id: 34, brand: 'Acqua di Parma', name: 'Blu Mediterraneo', price: '$220', img: '/images/local/asset-0029.png' },
 ];
 
 const sportsProducts = [
-  { id: 35, brand: 'Callaway', name: 'Golf Club Set Carbon', price: '$2,850', img: 'https://images.unsplash.com/photo-1535088462336-e933e3f06e57?w=500&h=500&fit=crop' },
-  { id: 36, brand: 'Wilson', name: 'Pro Tennis Racket', price: '$680', img: 'https://images.unsplash.com/photo-1554068865-24cecd4e34c8?w=500&h=500&fit=crop' },
-  { id: 37, brand: 'Bauer', name: 'Ice Hockey Equipment', price: '$1,200', img: 'https://images.unsplash.com/photo-1535088462336-e933e3f06e57?w=500&h=500&fit=crop' },
-  { id: 38, brand: 'Specialized', name: 'Carbon Mountain Bike', price: '$4,500', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop' },
+  { id: 35, brand: 'Callaway', name: 'Golf Club Set Carbon', price: '$2,850', img: '/images/local/asset-0030.png' },
+  { id: 36, brand: 'Wilson', name: 'Pro Tennis Racket', price: '$680', img: '/images/local/asset-0031.png' },
+  { id: 37, brand: 'Bauer', name: 'Ice Hockey Equipment', price: '$1,200', img: '/images/local/asset-0030.png' },
+  { id: 38, brand: 'Specialized', name: 'Carbon Mountain Bike', price: '$4,500', img: '/images/local/asset-0032.jpg' },
 ];
 
 const booksProducts = [
-  { id: 39, brand: 'First Edition', name: 'Signed Hemingway Collection', price: '$4,200', img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop' },
-  { id: 40, brand: 'Antiquarian', name: 'Leather Bound Shakespeare', price: '$3,100', img: 'https://images.unsplash.com/photo-1507842217343-583f7270bfba?w=500&h=500&fit=crop' },
-  { id: 41, brand: 'Vintage Press', name: 'Limited Edition Art Book', price: '$1,850', img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop' },
-  { id: 42, brand: 'Collector Editions', name: 'Signed Philosophy Set', price: '$2,600', img: 'https://images.unsplash.com/photo-1507842217343-583f7270bfba?w=500&h=500&fit=crop' },
+  { id: 39, brand: 'First Edition', name: 'Signed Hemingway Collection', price: '$4,200', img: '/images/local/asset-0033.jpg' },
+  { id: 40, brand: 'Antiquarian', name: 'Leather Bound Shakespeare', price: '$3,100', img: '/images/local/asset-0034.png' },
+  { id: 41, brand: 'Vintage Press', name: 'Limited Edition Art Book', price: '$1,850', img: '/images/local/asset-0033.jpg' },
+  { id: 42, brand: 'Collector Editions', name: 'Signed Philosophy Set', price: '$2,600', img: '/images/local/asset-0034.png' },
 ];
 
 const toysProducts = [
-  { id: 43, brand: 'Steiff', name: 'Limited Edition Teddy Bear', price: '$1,200', img: 'https://images.unsplash.com/photo-1590080876/teddy-bear?w=500&h=500&fit=crop' },
-  { id: 44, brand: 'Lego', name: 'Platinum Set Collectible', price: '$890', img: 'https://images.unsplash.com/photo-1594545514411-854a028e7195?w=500&h=500&fit=crop' },
-  { id: 45, brand: 'Scalextric', name: 'Vintage Track Set', price: '$1,450', img: 'https://images.unsplash.com/photo-1594545514411-854a028e7195?w=500&h=500&fit=crop' },
-  { id: 46, brand: 'Hot Wheels', name: 'Rare 1968 Custom', price: '$2,800', img: 'https://images.unsplash.com/photo-1594545514411-854a028e7195?w=500&h=500&fit=crop' },
+  { id: 43, brand: 'Steiff', name: 'Limited Edition Teddy Bear', price: '$1,200', img: '/images/local/asset-0035.png' },
+  { id: 44, brand: 'Lego', name: 'Platinum Set Collectible', price: '$890', img: '/images/local/asset-0036.png' },
+  { id: 45, brand: 'Scalextric', name: 'Vintage Track Set', price: '$1,450', img: '/images/local/asset-0036.png' },
+  { id: 46, brand: 'Hot Wheels', name: 'Rare 1968 Custom', price: '$2,800', img: '/images/local/asset-0036.png' },
 ];
 
 const CategoryLayout = ({ 
@@ -467,6 +534,7 @@ const CategoryLayout = ({
   cartItems, 
   showProfileDropdown, 
   setShowProfileDropdown,
+  onOpenMobileMenu,
   activeCategory = 'all',
   onCategorySelect,
   onProductSelect,
@@ -480,6 +548,7 @@ const CategoryLayout = ({
   cartItems: any[],
   showProfileDropdown: boolean,
   setShowProfileDropdown: (b: boolean) => void,
+  onOpenMobileMenu?: () => void,
   activeCategory?: ShopCategoryFilter,
   onCategorySelect?: (category: ShopCategory) => void,
   onProductSelect?: (product: any) => void,
@@ -526,6 +595,7 @@ const CategoryLayout = ({
       <TopNavBar 
         view={view} 
         setView={setView} 
+        onOpenMobileMenu={onOpenMobileMenu}
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         showProfileDropdown={showProfileDropdown}
         setShowProfileDropdown={setShowProfileDropdown}
@@ -539,17 +609,18 @@ const CategoryLayout = ({
       />
 
       <main className="flex flex-col">
-        {/* Hero Section */}
-        <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+        {/* FIX: hero mobile responsiveness */}
+        <section className="relative h-[100svh] md:h-[60vh] flex items-center justify-center overflow-hidden">
           <img 
             src={heroImg} 
             alt={title}
             className="absolute inset-0 w-full h-full object-cover grayscale-[0.3] brightness-50"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
             referrerPolicy="no-referrer"
           />
           <div className="relative z-10 text-center space-y-6 px-6">
             <span className="text-primary text-[10px] uppercase tracking-[0.4em] font-bold">{subtitle}</span>
-            <h1 className="text-6xl md:text-8xl font-headline font-bold text-on-surface tracking-tighter">{title}</h1>
+            <h1 className="font-headline font-bold text-on-surface tracking-tighter text-[clamp(1.5rem,5vw,3.5rem)] md:text-8xl">{title}</h1>
           </div>
         </section>
 
@@ -600,6 +671,7 @@ const CategoryLayout = ({
                     src={product.img} 
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
@@ -691,28 +763,35 @@ const ProfileDropdown = ({ setView, onClose }: { setView: (v: View) => void, onC
 };
 
 export default function App() {
-  const [view, setView] = useState<View>('home');
+  const [view, setView] = useState<View>('login');
+  const isPopNavigationRef = useRef(false);
 
-  React.useEffect(() => {
-    (window as any).__setView = setView;
-    const handlePath = () => {
-      let path = window.location.pathname.replace('/', '');
-      if (['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(path)) {
-        setView(path as any);
-      } else if (path === '') {
-        // Default
-      }
-    };
-    window.addEventListener('popstate', handlePath);
-    handlePath();
-    return () => window.removeEventListener('popstate', handlePath);
-  }, []);
+  const resolveViewFromPath = (pathName: string): View => {
+    const normalized = pathName.replace(/^\//, '');
+    const allViews: View[] = [
+      'login', 'register', 'forgot-password', 'home', 'shop', 'product-detail', 'cart', 'checkout-address',
+      'checkout-payment', 'checkout-review', 'checkout-success', 'order-tracking', 'my-orders', 'profile',
+      'wishlist', 'category-timepieces', 'category-jewelry', 'category-leather', 'category-fashion',
+      'category-home', 'category-beauty', 'category-sports', 'category-books', 'category-toys',
+      'profile-addresses', 'profile-payments', 'profile-notifications', 'profile-security', 'profile-help',
+      'admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'
+    ];
+
+    if (!normalized) return 'login';
+    return allViews.includes(normalized as View) ? (normalized as View) : 'login';
+  };
+
+  const viewToPath = (nextView: View) => (nextView === 'login' ? '/' : `/${nextView}`);
 
 
   
 
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedAddress, setSelectedAddress] = useState<'home' | 'work'>('home');
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [isShopLoading, setIsShopLoading] = useState(false);
+  const [shopPage, setShopPage] = useState(1);
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -720,7 +799,7 @@ export default function App() {
       price: 14500,
       variant: 'Midnight Gold / Sapphire Glass',
       quantity: 1,
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDZLtyJY0T_xYQ4dgbHTpaT8jV1nkOFLQqS_YToxNdmgTku2pqHcrJolN4CFHsRz7ppEJ0sN5Q--XCQvvfJlh_x9Nv36FFUkSDbxyWxnwphIw7wgkfzaoMrKLmlfLc7z5xXfiWT9eJPhEY5P7RbLxgK6brX40apJpHfokciMlIplJJaFLfKcdaM4rNyQKcZeoEcnvUZatJLOi4beuNDipS3dMyUrsf_YlzlkaafGCy9GTQjcQs9hZ6MUW8r0Ed7KyLPYz1_o2awav4',
+      img: '/images/local/asset-0037.png',
       outOfStock: false
     },
     {
@@ -729,7 +808,7 @@ export default function App() {
       price: 3200,
       variant: 'Hand-Carved Ebony / Gold Leaf',
       quantity: 0,
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAW0D-rFr_LJooQnIVylTNYb5yC8Y2uxK9zE7D-TFkzqlr9p3S3ZjRy1R7uzxR6hLkhHSk_sclGoqHj_VU7mpzyYmpOr9tQABkHjvUWJajdcibj_DWuqf-YLaVXt19Z8g19ARvF7TSxx25O6LCId4uu0-ect4hD5iyv8lqq-iUCWhBniYXzbBEYUAkB2r_1_e-5G2Tihd46eSUzsI2sMQ6vopxL4qDnJW4glQy4JMcXNCRCY08PkFOMjljPXRReJDEKpFVnKWA69iw',
+      img: '/images/local/asset-0038.png',
       outOfStock: true
     },
     {
@@ -738,7 +817,7 @@ export default function App() {
       price: 850,
       variant: '100ml Parfum / Collector Case',
       quantity: 2,
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAU8yjUAd9oPk5oNzuGEZYqp7tnvVQQ5CnF-ef6B1BDXwrzTEAd1_7dpF3yFsJFhO2yjGyS9RLnQW4eFnt1xlQTDj2-4Rg5ZaU4jMPmJgEdD6__euR-2bhFjwG9Rzrt8dDowTfmoca2mf_--8o3ggwcsel8yCPyRarEwOvmxBYCB8te-lKEyYPutCZCIMkF_c8U6lvB9jA8anCMhO4_ZQ2x6sp1s5RA7CbEbN0806uD_lIYC5Mcx34eyiQptX29iej5lDUatmURZww',
+      img: '/images/local/asset-0039.png',
       outOfStock: false
     }
   ]);
@@ -748,28 +827,28 @@ export default function App() {
       name: 'Noir Architect Bag',
       price: 4250,
       sku: 'OBS-7721',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnXrl-PgGyFXAkoiRkt-_1gsnpsg0geI5JtylUb-tAs28FTpxN6STtwz0OZwmv-u-3nwT95yoRyyBx3H4Ud7AQVUViI0l4q5uloc2iu5uqLF3sxxxW1HtvBELT0Uh8BkjzflbAETpMXNq-pUdQH0WLhWvtPaHWIQSaFJ2kfE0iWZjcQ5xe8s7UUgC2s-L_jDjayA7ikJTTeklgFhDLTjELP-tUD4drtIIcq4v-TysnjuNjizLvgPjNjMyKBrT5tUEFtbDnPLCYNmA'
+      img: '/images/local/asset-0040.png'
     },
     {
       id: 102,
       name: 'Ethereal Chrono',
       price: 12800,
       sku: 'OBS-1099',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUmqWyWmckSwvqlXnrokBllJWQilzRe90w064wzfqWnT8kqymX-gSZq7e2jamQQ-zgO5NJqu2d8hVLb9vqKOMCCyBlx1OdI5STpezTZFMU-XUoaQQPUE5DbahV4843-Q8ymFH0czxPtHjsAQ95KZgMXKYbjN8q8XT-PlMx4cKPOuPNUECVLvst8aVvg3xgYtYatUpiODqYN3oiTbf7_0Yyl8qFSnD6ZAKW0Y0Lm2FZElMJGXQb9o-v4IpSunxuaa7VrVC-pl_HSCM'
+      img: '/images/local/asset-0041.png'
     },
     {
       id: 103,
       name: 'Imperial Silk Drape',
       price: 890,
       sku: 'OBS-0045',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCwpPqziGJ4hGa1_6cTl4ffwP7vU4w--Q2sxXiLiBA5xpeqsryEyRB1ZXz4od2x_CjA7E7ihrCdkceJDqLr-jS6kEnESv1LU2gUoOIlmqjCBtJF7-YtAwbwMYe31p4-FvbzIqp-s-If2KgpGmVtZxzkfZlXlKxbIlW2KfKt3K7iSGUfRiQhay1toayNrvBkQ7N1Bevkh4dfVJtFpgWpbjmizLL5ijxnkYaBNmAT5Y7VbRw3qVh1mUz_oDwIHxeTJySmV4fb9CRnhYs'
+      img: '/images/local/asset-0042.png'
     },
     {
       id: 104,
       name: 'Aurelian Stilettos',
       price: 1100,
       sku: 'OBS-3382',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhxWwFxcfoZ6C0FIa1GSZbMymePYJBiAEbIrnLdMRIPqxaHbfd6fMukU-_Vyfh3XPDAhOSfWwqkQMPEXAxzoCIwNfYmhI438kC2j-zmGhCRLMYnKPXj78FF85RZeEz5qzM7BQqN3ZsWpQ47hEbM28xf9dQ6jP-vmuB12qvHOqjGPv0e5nI3lFqr5GJjI3xta-MXIO6RfXuLoPBhxb6XmNn1p7Pp01BL7EOsncsFw76cTeVKRXijt4NCPG2WFYo6OzqtCIzjmuPjJU'
+      img: '/images/local/asset-0043.png'
     }
   ]);
   const [showPassword, setShowPassword] = useState(false);
@@ -785,13 +864,148 @@ export default function App() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [shopSortBy, setShopSortBy] = useState<ShopSortBy>('relevance');
   const [shopMaxPrice, setShopMaxPrice] = useState<ShopMaxPrice>('all');
   const [shopMinRating, setShopMinRating] = useState<ShopMinRating>(0);
   const [selectedShopCategory, setSelectedShopCategory] = useState<ShopCategoryFilter>('all');
+  const [selectedShopCategories, setSelectedShopCategories] = useState<ShopCategory[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 20000 });
   const [otpError, setOtpError] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [addressFormData, setAddressFormData] = useState({
+    fullName: '', phone: '', pincode: '', addressType: 'HOME', street: '', city: '', state: ''
+  });
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
+
+  const fetchAddresses = async () => {
+    try {
+      const data = await addressApi.getAll();
+      setAddresses(data);
+    } catch(err) {
+      console.error(err);
+    }
+  };
+
+  /* FIX: search debounce */
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim().toLowerCase());
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
+
+  /* FIX: category image fallback */
+  useEffect(() => {
+    const handleImageError = (event: Event) => {
+      const target = event.target as HTMLImageElement;
+      if (!target || target.tagName !== 'IMG') return;
+      if (target.src === IMAGE_FALLBACK_URL) return;
+      target.src = IMAGE_FALLBACK_URL;
+    };
+
+    document.addEventListener('error', handleImageError, true);
+    return () => document.removeEventListener('error', handleImageError, true);
+  }, []);
+
+  /* FIX: history + URL state */
+  useEffect(() => {
+    (window as any).__setView = setView;
+
+    const applyUrlState = () => {
+      const nextView = resolveViewFromPath(window.location.pathname);
+      const hasToken = typeof localStorage !== 'undefined' && !!localStorage.getItem('accessToken');
+      const publicViews: View[] = ['login', 'register', 'forgot-password'];
+      const resolvedView = !hasToken && !publicViews.includes(nextView) ? 'login' : nextView;
+
+      setView(resolvedView);
+
+      if (resolvedView !== nextView) {
+        window.history.replaceState({ view: resolvedView }, '', viewToPath(resolvedView));
+      }
+
+      if (resolvedView !== 'shop') return;
+
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q') || '';
+      const categoriesParam = params.get('categories');
+      const brandParam = params.get('brands');
+      const minParam = Number(params.get('min') || 0);
+      const maxParam = Number(params.get('max') || 20000);
+      const ratingParam = Number(params.get('rating') || 0);
+      const inStockParam = params.get('inStock') === '1';
+      const sortParam = params.get('sort') as ShopSortBy | null;
+
+      setSearchTerm(q);
+      setDebouncedSearchTerm(q.toLowerCase());
+
+      const parsedCategories = categoriesParam
+        ? categoriesParam.split(',').filter((item): item is ShopCategory => shopCategoryOptions.some((cat) => cat.id === item))
+        : [];
+      setSelectedShopCategories(parsedCategories);
+      setSelectedShopCategory(parsedCategories[0] || 'all');
+
+      setSelectedBrands(brandParam ? brandParam.split(',').filter(Boolean) : []);
+      setPriceRange({ min: Number.isFinite(minParam) ? minParam : 0, max: Number.isFinite(maxParam) ? maxParam : 20000 });
+      setShopMinRating(ratingParam >= 5 ? 5 : ratingParam >= 4 ? 4 : 0);
+      setInStockOnly(inStockParam);
+      if (sortParam && ['relevance', 'low-to-high', 'high-to-low', 'top-rated', 'newest', 'most-popular'].includes(sortParam)) {
+        setShopSortBy(sortParam);
+      }
+    };
+
+    const handlePopState = () => {
+      isPopNavigationRef.current = true;
+      applyUrlState();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    applyUrlState();
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (isPopNavigationRef.current) {
+      isPopNavigationRef.current = false;
+      return;
+    }
+    const nextPath = viewToPath(view);
+    window.history.pushState({ view }, '', nextPath + window.location.search);
+  }, [view]);
+
+  useEffect(() => {
+    if (view !== 'shop') return;
+
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) params.set('q', searchTerm.trim());
+    if (selectedShopCategories.length) params.set('categories', selectedShopCategories.join(','));
+    if (selectedBrands.length) params.set('brands', selectedBrands.join(','));
+    if (priceRange.min > 0) params.set('min', String(priceRange.min));
+    if (priceRange.max < 20000) params.set('max', String(priceRange.max));
+    if (shopMinRating > 0) params.set('rating', String(shopMinRating));
+    if (inStockOnly) params.set('inStock', '1');
+    if (shopSortBy !== 'relevance') params.set('sort', shopSortBy);
+
+    const nextUrl = `${viewToPath('shop')}${params.toString() ? `?${params.toString()}` : ''}`;
+    window.history.replaceState({ view: 'shop' }, '', nextUrl);
+  }, [
+    view,
+    searchTerm,
+    selectedShopCategories,
+    selectedBrands,
+    priceRange.min,
+    priceRange.max,
+    shopMinRating,
+    inStockOnly,
+    shopSortBy
+  ]);
 
   // Forgot Password states
   const [forgotStep, setForgotStep] = useState(1); // 1: Identify, 2: Verify, 3: Restore, 4: Success
@@ -806,17 +1020,26 @@ export default function App() {
   };
 
   const clearShopFilters = () => {
+    /* FIX: fully working filter reset */
     setSelectedShopCategory('all');
+    setSelectedShopCategories([]);
     setShopMaxPrice('all');
     setShopMinRating(0);
     setShopSortBy('relevance');
     setSearchTerm('');
+    setSelectedBrands([]);
+    setInStockOnly(false);
+    setPriceRange({ min: 0, max: 20000 });
+    setShopPage(1);
   };
 
   const openShopCategory = (category: ShopCategoryFilter) => {
-    clearShopFilters();
+    /* FIX: category filter state + sidebar active sync */
     setSelectedShopCategory(category);
+    setSelectedShopCategories(category === 'all' ? [] : [category]);
     setView('shop');
+    setIsCategoryMenuOpen(false);
+    setShopPage(1);
     window.scrollTo(0, 0);
   };
 
@@ -830,34 +1053,79 @@ export default function App() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    setAuthError('');
+    try {
+      const response = await authApi.login({ email, password, rememberMe });
+      if (response.accessToken) {
+        localStorage.setItem('accessToken', response.accessToken);
+        fetchAddresses();
+        setView('home');
+        window.scrollTo(0, 0);
+      }
+    } catch (error: any) {
+      setAuthError(error.message || 'Login failed');
+    } finally {
       setIsLoading(false);
-      setView('home');
-    }, 2000);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleAddAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await addressApi.create(addressFormData);
+      await fetchAddresses();
+      setShowAddressForm(false);
+      setAddressFormData({ fullName: '', phone: '', pincode: '', addressType: 'HOME', street: '', city: '', state: '' });
+    } catch(err) {
+      console.error(err);
+    } finally {
       setIsLoading(false);
-      setView('home');
-    }, 2000);
+    }
   };
 
-  const handleForgotIdentify = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setAuthError("Passwords do not match");
+      return;
+    }
+    if (!agreeTerms) {
+      setAuthError("You must agree to the terms");
+      return;
+    }
+    setIsLoading(true);
+    setAuthError('');
+    try {
+      await authApi.register({ name, email, phone, password, confirmPassword, agreeTerms });
+      // Usually, after register, user is either logged in or asked to login
+      setView('login');
+      window.scrollTo(0, 0);
+    } catch (error: any) {
+      setAuthError(error.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotIdentify = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    setAuthError('');
+    try {
+      await authApi.forgotPassword(email);
       setForgotStep(2);
-    }, 1500);
+    } catch (error: any) {
+      setAuthError(error.message || 'Request failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleForgotVerify = (e: React.FormEvent) => {
+  const handleForgotVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     const enteredOtp = otp.join('');
     if (!/^\d{6}$/.test(enteredOtp)) {
@@ -867,19 +1135,33 @@ export default function App() {
 
     setOtpError('');
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await authApi.verifyForgotOtp(email, enteredOtp);
+      setResetToken(response.resetToken);
       setForgotStep(3);
-    }, 1500);
+    } catch (error: any) {
+      setOtpError(error.message || 'Verification failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleForgotRestore = (e: React.FormEvent) => {
+  const handleForgotRestore = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setAuthError("Passwords do not match");
+      return;
+    }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    setAuthError('');
+    try {
+      await authApi.resetPassword({ resetToken, newPassword: password, confirmPassword });
       setForgotStep(4);
-    }, 1500);
+    } catch (error: any) {
+      setAuthError(error.message || 'Reset failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -917,6 +1199,10 @@ export default function App() {
     products.map((product, index) => ({
       ...product,
       category,
+      description: `${product.brand} ${product.name} crafted for modern collectors.`,
+      inStock: index % 5 !== 0,
+      popularity: 100 - index,
+      createdAt: Date.now() - index * 86400000,
       rating: Math.min(5, Number((ratingBase + (index % 4) * 0.1).toFixed(1))),
       reviews: 24 + index * 11
     }));
@@ -933,22 +1219,103 @@ export default function App() {
     ...withShopMeta(toysProducts, 'toys', 4.5)
   ];
 
-  const filteredShopProducts = shopProducts
-    .filter((product) => {
-      const matchesCategory = selectedShopCategory === 'all' || product.category === selectedShopCategory;
-      const matchesSearch = !searchTerm.trim() ||
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.brand.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesPrice = shopMaxPrice === 'all' || toNumericPrice(product.price) <= Number(shopMaxPrice);
-      const matchesRating = product.rating >= shopMinRating;
-      return matchesCategory && matchesSearch && matchesPrice && matchesRating;
-    })
-    .sort((a, b) => {
-      if (shopSortBy === 'low-to-high') return toNumericPrice(a.price) - toNumericPrice(b.price);
-      if (shopSortBy === 'high-to-low') return toNumericPrice(b.price) - toNumericPrice(a.price);
-      if (shopSortBy === 'top-rated') return b.rating - a.rating;
-      return b.reviews - a.reviews;
+  const availableBrands = useMemo(() => Array.from(new Set(shopProducts.map((item) => item.brand))).sort(), [shopProducts]);
+
+  const activeFilterCount = [
+    selectedShopCategories.length > 0,
+    selectedBrands.length > 0,
+    priceRange.min > 0 || priceRange.max < 20000,
+    shopMinRating > 0,
+    inStockOnly,
+    shopSortBy !== 'relevance',
+    !!debouncedSearchTerm
+  ].filter(Boolean).length;
+
+  const filteredShopProducts = useMemo(() => {
+    return shopProducts
+      .filter((product) => {
+        const activeCategories = selectedShopCategories.length ? selectedShopCategories : (selectedShopCategory === 'all' ? [] : [selectedShopCategory]);
+        const matchesCategory = !activeCategories.length || activeCategories.includes(product.category);
+        const matchesSearch = !debouncedSearchTerm ||
+          product.name.toLowerCase().includes(debouncedSearchTerm) ||
+          product.brand.toLowerCase().includes(debouncedSearchTerm) ||
+          product.category.toLowerCase().includes(debouncedSearchTerm) ||
+          (product.description || '').toLowerCase().includes(debouncedSearchTerm);
+        const numericPrice = toNumericPrice(product.price);
+        const softMaxPrice = shopMaxPrice === 'all' ? Number.POSITIVE_INFINITY : Number(shopMaxPrice);
+        const matchesPrice = numericPrice >= priceRange.min && numericPrice <= Math.min(priceRange.max, softMaxPrice);
+        const matchesRating = product.rating >= shopMinRating;
+        const matchesBrand = !selectedBrands.length || selectedBrands.includes(product.brand);
+        const matchesStock = !inStockOnly || product.inStock;
+        return matchesCategory && matchesSearch && matchesPrice && matchesRating && matchesBrand && matchesStock;
+      })
+      .sort((a, b) => {
+        if (shopSortBy === 'low-to-high') return toNumericPrice(a.price) - toNumericPrice(b.price);
+        if (shopSortBy === 'high-to-low') return toNumericPrice(b.price) - toNumericPrice(a.price);
+        if (shopSortBy === 'top-rated') return b.rating - a.rating;
+        if (shopSortBy === 'most-popular' || shopSortBy === 'relevance') return b.popularity - a.popularity;
+        return b.createdAt - a.createdAt;
+      });
+  }, [
+    shopProducts,
+    selectedShopCategories,
+    selectedShopCategory,
+    debouncedSearchTerm,
+    shopMaxPrice,
+    priceRange.min,
+    priceRange.max,
+    shopMinRating,
+    selectedBrands,
+    inStockOnly,
+    shopSortBy
+  ]);
+
+  const showMainPagination = selectedShopCategory === 'all' && selectedShopCategories.length === 0;
+  const totalShopPages = Math.max(1, Math.ceil(filteredShopProducts.length / SHOP_PAGE_SIZE));
+  const paginatedShopProducts = showMainPagination
+    ? filteredShopProducts.slice((shopPage - 1) * SHOP_PAGE_SIZE, shopPage * SHOP_PAGE_SIZE)
+    : filteredShopProducts;
+
+  useEffect(() => {
+    if (!showMainPagination) return;
+    if (shopPage > totalShopPages) {
+      setShopPage(totalShopPages);
+    }
+  }, [shopPage, totalShopPages, showMainPagination]);
+
+  const toggleBrand = (brand: string) => {
+    setShopPage(1);
+    setSelectedBrands((current) => current.includes(brand) ? current.filter((item) => item !== brand) : [...current, brand]);
+  };
+
+  const toggleShopCategoryFilter = (category: ShopCategory) => {
+    setShopPage(1);
+    setSelectedShopCategories((current) => {
+      const updated = current.includes(category)
+        ? current.filter((item) => item !== category)
+        : [...current, category];
+      setSelectedShopCategory(updated[0] || 'all');
+      return updated;
     });
+  };
+
+  useEffect(() => {
+    if (view !== 'shop') return;
+    setIsShopLoading(true);
+    const timer = window.setTimeout(() => setIsShopLoading(false), 220);
+    return () => window.clearTimeout(timer);
+  }, [
+    view,
+    debouncedSearchTerm,
+    selectedShopCategory,
+    selectedShopCategories,
+    selectedBrands,
+    shopMinRating,
+    priceRange.min,
+    priceRange.max,
+    inStockOnly,
+    shopSortBy
+  ]);
 
   const removeFromWishlist = (id: number) => {
     setWishlistItems(prev => prev.filter(item => item.id !== id));
@@ -968,11 +1335,63 @@ export default function App() {
     <SearchContext.Provider value={{ searchTerm, setSearchTerm }}>
     <div className="min-h-screen bg-background text-on-background font-body selection:bg-primary/30 relative overflow-hidden">
       {/* Overlay Grain Texture */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[100] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[100] bg-[url('/images/local/asset-0044.png')]"></div>
 
       {/* Background Decoration */}
       <div className="fixed top-0 right-0 -z-10 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4"></div>
       <div className="fixed bottom-0 left-0 -z-10 w-[30vw] h-[30vw] bg-primary/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4"></div>
+
+      {/* FIX: mobile navigation (global categories side menu) */}
+      <AnimatePresence>
+        {isCategoryMenuOpen && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close menu"
+              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsCategoryMenuOpen(false)}
+            />
+            <motion.aside
+              className="fixed left-0 top-0 h-full w-full sm:w-[420px] bg-surface-container-lowest border-r border-outline-variant/20 z-50 lg:hidden overflow-y-auto"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'tween', duration: 0.25 }}
+            >
+              <div className="flex items-center justify-between p-6 border-b border-outline-variant/20">
+                <h2 className="font-headline text-2xl text-primary">Browse Categories</h2>
+                <button type="button" onClick={() => setIsCategoryMenuOpen(false)} className="p-2 rounded-lg hover:bg-surface-container-highest/40 text-on-surface-variant">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-6 space-y-3">
+                {shopCategoryOptions.map((cat) => {
+                  const isActive = selectedShopCategories.includes(cat.id) || selectedShopCategory === cat.id;
+                  return (
+                    <button
+                      type="button"
+                      key={`global-drawer-${cat.id}`}
+                      onClick={() => openShopCategory(cat.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${isActive ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant/20 hover:border-primary/40 text-on-surface'}`}
+                    >
+                      <img
+                        src={cat.image}
+                        alt={cat.label}
+                        className="w-10 h-10 rounded object-cover"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
+                      />
+                      <span className="font-label text-xs uppercase tracking-widest font-bold">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {['admin-dashboard', 'admin-products', 'admin-orders', 'admin-customers', 'admin-customer-profile', 'admin-coupons'].includes(view) && (
@@ -1002,6 +1421,7 @@ export default function App() {
             <TopNavBar 
               view={view} 
               setView={setView} 
+              onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
@@ -1184,10 +1604,10 @@ export default function App() {
                 </div>
                 <div className="flex gap-8 overflow-x-auto no-scrollbar pb-12 snap-x">
                   {[
-                    { name: 'Vanguard Titanium VII', price: '$8,900.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9yKS7lKG6nzAZUnoDJ6Dh4KjMZ6Ely0t-BGuWCPkjnYystsMd5XPHD9qQDo7YNbTamm-xwpbCCJdRsdfUy1eY9WuJ7tDI_yF0h7Vae6ZPdOhBB506Zy5C704pC8CD5Nrw_aB1yCG2ey7N9GWpn6GW6RH5G0o5HJtH4lHaHdmYJMFVeq4-qb4SC8dvIl3E0i6d8jo_PoZwMch-V5c5GbLzzbM9FSFpQRbDc7ajeUPqtLNvFqDnl0yoNhXy60XbCqpl9rh3gniMUwQ' },
-                    { name: 'Nomad Leather Holdall', price: '$2,450.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDh8RXwoI94VQ9T1jx_0iszg3N6y6tbEw-f8AL59q6dxVPjsuNs8BMorQmNs5odRgAH0fHo2r2epFT_Q2a6IPXhkp-3Bz42e5-m1NIsa_ooV3wWV8dm5K8peLnubr_8wrNYgyVs7hrbMoDVCg-uZ7hd7em6P99GaDNrXokpV3fU-1kMIeMChCA2iXJLKd_Ylhu4ExeCorMuMOnn9z20yYGKbsCGVOx4gBex94dorYDRvY-dvySQCmDFJDMyF9qA5x8ur6KUswc1cug' },
-                    { name: 'Stiletto Noir \'24', price: '$1,150.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCWt0sgrctWUgrBdPIupTTjZHXJP9zIV3u2BcoqUEtMyAyvLaFSZdHtiA61pP1v0WgjrdJi10Djh4P1OlqftEogqVs88IRt4JC9CBt4zKxn0GpsyjD972YJw-y6vK_nG4X_83ZuQ6ehIgSCcyd8ljMg9_m6Rwxcq1pyjpyccevxBkybSgw5ixbgbPJm2nRsYWh4lNHAbyV64TCPwyKyklMznanXMTA2wuuVDL22GCe2MZi45k-Uax3mMDHjc36PdNk6YMrRNcYwHwo' },
-                    { name: 'Eclipse Shades', price: '$620.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDn6xOKVfISdW3SWOCKl1KZOEXBbN8sBYrxfkDSberFqHHrky9W8k1RVEMH4qIeVUgIB_l8bI-WBUF5sJwNbDx_44HYFKKT8W_g4TiBefO7qDGNTW_Bt5DXNChEt2tNlikHqzIaQGYt7HL-zXetgGX53jwcYIGfPiPuHdtt2oiqZIyqPG2Jfk5p-vtYUH4bOr8pypKyndQunYGIwxFcjsOIjXzLhs4wRbPd7SPBJ-a23Oj3U-BIHXs8mpjqODLi4IVSnNAq8zzipJA' }
+                    { name: 'Vanguard Titanium VII', price: '$8,900.00', img: '/images/local/asset-0045.png' },
+                    { name: 'Nomad Leather Holdall', price: '$2,450.00', img: '/images/local/asset-0046.png' },
+                    { name: 'Stiletto Noir \'24', price: '$1,150.00', img: '/images/local/asset-0047.png' },
+                    { name: 'Eclipse Shades', price: '$620.00', img: '/images/local/asset-0048.png' }
                   ].map((item, i) => (
                     <div key={i} className="min-w-[320px] snap-start group cursor-pointer">
                       <div className="h-96 w-full mb-6 overflow-hidden rounded-lg bg-surface-container-low">
@@ -1252,6 +1672,7 @@ export default function App() {
             <TopNavBar 
               view={view} 
               setView={setView} 
+              onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
@@ -1291,48 +1712,35 @@ export default function App() {
                     <p className="text-on-surface-variant font-light tracking-wide">Select your curated destination for arrival.</p>
                   </header>
 
+                  {/* FIX: checkout address radio highlight */}
                   {/* Saved Addresses Bento Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Address Card Active */}
-                    <label className="relative group cursor-pointer">
-                      <input defaultChecked className="peer sr-only" name="address" type="radio"/>
-                      <div className="h-full p-6 bg-surface-container-highest/10 backdrop-blur-xl border border-outline-variant/30 rounded-xl transition-all duration-500 peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-surface-container-high/40">
-                        <div className="flex justify-between items-start mb-4">
-                          <span className="px-3 py-1 bg-surface-container-highest text-primary text-[10px] font-headline uppercase tracking-[0.2em] rounded-full">Home</span>
-                          <div className="w-5 h-5 rounded-full border border-outline-variant peer-checked:bg-primary flex items-center justify-center transition-colors">
-                            <div className="w-2 h-2 rounded-full bg-on-primary opacity-0 peer-checked:opacity-100"></div>
+                    {addresses.map((addr) => (
+                      <label key={addr.id} className={`address-card relative group cursor-pointer h-full p-6 bg-surface-container-highest/10 backdrop-blur-xl border rounded-xl transition-all duration-500 hover:bg-surface-container-high/40 ${selectedAddress === addr.id ? 'border-yellow-400 shadow-[0_0_0_1px_#F5C518]' : 'border-outline-variant/30'}`}>
+                        <input
+                          className="checkout-address-radio"
+                          name="address"
+                          type="radio"
+                          value={addr.id}
+                          checked={selectedAddress === addr.id}
+                          onChange={(e) => setSelectedAddress(e.target.value as 'home' | 'work')}
+                        />
+                        <div className="h-full">
+                          <div className="flex justify-between items-start mb-4">
+                            <span className="px-3 py-1 bg-surface-container-highest text-primary text-[10px] font-headline uppercase tracking-[0.2em] rounded-full">{addr.addressType}</span>
                           </div>
+                          <h3 className="text-lg font-headline text-on-surface mb-1">{addr.fullName}</h3>
+                          <p className="text-sm text-on-surface-variant mb-4">{addr.phone}</p>
+                          <p className="text-sm text-on-surface-variant leading-relaxed font-light">
+                            {addr.street}<br/>
+                            {addr.city}, {addr.state} {addr.pincode}<br/>
+                          </p>
                         </div>
-                        <h3 className="text-lg font-headline text-on-surface mb-1">Julian Thorne</h3>
-                        <p className="text-sm text-on-surface-variant mb-4">+1 (555) 012-3456</p>
-                        <p className="text-sm text-on-surface-variant leading-relaxed font-light">
-                          427 Obsidian Avenue, Suite 900<br/>
-                          Lower Manhattan, NY 10013<br/>
-                          United States
-                        </p>
-                      </div>
-                    </label>
-
-                    {/* Address Card */}
-                    <label className="relative group cursor-pointer">
-                      <input className="peer sr-only" name="address" type="radio"/>
-                      <div className="h-full p-6 bg-surface-container-highest/10 backdrop-blur-xl border border-outline-variant/30 rounded-xl transition-all duration-500 peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-surface-container-high/40">
-                        <div className="flex justify-between items-start mb-4">
-                          <span className="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-headline uppercase tracking-[0.2em] rounded-full">Work</span>
-                          <div className="w-5 h-5 rounded-full border border-outline-variant peer-checked:bg-primary flex items-center justify-center transition-colors"></div>
-                        </div>
-                        <h3 className="text-lg font-headline text-on-surface mb-1">Julian Thorne</h3>
-                        <p className="text-sm text-on-surface-variant mb-4">+1 (555) 987-6543</p>
-                        <p className="text-sm text-on-surface-variant leading-relaxed font-light">
-                          Metropolitan Tower, Floor 54<br/>
-                          Financial District, NY 10005<br/>
-                          United States
-                        </p>
-                      </div>
-                    </label>
+                      </label>
+                    ))}
 
                     {/* Add New Address Button */}
-                    <button className="h-full p-8 border border-dashed border-outline-variant/50 rounded-xl flex flex-col items-center justify-center gap-4 text-on-surface-variant hover:text-primary hover:border-primary transition-all duration-500 hover:bg-primary/5 group">
+                    <button type="button" onClick={() => setShowAddressForm(true)} className="h-full p-8 border border-dashed border-outline-variant/50 rounded-xl flex flex-col items-center justify-center gap-4 text-on-surface-variant hover:text-primary hover:border-primary transition-all duration-500 hover:bg-primary/5 group">
                       <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Plus size={24} />
                       </div>
@@ -1341,42 +1749,48 @@ export default function App() {
                   </div>
 
                   {/* Inline Form (Expanded State Concept) */}
-                  <div className="pt-8 border-t border-outline-variant/10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Full Name</label>
-                        <input className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light outline-none" placeholder="Enter full name" type="text"/>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Phone Number</label>
-                        <input className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light outline-none" placeholder="+1 (000) 000-0000" type="tel"/>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Pincode</label>
-                        <input className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light font-mono outline-none" placeholder="Zip / Postal Code" type="text"/>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Type</label>
-                        <div className="flex gap-4 py-1">
-                          <button className="px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary text-[10px] font-headline uppercase tracking-widest">Home</button>
-                          <button className="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant text-[10px] font-headline uppercase tracking-widest hover:border-on-surface transition-colors">Work</button>
-                          <button className="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant text-[10px] font-headline uppercase tracking-widest hover:border-on-surface transition-colors">Other</button>
+                  {showAddressForm && (
+                    <form onSubmit={handleAddAddressSubmit} className="pt-8 border-t border-outline-variant/10">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Full Name</label>
+                          <input required value={addressFormData.fullName} onChange={(e) => setAddressFormData({...addressFormData, fullName: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light outline-none" placeholder="Enter full name" type="text"/>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Phone Number</label>
+                          <input required value={addressFormData.phone} onChange={(e) => setAddressFormData({...addressFormData, phone: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light outline-none" placeholder="+1 (000) 000-0000" type="tel"/>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Pincode</label>
+                          <input required value={addressFormData.pincode} onChange={(e) => setAddressFormData({...addressFormData, pincode: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light font-mono outline-none" placeholder="Zip / Postal Code" type="text"/>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Type</label>
+                          <div className="flex gap-4 py-1">
+                            <button type="button" onClick={() => setAddressFormData({...addressFormData, addressType: 'HOME'})} className={`px-4 py-2 rounded-full border ${addressFormData.addressType === 'HOME' ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'} text-[10px] font-headline uppercase tracking-widest transition-colors`}>Home</button>
+                            <button type="button" onClick={() => setAddressFormData({...addressFormData, addressType: 'WORK'})} className={`px-4 py-2 rounded-full border ${addressFormData.addressType === 'WORK' ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'} text-[10px] font-headline uppercase tracking-widest transition-colors`}>Work</button>
+                            <button type="button" onClick={() => setAddressFormData({...addressFormData, addressType: 'OTHER'})} className={`px-4 py-2 rounded-full border ${addressFormData.addressType === 'OTHER' ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'} text-[10px] font-headline uppercase tracking-widest transition-colors`}>Other</button>
+                          </div>
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Line 1</label>
+                          <input required value={addressFormData.street} onChange={(e) => setAddressFormData({...addressFormData, street: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light outline-none" placeholder="Street name and house number" type="text"/>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">City</label>
+                          <input required value={addressFormData.city} onChange={(e) => setAddressFormData({...addressFormData, city: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text" placeholder="New York" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">State</label>
+                          <input required value={addressFormData.state} onChange={(e) => setAddressFormData({...addressFormData, state: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text" placeholder="NY" />
                         </div>
                       </div>
-                      <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Line 1</label>
-                        <input className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 py-3 transition-all font-light outline-none" placeholder="Street name and house number" type="text"/>
+                      <div className="mt-8 flex justify-end gap-4">
+                        <button type="button" onClick={() => setShowAddressForm(false)} className="px-6 py-3 font-headline text-xs tracking-widest uppercase hover:text-primary transition-colors">Cancel</button>
+                        <button type="submit" className="px-6 py-3 bg-primary text-on-primary rounded font-headline text-xs tracking-widest uppercase">Save</button>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">City</label>
-                        <input className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text" defaultValue="New York"/>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">State</label>
-                        <input className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text" defaultValue="NY"/>
-                      </div>
-                    </div>
-                  </div>
+                    </form>
+                  )}
 
                   <div className="flex justify-start">
                     <button 
@@ -1544,8 +1958,8 @@ export default function App() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <img loading="lazy" className="h-6 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6COW9Wlghkg27HhY8Bv0r0aRHiAQ-Rs-5l3FjZC9jBT582dsgbTsu998n-UDSPlC9brVW-X3f4sjRUjJXM_APbPu73-tqN7Dt-oSrB3IDtjzSTwmdC1KluyTRU237t71CkWVvNXH1hcg-1KpLPiRQw5wl3kjuNuqJF5jp85Wm4UEgkbrHa6MHQ72xmU_04MiENtQgBfwG4ciVCTxuTPF6F66TMxEG6mJpa-gCW0_7jeGfecLkMvj2Erarrv1YvJXFXThRg0l4_VY" alt="Visa" />
-                          <img loading="lazy" className="h-6 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiKrjxS9gB9now9ctq4FNKNBzsS1JCEpgwzu5KyhtRiz7SbaYGcd7-4qIjVu6Ue3D3O0IWnMUcmaQ7uQgHQNIq1GPrRmYYWXVNNNxaqzTweIJMTXO8hdarfPT_khnExM0YqxVVYbCQus1vuEJCfVFqV9eY3UtOzYehkyMmGEDhw1u55ZF-lxIds57XpZy1Su4XWjdK9J4M6ClN_9TDahf3ZGvDegmsHL2s4GAC-CifsxJTfjRV5RqJnMoN7_nrNhxJgKTTeiWYD6I" alt="Mastercard" />
+                          <img loading="lazy" className="h-6 opacity-80" src="/images/local/asset-0049.png" alt="Visa" />
+                          <img loading="lazy" className="h-6 opacity-80" src="/images/local/asset-0050.png" alt="Mastercard" />
                         </div>
                       </label>
                       
@@ -1609,7 +2023,7 @@ export default function App() {
                             <span className={`font-headline text-lg ${paymentMethod === 'upi' ? 'text-on-surface' : 'text-on-surface-variant'}`}>UPI Payment</span>
                           </div>
                         </div>
-                        <img loading="lazy" className="h-4 opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVzjbe1B4nl5VLbJzUTY-69oFjlLPemtPzOdLNImPLpPotGsZvJ8W6I07NkUD4CS9LdAaz9ZmYxXGebDHvTthUj_kmKDtlB5vYKKU7ea1bro_dT_tW7_4W0_g6bjblzvunZ7-4DbmHgahFCVgNzDfDod_IJnClJIIdDUMCwnYHwRPJ0M_J2vES8gkgQ2AhVH6nuwJ2ie67ngaTMmhJvwVWbrl3KHw7__t5t_yuhqThZZYhvvhSPpXzSqdDRDBNg7SdDer0namC8AY" alt="UPI" />
+                        <img loading="lazy" className="h-4 opacity-40" src="/images/local/asset-0051.png" alt="UPI" />
                       </label>
                     </div>
 
@@ -2163,7 +2577,7 @@ export default function App() {
                           <img 
                             alt="Luxury Item" 
                             className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500" 
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM_J84AWBlt1n-UwraOxGAdemOwbRosz4-zpe2TKrYENbkiNQtTKe52-kflw8f8iDc5fs0QbsekjyTG96JuD9ReUFllsUitI_KcfGeDQiS_zS89KnjWHroRGJeXxN6ezVHs3kE7vZUOatATKdKSKJy5FcsotRb9Bq5LHNijXNhK7n2n-IrSTXrglnzVsWrA3P98SzePGV3tWvLX4Dmiag4tdDMmBwfnsCWEps0AapSkxhl2_Bkv7bx12G1lvoOqDrIxuFwcCDuPWw"
+                            src="/images/local/asset-0052.png"
                             referrerPolicy="no-referrer"
                           />
                         </div>
@@ -2181,7 +2595,7 @@ export default function App() {
                           <img 
                             alt="Luxury Item" 
                             className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500" 
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiUu4V-hZLRrhctVtDqZiGdQZtjd0mnZvfHVMAv9Nn-eFFINDzU4VrGHkSFkciq0Mg7fg7gWH_MxVBXCT5acQewn16IsApXkXxKAGhg_oI0NwtsSZkjA9ErCQtAs92XRGrKt5doU7_xWrcueHbfktLmYJmFN1fQrXCpZXaUxCwcEF7OCQSfTJoHMKTwjSVhp5P2fSSFrPFuvMgts64WL7TAG40Aqs_WDWMLohwQ9CCUVM3N_CEl0MFDiv6OtkGAxkN9VEYhCy8RdQ"
+                            src="/images/local/asset-0053.png"
                             referrerPolicy="no-referrer"
                           />
                         </div>
@@ -2199,7 +2613,7 @@ export default function App() {
                           <img 
                             alt="Luxury Item" 
                             className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500" 
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiCQpMYBekSgE57-anDVkf40zYJwOu_pystzAyc2A31x-9YN1BssuQUETD-IlCoC9UzANYmeFSjyrKRh8sA5ABYHg6e_19xUIYwViMHX4rBroWgdhqdEQxU8sVxjg0vMmHdtsTJjIin52cay_DtRF0EiTP1uFnbENrZU20mgt5esH3WF-MxXAs2oVcHfldMFTFUy4uQjOkmB3URGKILu0TKOSMI7G1p6roTJMSOLKG7CASoR8NSR7snIMwsnZzZ-JWBeRbV4xF2d8"
+                            src="/images/local/asset-0054.png"
                             referrerPolicy="no-referrer"
                           />
                         </div>
@@ -2375,7 +2789,7 @@ export default function App() {
                     </div>
                     <div className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/30">
                       <div className="flex items-center gap-4 mb-4">
-                        <img loading="lazy" className="w-12 h-12 rounded-full object-cover grayscale brightness-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANiWUQVAXT2mseIYESKYPqTOYmIInFyzgB7GybWRrvyxMEjNyXLOyUGilGLg3R8wgd1B_8BHiL0HgAB-h9UKandWii5N-Y-nBui-7Uut0AYFmXjw4jGH7OT5PoiXtRz3rH5_XWUSJP0Go9HWbN0RnHmgZZ6kfwkOKuJpEZtdy66bsYGey_xKfboJoPC0wZODIKeGsTxCpzcEA3tD0Y6PLQnY4YEfH-4j5lJtB5ksLsdDI7PtqlPYnq7GQ4t3sSCaojjgoIweijGpo" alt="Designated Driver Avatar" />
+                        <img loading="lazy" className="w-12 h-12 rounded-full object-cover grayscale brightness-110" src="/images/local/asset-0055.png" alt="Designated Driver Avatar" />
                         <div>
                           <p className="font-label text-[10px] uppercase text-on-surface-variant">Designated Driver</p>
                           <p className="font-body font-bold text-on-surface">Julien Vasseur</p>
@@ -2435,7 +2849,7 @@ export default function App() {
                       <p className="text-on-surface-variant">France</p>
                     </div>
                     <div className="mt-6 aspect-video rounded-lg overflow-hidden grayscale brightness-50 contrast-125 border border-outline-variant/30">
-                      <img loading="lazy" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCETgRstAM0HrZBkWfOmkhLKzTxtROGgerIUjzUKoyXR2UgLc1jjD84BtJmV4HRzY9YR7FYSyx2OChoqd0vQ9yJ3jUdYLMSARtPqAT-fuN-DpOcer-SHrLB4lF3LOvRmDFhbDne9jxStsrQ4HFBeusOLdBZN11YT7Iw110SaJa5KQxIiYDMKrmevLKGexkfg494hp3H9fDdPdC1Cjk8McBHO9VYNuBrieKdVvxcmH6U8KGqm2YAHpSHaO-ykvJF7dJBSEQ7g2H9T-k" alt="Luxury Interior Showcase" />
+                      <img loading="lazy" className="w-full h-full object-cover" src="/images/local/asset-0056.png" alt="Luxury Interior Showcase" />
                     </div>
                   </div>
                   {/* Items in Shipment */}
@@ -2447,7 +2861,7 @@ export default function App() {
                     <div className="space-y-6">
                       <div className="flex gap-4 group">
                         <div className="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
-                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVanmtsmbt0gH7LorH6TuYJEDEM_Z3Qk4lGvh4PIBAbkA7hba9bdDihvYhBWtK9m2_UnCB-_EETqqOAw-a-D4iy5KiWr5IcD8OsgG0_7Z7-_ZaIHZVTkxSUjIZ7vamAKS3rWBSkjd-TwjKKoimdjzMW3tymVbVo3NBm2o_BYiGM6Q3BwAIxQV9W-j63nKa-AXbVdf3GlOdrtnNbT4VQ2L0k6n_8GH9JuBlptKXokGn8IhFX0twf4xFU54U0PZ4y_YPErKx3FsQqu0" alt="Obsidian Heritage Signature" />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="/images/local/asset-0057.png" alt="Obsidian Heritage Signature" />
                         </div>
                         <div className="flex flex-col justify-center">
                           <p className="font-headline text-sm font-semibold leading-tight text-on-surface">Noire Saffiano Tote</p>
@@ -2456,7 +2870,7 @@ export default function App() {
                       </div>
                       <div className="flex gap-4 group">
                         <div className="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
-                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4IMP9xvc9vfj_82Z4AhX_2WQKLPXElmakGqZcwfNDpAEYy8SOvt-b4nXMrTehEjFtwoJGILWG7qV0bCXaMQpCX3Pd6_5WP4W1bZnzKbx6esio94_AEVcDB29Qcd5eFhSke-t2STghbwdK1oqBfoOx4HHyArs9kus0Ns21_tQ1tD0ujXWJ935_atkwLHGkNDqAc6RSfRiG-kFJy-zUTJ6cA3Unkcu4HbyOR0K4WtV7zz4L2edrnjPRoITgjtZCgKfXgnCkDEEtnVw" alt="Premium Crafted Essence" />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="/images/local/asset-0058.png" alt="Premium Crafted Essence" />
                         </div>
                         <div className="flex flex-col justify-center">
                           <p className="font-headline text-sm font-semibold leading-tight text-on-surface">Eclipse Chronometer</p>
@@ -2465,7 +2879,7 @@ export default function App() {
                       </div>
                       <div className="flex gap-4 group opacity-50">
                         <div className="w-16 h-16 rounded bg-surface-container-high overflow-hidden shrink-0">
-                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ80WVERTSqcG39j3RqBe2jz6cuJXg7OXKa3IZEYtmZeDGNxkQP8vK9dKSFG0JkahUsOZsX0Ajsx6uZ2AWNMRYYAjsJHORQdYujf7bulgCt9CFn-bFK1HwhJiGrOSuCpAVmzi0pDH1levb0D4xlZWFZsdAUt0W2Thy6gQoEWPZpQzJqyvGrdSkrUEoF8jgZeLJUxX1-kIrE4P5EDJb_Yka2LBX_EZNjdkSThqjTdlpA07WWDw9j0aHKqQZlojUs5kharrLdhslCEk" alt="Artisanal Leather Craft" />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-110" src="/images/local/asset-0059.png" alt="Artisanal Leather Craft" />
                         </div>
                         <div className="flex flex-col justify-center">
                           <p className="font-headline text-sm font-semibold leading-tight text-on-surface">Velvet Step Loafers</p>
@@ -2607,10 +3021,10 @@ export default function App() {
                         </div>
                         <div className="flex -space-x-4">
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300">
-                            <img loading="lazy" alt="Luxury silk scarf" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC33u-D5feId20_mfEE8zEDs0igE03Uk4FFop3NCatE5MKtVlY8DKU5Pfnw2v4A8GQ6MN2GOhKI6HlzsMFw7oIjpBfA8FMEPiLQ1vxK4Z9Npgr0zVxAf2RbRYwdazGHls1_UWw0-QxORsTL5lzXIOydvqu1IXvz9iXop6TzVLvFHQrZm2auFBF8DQ1cKAoitRB1oxwdAXuVjlKY85q4J5Wl26juIlBSPirv8XSWAzRDENT2id0UqIs6GpFulxd6Q0LvrVlY3hjOmyw" />
+                            <img loading="lazy" alt="Luxury silk scarf" className="w-full h-full object-cover" src="/images/local/asset-0060.png" />
                           </div>
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300 delay-75">
-                            <img loading="lazy" alt="Designer timepiece" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrwvNinjtVsciLIx2_xGa7Wdy8ryErfCWJW3lFnZKPQDBVU9IQZwEPfnyP4Bjpbox7HAel3RuKVV3NOyP-RVMuucIOMMSIAB7z5Ls-CjGLlr3_QiNCrf9kCIBRI-HskZY-7t3ATkY-QSdjCaG-GOo2m36AmBHt7n7I3YTNcnAUCygkDYIPVurjFm_zmHUVnURhDGYzjqVUefGK90pTytGGh-YVri62pdUKgTBZsDgdRcmfiNLAWOnMIwFBlf9ROhfjFnp0XVOBzkM" />
+                            <img loading="lazy" alt="Designer timepiece" className="w-full h-full object-cover" src="/images/local/asset-0061.png" />
                           </div>
                           <div className="w-20 h-24 bg-surface-container-high rounded-lg flex items-center justify-center border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300 delay-150">
                             <span className="text-xs font-bold text-outline">+1</span>
@@ -2649,7 +3063,7 @@ export default function App() {
                         </div>
                         <div className="flex">
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl">
-                            <img loading="lazy" alt="Bespoke leather boots" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1nFaLKAs15ex2WwLINfv3Vscb47Cyni7CNOhb-twK0R5YJ2y4rxE4hnXTyOR7LoI8DEO9B8ApPpQS1l8hlv4a3LJ8_4P5Dc4iA8uDKz6Edv_O6S8xQLkxh2ikMRViKLjVtBdfkhMAPTPt4cmxm-Z5nj52nkyCrKZw_qrCx_r8A-QW15YE5rolbyHY6WiULtNJTRmcl5mrWUkTgAzkhSp8X_aDDHka5_5QmR9YNamjqTabYmpfMnXFnSlh7M5TJekq2aGx2_NWIko" />
+                            <img loading="lazy" alt="Bespoke leather boots" className="w-full h-full object-cover" src="/images/local/asset-0062.png" />
                           </div>
                         </div>
                         <p className="text-sm text-on-surface-variant font-medium">1 Item total • <span className="text-on-surface">Delivered Oct 02, 2024</span></p>
@@ -2685,7 +3099,7 @@ export default function App() {
                         </div>
                         <div className="flex">
                           <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest grayscale shadow-xl">
-                            <img loading="lazy" alt="Crystal decanter" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKD_EFGiKYA46zgCCroiGNUAofr9VKqFbySpn87T_iJXA8gJ7aYAqC9ap1hS4R84_yQ0PJh17kEAEjFm3EXsM1GrLfQ1ci0M63CBw8bsWZJKROEEfA4m2CiC5tLRnPQFbZ5E86dXPu-AVD0UMbYDSt9rI7fGIY8B-MR7nGn2iFJvNO4vjQETpRgpvpscD2MHssqwM4y6UtZU_f14YI825Jy3EKr9dU7FZ571azXbz6Hpefbfi5lAQ59oq61uXG6WvfpFbdvUvrbFU" />
+                            <img loading="lazy" alt="Crystal decanter" className="w-full h-full object-cover" src="/images/local/asset-0063.png" />
                           </div>
                         </div>
                         <p className="text-sm text-outline font-medium italic">Order was cancelled by customer</p>
@@ -2855,7 +3269,7 @@ export default function App() {
                   <div className="flex flex-col md:flex-row gap-10 items-start md:items-center relative z-10">
                     <div className="relative group/avatar">
                       <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-primary/20 p-1">
-                        <img loading="lazy" className="w-full h-full object-cover rounded-full" alt="Curator Identity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOb_-CF6n0kU_BRR35D8QXnZfNWMZ0hZBDDCGrrF4q_UOqszPvINYF_XpBq3nxGn2j5-OD7mY1v6nrW9mb-sGJGLvEP1hxYjHw273WYP7DYSqdZ-Wa22GdoGAIIgGnsLjs1Na4o8IlWizQSlVKvJbEB5A5NALojxA511bCbJ0CzNHv-c8jarzZ6VUKLFcmiSiMhtgjxXI0DA0uPBjGYccoxMyKrYKyw5lORzHJ7i_MUdEO6ydcokJpiY3Hm6NCJZr14qir068t3bQ" referrerPolicy="no-referrer" />
+                        <img loading="lazy" className="w-full h-full object-cover rounded-full" alt="Curator Identity" src="/images/local/asset-0064.png" referrerPolicy="no-referrer" />
                       </div>
                       <button className="absolute bottom-2 right-2 bg-primary text-on-primary p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center">
                         <Camera size={16} />
@@ -3061,29 +3475,73 @@ export default function App() {
           >
             <div className="flex flex-col gap-8">
               <div className="flex justify-end">
-                <button className="px-6 py-3 bg-primary text-on-primary rounded-lg font-headline text-xs uppercase tracking-widest hover:bg-primary-container transition-all">
-                  Add New Residence
+                <button type="button" onClick={() => setShowAddressForm(!showAddressForm)} className="px-6 py-3 bg-primary text-on-primary rounded-lg font-headline text-xs uppercase tracking-widest hover:bg-primary-container transition-all">
+                  {showAddressForm ? 'Cancel' : 'Add New Residence'}
                 </button>
               </div>
+
+              {showAddressForm && (
+                <form onSubmit={handleAddAddressSubmit} className="pt-8 border-t border-outline-variant/10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Full Name</label>
+                      <input required value={addressFormData.fullName} onChange={(e) => setAddressFormData({...addressFormData, fullName: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text"/>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Phone Number</label>
+                      <input required value={addressFormData.phone} onChange={(e) => setAddressFormData({...addressFormData, phone: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="tel"/>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Pincode</label>
+                      <input required value={addressFormData.pincode} onChange={(e) => setAddressFormData({...addressFormData, pincode: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text"/>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Type</label>
+                      <div className="flex gap-4 py-1">
+                        <button type="button" onClick={() => setAddressFormData({...addressFormData, addressType: 'HOME'})} className={`px-4 py-2 rounded-full border ${addressFormData.addressType === 'HOME' ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'} text-[10px] transform-none transition-colors`}>Home</button>
+                        <button type="button" onClick={() => setAddressFormData({...addressFormData, addressType: 'WORK'})} className={`px-4 py-2 rounded-full border ${addressFormData.addressType === 'WORK' ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'} text-[10px] transform-none transition-colors`}>Work</button>
+                        <button type="button" onClick={() => setAddressFormData({...addressFormData, addressType: 'OTHER'})} className={`px-4 py-2 rounded-full border ${addressFormData.addressType === 'OTHER' ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'} text-[10px] transform-none transition-colors`}>Other</button>
+                      </div>
+                    </div>
+                    <div className="md:col-span-2 space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Address Line 1</label>
+                      <input required value={addressFormData.street} onChange={(e) => setAddressFormData({...addressFormData, street: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text"/>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">City</label>
+                      <input required value={addressFormData.city} onChange={(e) => setAddressFormData({...addressFormData, city: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">State</label>
+                      <input required value={addressFormData.state} onChange={(e) => setAddressFormData({...addressFormData, state: e.target.value})} className="w-full bg-surface-container-highest/50 border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface py-3 transition-all font-light outline-none" type="text" />
+                    </div>
+                  </div>
+                  <div className="mt-8 flex justify-end gap-4">
+                    <button type="submit" className="px-6 py-3 bg-primary text-on-primary rounded font-headline text-xs tracking-widest uppercase">Save Address</button>
+                  </div>
+                </form>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-8 rounded-xl bg-surface-container-lowest border border-primary/20 relative group">
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <button className="p-2 text-on-surface-variant hover:text-primary transition-colors"><RotateCcw size={16} /></button>
-                    <button className="p-2 text-on-surface-variant hover:text-error transition-colors"><Trash2 size={16} /></button>
-                  </div>
-                  <div className="flex gap-6 items-start">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Home size={24} />
+                {addresses.map((addr) => (
+                  <div key={addr.id} className="p-8 rounded-xl bg-surface-container-lowest border border-primary/20 relative group">
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <button className="p-2 text-on-surface-variant hover:text-primary transition-colors"><RotateCcw size={16} /></button>
+                      <button className="p-2 text-on-surface-variant hover:text-error transition-colors"><Trash2 size={16} /></button>
                     </div>
-                    <div className="space-y-1">
-                      <span className="text-[10px] uppercase tracking-widest text-primary font-bold">Primary Estate</span>
-                      <h4 className="text-xl font-headline text-on-surface">Alexander Vance</h4>
-                      <p className="text-on-surface-variant font-light">742 Evergreen Terrace</p>
-                      <p className="text-on-surface-variant font-light">Springfield, OR 97403</p>
-                      <p className="text-on-surface-variant font-light">United States</p>
+                    <div className="flex gap-6 items-start">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <Home size={24} />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase tracking-widest text-primary font-bold">{addr.addressType}</span>
+                        <h4 className="text-xl font-headline text-on-surface">{addr.fullName}</h4>
+                        <p className="text-on-surface-variant font-light">{addr.street}</p>
+                        <p className="text-on-surface-variant font-light">{addr.city}, {addr.state} {addr.pincode}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </ProfileViewLayout>
@@ -3259,12 +3717,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="timepieces"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Luxury Timepieces"
             subtitle="Engineering Eternity"
-            heroImg="https://images.unsplash.com/photo-1523170335684-f042f1b8f374?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0001.png"
             products={timepieceProducts}
           />
         )}
@@ -3276,12 +3735,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="jewelry"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="High Jewelry"
             subtitle="Artisanal Brilliance"
-            heroImg="https://images.unsplash.com/photo-1515562141207-5dba3b964d7d?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0009.png"
             products={jewelryProducts}
           />
         )}
@@ -3293,12 +3753,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="leather"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Leather Goods"
             subtitle="Timeless Craftsmanship"
-            heroImg="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0003.png"
             products={leatherProducts}
           />
         )}
@@ -3310,12 +3771,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="fashion"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Haute Couture"
             subtitle="Sartorial Excellence"
-            heroImg="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0002.png"
             products={fashionProducts}
           />
         )}
@@ -3327,12 +3789,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="home"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Home & Living"
             subtitle="Curated Interiors"
-            heroImg="https://images.unsplash.com/photo-1578926314433-8e51a28a0204?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0004.png"
             products={homeProducts}
           />
         )}
@@ -3344,12 +3807,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="beauty"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Fragrances & Beauty"
             subtitle="Olfactory Masterpieces"
-            heroImg="https://images.unsplash.com/photo-1595777707802-21b287641c1d?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0005.png"
             products={beautyProducts}
           />
         )}
@@ -3361,12 +3825,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="sports"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Sports & Recreation"
             subtitle="Athletic Excellence"
-            heroImg="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0006.png"
             products={sportsProducts}
           />
         )}
@@ -3378,12 +3843,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="books"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Rare Books & Manuscripts"
             subtitle="Literary Treasures"
-            heroImg="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0007.png"
             products={booksProducts}
           />
         )}
@@ -3395,12 +3861,13 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="toys"
             onCategorySelect={openShopCategory}
             onProductSelect={openProductDetail}
             title="Collectible Toys"
             subtitle="Timeless Companions"
-            heroImg="https://images.unsplash.com/photo-1594545514411-854a028e7195?w=1600&h=800&fit=crop"
+            heroImg="/images/local/asset-0008.png"
             products={toysProducts}
           />
         )}
@@ -3431,8 +3898,8 @@ export default function App() {
             />
 
             <main className="flex-grow">
-              {/* Hero Banner */}
-              <section className="relative min-h-[80vh] flex items-center px-6 md:px-20 py-20 overflow-hidden">
+              {/* FIX: hero mobile responsiveness */}
+              <section className="relative min-h-[100svh] flex items-center px-4 md:px-20 py-12 md:py-20 overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none"></div>
                 <div className="max-w-[1920px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                   <motion.div 
@@ -3445,7 +3912,7 @@ export default function App() {
                     <span className="inline-block px-4 py-1 rounded-full bg-surface-container-highest text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-6 border border-primary/20">
                       New Era of Commerce
                     </span>
-                    <h1 className="text-6xl md:text-8xl font-black text-on-surface leading-[0.9] mb-8 tracking-tighter font-headline">
+                    <h1 className="font-black text-on-surface leading-[0.9] mb-8 tracking-tighter font-headline text-[clamp(1.5rem,5vw,3.5rem)] md:text-8xl">
                       Shop the Future, <br/>
                       <span className="text-primary italic">Delivered Today</span>
                     </h1>
@@ -3455,7 +3922,7 @@ export default function App() {
                     <div className="flex flex-wrap gap-6">
                       <button 
                         onClick={() => openShopCategory('all')}
-                        className="px-10 py-4 bg-primary text-on-primary font-bold rounded-lg shadow-[0_20px_40px_rgba(230,195,100,0.2)] hover:scale-105 transition-transform uppercase tracking-widest text-xs"
+                        className="px-10 py-4 min-h-11 min-w-11 bg-primary text-on-primary font-bold rounded-lg shadow-[0_20px_40px_rgba(230,195,100,0.2)] hover:scale-105 transition-transform uppercase tracking-widest text-xs"
                       >
                         Shop Now
                       </button>
@@ -3481,7 +3948,7 @@ export default function App() {
                           price: '$14,200',
                           rating: 5,
                           reviews: 84,
-                          img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB_llE45W0HkI_1DaKHqIRFybzWfdmRrSP4o_5YaBTEngwCN07GrVPGKXz36N1WvS78lhaMCa1yszjkpbfhfxln1otPQdPxoWQ-WywHcsxuYILqUrKhh1PnLNdpNV1zv1EO_7R8-TCRKq_DHwXdG_jagWgo3ut86EiqhwkNxOe2Oxr1ZICwCy-j0uV4FGfJBXBeZcstmQ5g8Q1We1cg6h850_RqsFkxfX-TEGXbQyjJgLeNUreHAxr_trXn6a9ASYD1lI6BAGCFNKE'
+                          img: '/images/local/asset-0065.png'
                         });
                         setView('product-detail');
                         setSelectedImage(0);
@@ -3490,7 +3957,8 @@ export default function App() {
                       <img 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
                         alt="Featured Product"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_llE45W0HkI_1DaKHqIRFybzWfdmRrSP4o_5YaBTEngwCN07GrVPGKXz36N1WvS78lhaMCa1yszjkpbfhfxln1otPQdPxoWQ-WywHcsxuYILqUrKhh1PnLNdpNV1zv1EO_7R8-TCRKq_DHwXdG_jagWgo3ut86EiqhwkNxOe2Oxr1ZICwCy-j0uV4FGfJBXBeZcstmQ5g8Q1We1cg6h850_RqsFkxfX-TEGXbQyjJgLeNUreHAxr_trXn6a9ASYD1lI6BAGCFNKE" 
+                        src="/images/local/asset-0065.png" 
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
                       <div className="absolute bottom-8 left-8">
@@ -3502,7 +3970,7 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Category Grid */}
+              {/* FIX: category images mapping */}
               <section className="py-24 px-6 md:px-12 max-w-[1920px] mx-auto">
                 <div className="flex justify-between items-end mb-16">
                   <div>
@@ -3525,9 +3993,18 @@ export default function App() {
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.1 }}
                       onClick={() => openShopCategory(cat.id)}
-                      className="group bg-surface-container-low p-8 rounded-xl hover:bg-surface-container-highest transition-all duration-500 cursor-pointer border border-outline-variant/5 hover:border-primary/20"
+                      className="group bg-surface-container-low p-4 rounded-xl hover:bg-surface-container-highest transition-all duration-500 cursor-pointer border border-outline-variant/5 hover:border-primary/20"
                     >
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                      <div className="relative w-full h-32 overflow-hidden rounded-lg mb-4 border border-outline-variant/10">
+                        <img
+                          src={cat.image}
+                          alt={cat.label}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
                         <cat.icon size={24} />
                       </div>
                       <h4 className="text-xl font-headline mb-2">{cat.label}</h4>
@@ -3570,10 +4047,10 @@ export default function App() {
                 </div>
                 <div className="flex gap-8 px-6 md:px-12 overflow-x-auto no-scrollbar pb-12 scroll-smooth">
                   {[
-                    { name: 'The Navigator Prime', price: '$1,299', tag: 'Limited Edition', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBOddCSuAs9TiAg1kqTUIDDwGV1MFMWwUBY7DGwpvvNcHNbw5aFIx2-fsFnC2SpxX08WVoUGeOP_RjmYEvTEXZBMDbExeNPa_ZOdUH2PcAi_LLTazPmaKYNzM89A1ptZFTK23Rt2biy6Dy_IvblACBK73R5gotvCe7ah7xR4wLf0GLMR1iY-9-6LXV6PMU0dFsYSCSOnkp7rPoPTJixzOquTmZ7IjDKpZHE_a6pOChS3pbBXPB3l-o-roHxxTpfci8c_vNTq-KA6wU' },
-                    { name: 'Obsidian Soundstage v4', price: '$549', tag: 'Audio Perfection', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClzLo29TAEyv7VoOsTD1JmYbu5he6v0z6PEqVSSGgODa7zm_OQTGUM3aaANXWb5HUtBG8yvn8nkcboHcWy2Id1MJMIA7iut6ykzRqCl5Vin3CvTCUHqWBpPeMLWQX_U5Jv-fsLNh_7oW-SqRNQSCh1rVZz_iK4JmdboUFyGSQwf6-DJsjd9Wag36aGx9ZREfq0o64tjcfCnWbSRzHIw4ZZaS6ujubv4QNzqr0djcYQtskzFcsuIketnsOivl3fEnbPeU3Qy2GpYSI' },
-                    { name: "L'Essence de L'Ombre", price: '$210', tag: 'Signature Scent', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB5-O5lwAGAhiQGzu2PplCemk6W8UA_Bo2-kVxVQqJGj291d5WC-NYyy-NwvmI1DL0_-GOaKCK38ebkJ5LQWUL6JEdT4wJfypz1rXn2ZxRneu18CrGPIiHi-xRSVnmLYlnIBfAzmCC-lAaktZU7lDOkC225pK7ZHVFWjqvGEbWITsK74t4xWA9bcKyj--hz1mcW-X3rVVaSfXx5au0gjj0HSzAyLD3p9Hk8i63J6mTA6VOQvSlmSrM3sYvWEF3NjUsQnaF4ZABCxEQ' },
-                    { name: 'The Voyager Duffel', price: '$890', tag: 'Artisanal Carry', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCrxuimTsUOnsUNyyaDjC_Q1UTSjbp3KJ9MjpDZDko9jtNp5mp8i_8YEAmtEyz2-RhMS5twd13TGwacLDhtW8KQ5_ZUo1SntTHoMAcGgzGD-qMIaxXrlzOkh4fK9VgwM440SZs1y2rU2uBGd9aX_zxHp3C7vUuU6pwRfm4NUOzwpnPjgXv4ysEH5wBj4EEbK8sUupGhffzmOiRovQQT_77-bhnHyxXHf2VUiP2A2THHmhSY6Svhl82CYnUG2-utAqaiQvfOKgScCMs' },
+                    { name: 'The Navigator Prime', price: '$1,299', tag: 'Limited Edition', img: '/images/local/asset-0066.png' },
+                    { name: 'Obsidian Soundstage v4', price: '$549', tag: 'Audio Perfection', img: '/images/local/asset-0067.png' },
+                    { name: "L'Essence de L'Ombre", price: '$210', tag: 'Signature Scent', img: '/images/local/asset-0068.png' },
+                    { name: 'The Voyager Duffel', price: '$890', tag: 'Artisanal Carry', img: '/images/local/asset-0069.png' },
                   ].map((item, i) => (
                     <motion.div 
                       key={item.name}
@@ -3636,9 +4113,9 @@ export default function App() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {[
-                    { name: 'Elena Vance', role: 'Art Director', quote: "The level of curation here is unmatched. It's like having a personal shopper with the world's most discerning eye for quality.", img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMsVgiI2n02XAVYXgk12_LrMY30XvytuGXDYO9PUO9s-HDVtFo6nUviMQS7onkIU-wvj5sQMgzQRBP08iHfC4Yh52gskBFTiLtWu-EzGi9PNi5Ht0VSdhkYRmzBVCQA3qc864kohKHt23dsd_9yprsJp_yb1QyWbtrywtu4fbfiwjujoiDLs1pD5MBCgN017oztCOQRYpOSfxK-Nm9Zzb64LrwaVLoP8qXq5GbldiF6b_bhBCT3gVX5YQc9hsNVtRXwNyalpKAiNA' },
-                    { name: 'Julian Thorne', role: 'Tech Founder', quote: "Fast delivery used to mean compromising on experience. The Obsidian Curator proves you can have both: speed and luxury.", img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBb2bg1mT3ZHRXWb0FXQIlD8Y2UOYXcirCAVc_9fbAppAToGLsAKGbLGJCVVTXqS4664q83lafxMFAKZFJtribwfDR6Z1dFMzfbqfHqdLK5aXSjI-SxhLiHvNA5f2i5u7FPAoE7zGeJcCLtGJuqi-5qSf-cTZfzx44df9GQShsVP1F8SgXqvgp__9IbvGW2YV2AQUwAYpJ6raDp6uyq1Y7NOt4KhPrqr4Rm86eErVrIy5_By5LOx_aic49c6Jje2uv6bIL1_HrwMTM' },
-                    { name: 'Sasha Grey', role: 'Digital Creator', quote: "Every package feels like a gift. The presentation is as important as the product itself. Truly a five-star service.", img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuANE9RLknVyHX9dmRIfJfsTGU7bK0A37GbDJ9V0TgG0sdEvrbyi450ae533uSj58Oiod5AyFTnBKQN2GMEPAPbmoDfivqlSDh1jStBeNoAE1InD6Ee9lPsAOBvzEp4eomZan_lGZC9bC4Mc0c3AwJI0MRFo7EHfooQeKInKi37PorOAbFpP7Nou1C89px9x6dENlyYXLbifK3De1UTVuCvzuKDyi2qiCRJ9Ak_YAPOqM7OPl2zW8P7VCc88fIAtGTKaHLsDViNtwGU' },
+                    { name: 'Elena Vance', role: 'Art Director', quote: "The level of curation here is unmatched. It's like having a personal shopper with the world's most discerning eye for quality.", img: '/images/local/asset-0070.png' },
+                    { name: 'Julian Thorne', role: 'Tech Founder', quote: "Fast delivery used to mean compromising on experience. The Obsidian Curator proves you can have both: speed and luxury.", img: '/images/local/asset-0071.png' },
+                    { name: 'Sasha Grey', role: 'Digital Creator', quote: "Every package feels like a gift. The presentation is as important as the product itself. Truly a five-star service.", img: '/images/local/asset-0072.png' },
                   ].map((t, i) => (
                     <motion.div 
                       key={t.name}
@@ -3776,7 +4253,7 @@ export default function App() {
                       initial={{ opacity: 0, scale: 1.1 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                      src={selectedProduct?.img || "https://lh3.googleusercontent.com/aida-public/AB6AXuBPODWNW7yoQlR40fXLLrKJmu00Ts5azOeRgAAe8l3NYn6OkugzT2xOJ4PjMzLpohaNC3APoDw4R1uxscE-gLT1nyjQlaKWhrgySEOtwVzq4RcLM000R3RVl109y271dZlxz_OItntjBih7CUfRiMVK413UWPkyrlY4dVkyIEPBQv1j_aVljKiR6lWrzu5DMHwQqyti1H8hoFT8jMDx_D27zo5pGzowndIumzaTY4vbUKG-XSYRsFvnmR4hFJdpdmS3hvfY9Yqt6O4"}
+                      src={selectedProduct?.img || "/images/local/asset-0073.png"}
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute top-6 left-6 bg-primary/90 text-on-primary px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-xl">
@@ -3792,7 +4269,7 @@ export default function App() {
                       >
                         <img 
                           className="w-full h-full object-cover" 
-                          src={selectedProduct?.img || "https://lh3.googleusercontent.com/aida-public/AB6AXuBsciy6ogfhpGFJSwJKeZwPDLgbf2Ez9h9hXsBCpLxJ3y4GwUZWPKoSN8B370y3uzR43yPnN13y5LRaIFeqSskyt4arXjCiqC9NU5qAsJA7nFw_TTSd5FqQ4Masxptv-xS2l_HAEFr9_SeMjDE1mJnGkapj6JuP1ndmOvMnL0_b2DQ1LDuML05CNJo0n2D3wHwNA3w-vtybB7gsb8uq5PFYfIYJzabUkOIHHi7_uxY8vm54oWQlKpyakotY8OxMO0wR4yjSzm1Vo2o"}
+                          src={selectedProduct?.img || "/images/local/asset-0074.png"}
                           referrerPolicy="no-referrer"
                         />
                       </div>
@@ -3883,7 +4360,7 @@ export default function App() {
                             name: selectedProduct?.name || 'The Midnight Eclipse Perpetual',
                             price: parseInt((selectedProduct?.price || '$4,250.00').replace(/[^0-9]/g, '')),
                             quantity: 1,
-                            img: selectedProduct?.img || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBPODWNW7yoQlR40fXLLrKJmu00Ts5azOeRgAAe8l3NYn6OkugzT2xOJ4PjMzLpohaNC3APoDw4R1uxscE-gLT1nyjQlaKWhrgySEOtwVzq4RcLM000R3RVl109y271dZlxz_OItntjBih7CUfRiMVK413UWPkyrlY4dVkyIEPBQv1j_aVljKiR6lWrzu5DMHwQqyti1H8hoFT8jMDx_D27zo5pGzowndIumzaTY4vbUKG-XSYRsFvnmR4hFJdpdmS3hvfY9Yqt6O4',
+                            img: selectedProduct?.img || '/images/local/asset-0073.png',
                             variant: '40MM / Obsidian Black',
                             outOfStock: false
                           };
@@ -4013,9 +4490,9 @@ export default function App() {
                 <div className="bg-surface-container-low p-10 rounded-3xl flex flex-col lg:flex-row items-center gap-12 border border-outline-variant/10">
                   <div className="flex items-center gap-8 flex-wrap justify-center">
                     {[
-                      { name: 'Midnight Eclipse', img: selectedProduct?.img || 'https://lh3.googleusercontent.com/aida-public/AB6AXuB9fkRIfaXffB46jLtFI5J5c01IBnnOBtsDEApeY80pHsmbazkPWScLdCitIqcFk63NTvxlhflEvwpHOSvCGLKw2oyPtax5oyZpHL2NtMdKOkCaG1wzr3Pq18GVB31Xg-EIP7NGUjADEciDbgIfn1nq_luKt4o82aRvgF7MgKVFcV8ciHRhwlTvS97jXLe3R-dDOEeAiWIT9cN3PmD6IsQfLVFyxxz7qtSbZ-p1FmIp2JlH71v_oy55kI6OBObtMjhUfiLd7zZkQxc' },
-                      { name: 'Leather Watch Roll', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD8GErgE6IgM4e0CxYDOxDhi1T8Q8ReNPQnAu5gP5x1v_ZhxIAFZtc2F4-GXChquLN53EyNccmAGy06J72YbaApp9-h-RjscBlAGyvk5Hoo8SaIQmfhukDWPxbHRiGyw5z4MNkk-6a3SZaEnhE3j-0dsJETbkRTVfQ3fiHeF_QhAVVeaUkuW538cCqRS7VQhkxOxTd9206lkenF4l1GIqyEBp3AcWsjcCQbwTMV3xrjTGF98-Rlkg46EtmBupgL0eBQ_w2z1dmimAc' },
-                      { name: 'Automatic Winder', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBfLc80feKUxYjz9Tw65eY9a7t8QxIpwo_R3-FwYhz3SdaP6shawONx7aM5KiACt97UK6pP2hRrGGpeM8tD7b8ngEtqWESvMJE5K_QVVibKWgp40uPJY0BLdFIsGFbqA78X2EpSBnPwoprjadqOxb_FJk1mVohh61CLjB-kEX6JF3mqbYXJoyHvFepn8k4if0-vPZaKoNJ4w4H0nqEC0wPkgCe2TFz2kPGExPL-um1ZBrHTbgQ01urvngJUX0gjOVvk08UqG2vxwUc' }
+                      { name: 'Midnight Eclipse', img: selectedProduct?.img || '/images/local/asset-0075.png' },
+                      { name: 'Leather Watch Roll', img: '/images/local/asset-0076.png' },
+                      { name: 'Automatic Winder', img: '/images/local/asset-0077.png' }
                     ].map((item, i) => (
                       <React.Fragment key={i}>
                         <div className="relative group text-center">
@@ -4056,11 +4533,11 @@ export default function App() {
                 </div>
                 <div className="flex gap-8 overflow-x-auto pb-12 no-scrollbar">
                   {[
-                    { brand: 'Aurelian', name: 'The Solstice Gold', price: '$3,800.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAjVfG-U-x6uccoEhW4n4ieh5jAk9nSLt-ozUWCQtR3rPINvkCKHbB8o3yDnIvo5dFdC9ALXxCpQ6T7XSI6H4psLePfgPGPs_Ti1kQ2N2FAnYarY0r8KRXwmyyBqSo__PXR0K58Lcxo2bQ8BDk7v1vKXZrdG72VgWuIsjUVPq2XpWakXbFbi-D1Ayqc4dwt4K1TUQ9Iz-kcXZXRKxWgUpZzwjghgn0xzKrzL0F41N2H7RVxOMpZOBJ9c72pCI_0DQ0RCxEAqtL1fD8' },
-                    { brand: 'Techne', name: 'Vanguard Titanium', price: '$2,450.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDqDoP5CLAhd2EQZ7YeEwPMl_EUsT26QCsB8Pr848lbtDx2g1Nmivf8xUTduYCYFZFSD8PDbbv-1u5k3X2G_ckDn5vJ4UOyzXcvN2ML4lMIAyLN9RfMfw-m5p2pgsOJzxp_yCLKuUUjsWbiSwXD0GvFipceUKIgazAAiIcwHn3NrEjoLXvRvT99rvkQp_zM60-U0pd1ciLeDMqoPPmZ2V08hEnPLhN7DPsNxIh7QM-tSGFMrJ5XHUwOwN7F8OTa5AEF2XLhwDw6VNM' },
-                    { brand: 'Chronos', name: 'Aero Classic', price: '$5,200.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBJZKpUuXubYXQMTIC7_N2lPAEmuiDsoWSf7TnxAuukhaG3LEshpStlxCMEh52EJuJfcgLMsLxtkahWV7K5HqcouSm6pSW2-WdlFga9Y2WUzjgVnfa0a6HNKitLWXtxw6_vLVapBIgCqZP2vvtawMTG7FHqiIpz5gB7BEEJZQcf6_2vq4Z-3lBtMJ4LyMGOsucJAY3LISfNBOUS5y_T2MxnMIQIGT_i2vLJKSXygySm_avst3pb1vrWyMgELYft9P6aZguBQnHoKdE' },
-                    { brand: 'Objets', name: 'Tonal Desk Chronometer', price: '$950.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApTG5Tl4lOaRP8prNfeexzrPhgwAbWV10YUeGawD82oJ-LUs78on3xaA1yUdXbAJGVctiP8KI7FIP8vZyGa4QL-ShZNq-3RmvSsSUsdYllAyL-aKSzywya_pFnbVcrUDl8Y35MEjJ4rB7XN22uEh5W_m6p_gpblRvNAZGHXUh3dTeIfgA97ZOm9TQADEkUjjOADhAS-_j2J2Yep2GqWPEWVifpAzDeqvb-t-8SepAvm2hzp-X2wV7eJwdQYjqJP6xnyHAJPXn2n9I' },
-                    { brand: 'Forge', name: 'The Ironclad GMT', price: '$3,100.00', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuChrdA9wum_tq-hgyHiGEwue543ZoZ0eBzmLOo8NDyoSPpf4fcPz_z_tQPyzHTUGOlnz4QyJUkF2uP9MJI8kkgeHjIARJHk5N-itBrtN59qavg5S8EWk-zO0VjOnHGOnP3q7rjxub6N0b_eSYmYoE_ecKU229JnUFSGo1R8OeadkU8o9rIUNsZGb-XGZFQHIUcr6v4O4Oj4C5aw4lWxfUBxb49NRumkM49xTEDOPrVfngyNQ6KbKm0fXcRZZ1FkDhFUbSJIWFQfSH8' },
+                    { brand: 'Aurelian', name: 'The Solstice Gold', price: '$3,800.00', img: '/images/local/asset-0078.png' },
+                    { brand: 'Techne', name: 'Vanguard Titanium', price: '$2,450.00', img: '/images/local/asset-0079.png' },
+                    { brand: 'Chronos', name: 'Aero Classic', price: '$5,200.00', img: '/images/local/asset-0080.png' },
+                    { brand: 'Objets', name: 'Tonal Desk Chronometer', price: '$950.00', img: '/images/local/asset-0081.png' },
+                    { brand: 'Forge', name: 'The Ironclad GMT', price: '$3,100.00', img: '/images/local/asset-0082.png' },
                   ].map((item, i) => (
                     <div key={i} className="w-72 flex-shrink-0 group cursor-pointer" onClick={() => { setSelectedProduct(item); setSelectedImage(0); window.scrollTo(0, 0); }}>
                       <div className="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6 border border-outline-variant/10">
@@ -4152,54 +4629,85 @@ export default function App() {
                   <h2 className="text-primary font-black text-xl mb-1 font-headline">Filter Gallery</h2>
                   <p className="text-on-surface-variant/40 normal-case tracking-normal text-xs italic font-body">Refine your selection</p>
                 </div>
-                
+
                 <div className="space-y-4">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedShopCategory('all')}
-                    className="w-full text-primary bg-surface-variant/30 rounded-lg flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
-                  >
-                    <LayoutGrid size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">{getShopCategoryLabel(selectedShopCategory)}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShopMaxPrice('5000')}
-                    className="w-full text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
-                  >
-                    <DollarSign size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">Price under $5K</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShopMinRating(4)}
-                    className="w-full text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
-                  >
-                    <Award size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">Designer Brands</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShopMinRating(5)}
-                    className="w-full text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer"
-                  >
-                    <Star size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">5 Star Only</span>
-                  </button>
-                  <div className="text-on-surface-variant/40 hover:text-on-surface flex items-center gap-4 p-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
-                    <Package size={20} />
-                    <span className="font-label uppercase tracking-widest text-xs font-bold">Availability</span>
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold">Categories</p>
+                    {shopCategoryOptions.map((cat) => {
+                      const isActive = selectedShopCategories.includes(cat.id) || selectedShopCategory === cat.id;
+                      return (
+                        <button
+                          type="button"
+                          key={cat.id}
+                          onClick={() => toggleShopCategoryFilter(cat.id)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${isActive ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant/20 hover:border-primary/40 text-on-surface'}`}
+                        >
+                          <img
+                            src={cat.image}
+                            alt={cat.label}
+                            className="w-10 h-10 rounded object-cover"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
+                          />
+                          <span className="font-label uppercase tracking-widest text-xs font-bold">{cat.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-3 pt-4 border-t border-outline-variant/10">
+                    <label className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold block">Price Range</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        value={priceRange.min}
+                        onChange={(e) => {
+                          setShopPage(1);
+                          setPriceRange((prev) => ({ ...prev, min: Math.max(0, Number(e.target.value) || 0) }));
+                        }}
+                        className="bg-surface-container-highest/30 border border-outline-variant/20 rounded px-2 py-2 text-xs outline-none"
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        value={priceRange.max}
+                        onChange={(e) => {
+                          setShopPage(1);
+                          setPriceRange((prev) => ({ ...prev, max: Math.max(prev.min, Number(e.target.value) || 0) }));
+                        }}
+                        className="bg-surface-container-highest/30 border border-outline-variant/20 rounded px-2 py-2 text-xs outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-4 border-t border-outline-variant/10">
+                    <label className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold block">Brands</label>
+                    <div className="max-h-40 overflow-auto space-y-1 pr-1">
+                      {availableBrands.slice(0, 10).map((brand) => (
+                        <label key={brand} className="flex items-center gap-2 text-xs">
+                          <input type="checkbox" checked={selectedBrands.includes(brand)} onChange={() => toggleBrand(brand)} />
+                          <span>{brand}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-4 border-t border-outline-variant/10">
+                    <label className="flex items-center justify-between text-xs">
+                      <span className="uppercase tracking-widest text-on-surface-variant/60 font-bold">In Stock</span>
+                      <input
+                        type="checkbox"
+                        checked={inStockOnly}
+                        onChange={(e) => {
+                          setShopPage(1);
+                          setInStockOnly(e.target.checked);
+                        }}
+                      />
+                    </label>
                   </div>
                 </div>
 
                 <div className="mt-auto pt-8 border-t border-outline-variant/10">
-                    <button
-                      type="button"
-                      onClick={() => setView('shop')}
-                      className="w-full py-4 bg-primary text-on-primary rounded-lg font-bold tracking-widest text-xs uppercase hover:opacity-90 transition-opacity mb-4"
-                    >
-                      Apply Filters
-                    </button>
                     <button
                       type="button"
                       onClick={clearShopFilters}
@@ -4225,21 +4733,51 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* FIX: responsive filter controls */}
+                  <div className="mt-6 flex items-center gap-3 lg:hidden">
+                    <button
+                      type="button"
+                      onClick={() => setIsCategoryMenuOpen(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-primary/40 text-primary"
+                    >
+                      <Menu size={16} />
+                      <span className="text-[10px] uppercase tracking-widest font-bold">Categories</span>
+                    </button>
+                    <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-primary text-on-primary text-[10px] font-bold">
+                      {activeFilterCount}
+                    </span>
+                  </div>
+
                   {/* Controls */}
                     <div className="mt-12 flex flex-wrap items-center justify-between gap-4 py-6 border-y border-outline-variant/10">
+                      <div className="min-w-[220px] flex-1 max-w-xl">
+                        <input
+                          type="search"
+                          value={searchTerm}
+                          onChange={(e) => {
+                            setShopPage(1);
+                            setSearchTerm(e.target.value);
+                          }}
+                          placeholder="Search by name, category, brand, description..."
+                          className="w-full bg-surface-container-highest/20 border border-outline-variant/20 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-primary/50"
+                        />
+                      </div>
                       <div className="flex items-center gap-3">
                         {/* Applied Filters */}
-                        {selectedShopCategory === 'all' && shopMaxPrice === 'all' && shopMinRating === 0 && shopSortBy === 'relevance' && !searchTerm.trim() ? (
+                        {selectedShopCategories.length === 0 && selectedShopCategory === 'all' && shopMaxPrice === 'all' && shopMinRating === 0 && shopSortBy === 'relevance' && !searchTerm.trim() ? (
                           <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-bold">No filters applied</span>
                         ) : (
                           <>
-                            {selectedShopCategory !== 'all' && (
+                            {(selectedShopCategory !== 'all' || selectedShopCategories.length > 0) && (
                               <button
                                 type="button"
                                 className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20 text-[10px] uppercase tracking-widest font-bold hover:border-primary/50 transition-colors"
-                                onClick={() => setSelectedShopCategory('all')}
+                                onClick={() => {
+                                  setSelectedShopCategory('all');
+                                  setSelectedShopCategories([]);
+                                }}
                               >
-                                <span className="text-primary">{getShopCategoryLabel(selectedShopCategory)}</span>
+                                <span className="text-primary">{selectedShopCategories.length ? `${selectedShopCategories.length} Categories` : getShopCategoryLabel(selectedShopCategory)}</span>
                                 <X size={12} />
                               </button>
                             )}
@@ -4293,12 +4831,17 @@ export default function App() {
                         <select
                             className="bg-transparent border-none text-sm text-on-surface focus:ring-0 cursor-pointer font-bold pr-8 outline-none"
                             value={shopSortBy}
-                            onChange={(e) => setShopSortBy(e.target.value as ShopSortBy)}
+                            onChange={(e) => {
+                              setShopPage(1);
+                              setShopSortBy(e.target.value as ShopSortBy);
+                            }}
                         >
                           <option className="bg-background" value="relevance">Relevance</option>
                           <option className="bg-background" value="low-to-high">Price: Low to High</option>
                           <option className="bg-background" value="high-to-low">Price: High to Low</option>
                           <option className="bg-background" value="top-rated">Top Rated</option>
+                          <option className="bg-background" value="newest">Newest</option>
+                          <option className="bg-background" value="most-popular">Most Popular</option>
                         </select>
                       </div>
                       <div className="h-4 w-[1px] bg-outline-variant/20"></div>
@@ -4314,9 +4857,32 @@ export default function App() {
                   </div>
                 </header>
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-12 gap-y-20">
-                  {filteredShopProducts.map((product, i) => (
+                {/* FIX: loading states + pagination */}
+                {isShopLoading ? (
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-x-8 gap-y-12" aria-live="polite" aria-busy="true">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={`skeleton-${index}`} className="animate-pulse">
+                        <div className="aspect-[4/3] rounded-xl bg-surface-container-high mb-4" />
+                        <div className="h-4 bg-surface-container-high rounded mb-2 w-2/3" />
+                        <div className="h-3 bg-surface-container-high rounded w-1/2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredShopProducts.length === 0 ? (
+                  <div className="py-16 text-center border border-outline-variant/20 rounded-xl bg-surface-container-low/30">
+                    <p className="text-on-surface text-lg font-headline mb-3">No products match your search and filters.</p>
+                    <button
+                      type="button"
+                      onClick={clearShopFilters}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary text-xs uppercase tracking-widest font-bold"
+                    >
+                      <RotateCcw size={14} />
+                      Clear Search
+                    </button>
+                  </div>
+                ) : (
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-x-8 gap-y-12">
+                  {paginatedShopProducts.map((product, i) => (
                     <motion.div 
                       key={product.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -4331,6 +4897,7 @@ export default function App() {
                           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                           src={product.img} 
                           alt={product.name}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
                           referrerPolicy="no-referrer"
                         />
                         <button className="absolute top-6 right-6 p-3 bg-background/40 backdrop-blur-md rounded-full text-on-surface/60 hover:text-primary transition-colors z-10">
@@ -4344,8 +4911,8 @@ export default function App() {
                       </div>
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <span className="text-[10px] uppercase tracking-[0.3em] text-primary font-bold mb-2 block">{product.brand}</span>
-                          <h3 className="font-headline text-2xl group-hover:text-primary transition-colors cursor-pointer leading-tight">{product.name}</h3>
+                          <span className="text-[10px] uppercase tracking-[0.3em] text-primary font-bold mb-2 block">{renderHighlightedText(product.brand, debouncedSearchTerm)}</span>
+                          <h3 className="font-headline text-2xl group-hover:text-primary transition-colors cursor-pointer leading-tight">{renderHighlightedText(product.name, debouncedSearchTerm)}</h3>
                         </div>
                         <span className="font-mono text-xl text-on-surface font-bold">{product.price}</span>
                       </div>
@@ -4365,23 +4932,45 @@ export default function App() {
                     </motion.div>
                   ))}
                 </div>
+                )}
 
-                {/* Pagination */}
-                <nav className="mt-32 flex items-center justify-center gap-6">
-                  <button className="w-14 h-14 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant group">
-                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                  </button>
-                  <div className="flex items-center gap-3">
-                    <button className="w-14 h-14 flex items-center justify-center rounded-full bg-primary text-on-primary font-bold text-sm">1</button>
-                    <button className="w-14 h-14 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant font-bold text-sm">2</button>
-                    <button className="w-14 h-14 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant font-bold text-sm">3</button>
-                    <span className="text-on-surface-variant/40 px-4 font-mono tracking-widest">...</span>
-                    <button className="w-14 h-14 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant font-bold text-sm">15</button>
-                  </div>
-                  <button className="w-14 h-14 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant group">
-                    <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </nav>
+                {showMainPagination && totalShopPages > 1 && (
+                  <nav className="mt-16 flex items-center justify-center gap-4" aria-label="Product pagination">
+                    <button
+                      type="button"
+                      aria-label="Previous page"
+                      disabled={shopPage === 1}
+                      onClick={() => setShopPage((prev) => Math.max(1, prev - 1))}
+                      className="w-12 h-12 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: totalShopPages }).slice(0, 7).map((_, index) => {
+                        const page = index + 1;
+                        return (
+                          <button
+                            key={`page-${page}`}
+                            type="button"
+                            onClick={() => setShopPage(page)}
+                            className={`w-11 h-11 flex items-center justify-center rounded-full font-bold text-sm transition-all ${shopPage === page ? 'bg-primary text-on-primary' : 'border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary'}`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Next page"
+                      disabled={shopPage === totalShopPages}
+                      onClick={() => setShopPage((prev) => Math.min(totalShopPages, prev + 1))}
+                      className="w-12 h-12 flex items-center justify-center rounded-full border border-outline-variant/20 hover:border-primary hover:text-primary transition-all text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </nav>
+                )}
               </main>
             </div>
 
@@ -4439,13 +5028,18 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="min-h-screen flex flex-col md:flex-row overflow-hidden"
           >
+            {/* FIX: back navigation */}
+            <div className="absolute top-6 left-6 z-30">
+              <BackButton onBack={() => (window.history.length > 1 ? window.history.back() : setView('home'))} />
+            </div>
+
             {/* Left Side: Editorial Image & Quote */}
             <section className="hidden md:flex md:w-7/12 relative items-end p-20 overflow-hidden">
               <div className="absolute inset-0 z-0">
                 <img
                   alt="Luxury Interior"
                   className="w-full h-full object-cover grayscale brightness-[0.3]"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_MvWAl5HPdC41DpWypptmZrnBykl6FSoZNKZclY7vvfBp6HSOY--hFEP_DLwAdvDgT1kGywqIdrHuehXk8YozxM_Y5LBrnvVV707P87B7FIH-urfefbXsYMhFbHypWckrXmrUwosiGLV0Xbehaz3KxK6fs0_M0C1MHjhIC3gG8XpahnXDqhSHISqdbowLUIkiq14AgI5jIpInONIcoAbUB8IK_pB6iZylE78EmLTb8cbA7BYasJqyEkauZ4Q00D6n535H0MQk1m8"
+                  src="/images/local/asset-0083.png"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
@@ -4501,6 +5095,7 @@ export default function App() {
                 </div>
 
                 {/* Form Section */}
+                {authError && <div className="text-error font-body text-sm mb-4 p-3 bg-error/10 border border-error/20 rounded-md text-center">{authError}</div>}
                 <form className="space-y-8" onSubmit={handleLogin}>
                   {/* Email Field */}
                   <div className="space-y-2">
@@ -4654,12 +5249,17 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="min-h-screen flex flex-col md:flex-row"
           >
+            {/* FIX: back navigation */}
+            <div className="absolute top-6 left-6 z-30">
+              <BackButton onBack={() => (window.history.length > 1 ? window.history.back() : setView('home'))} />
+            </div>
+
             {/* Left Side: Visual Narrative */}
             <section className="relative hidden md:flex md:w-1/2 lg:w-[60%] overflow-hidden items-center justify-center">
               <img
                 alt="Luxury black onyx and gold watch display"
                 className="absolute inset-0 w-full h-full object-cover brightness-[0.4] scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4w4zwGBW3gWQOH27GwTrg3Z8Ms3QL1d9jthK67VCPj1BZq8agqn2XU-VfF-n4wbFarsN9i1eJBCJq8UhJ2_KwkK4Qj2EdKn0O39xqV9YijR1XPS_DT54-OnqJHAjPSeBxpPP8mVMjgU4xuEMFNVn0XHJ3shyHAroYu8eTa-jNlMGsZ8NLfMdX4IxE-ljkhAO92pgCxrlovpR5eUSlsJGK-9g1qY65RwBSD6ORddoT42IDbVsID3PIGzMXCM7VkaY1zqmO17a-RNM"
+                src="/images/local/asset-0084.png"
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-background via-transparent to-transparent"></div>
@@ -4671,9 +5271,9 @@ export default function App() {
                 </p>
                 <div className="flex items-center gap-6">
                   <div className="flex -space-x-3">
-                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnqx1-pixOCBN02ewAIwKmI0jOn41p4JBnlytSLKnoonfYAA1qaqJqAKwbiTD0yjd3-OfWX34iovKlUUfs_Sy8m44EUhAH94cb0nvF0CZKFT-dU1OGjppFXVNmvmHuBXe5iIb0vanvbWHyjTk13s5m2NIUFrEjAAVH-kQngvCjZVNS35RvbUaNzi-JdnHUmiF1YL3kaoeOM0FGY-zrdurONRTVQZ_p91ctl5Xkr2Imc9RIJqQnuP21Dn5bR8rqiVVJR3YreFHPJxM" referrerPolicy="no-referrer" alt="Curator Avatar 1" />
-                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTcY9kiSxEu3JIqlH4ioBRoo7EwVXhkhROVV6EdBWHDExhN8GuZfThAHZskyHxwXyD3S4S93BtGV2ZjjNDPe9jd_q7eSJshjCbn8Wsoj8fVOKjyN0mUhzEmaCL8CQ2bSUdn3CIFzjQ8kYRePNh5t3VvSY9xz8503q6GtCguJML8pQqSaP6DYNgJo_4YYNfctJgDpmZ08Dmli7F2CeZTjwM3R8KG4oaDndUg8sV3Mawl6ipa8YOINb1BY8x6kzsSVVfFaA2Hy6mbic" referrerPolicy="no-referrer" alt="Curator Avatar 2" />
-                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAogWBpy1Gsu4mTHLtxpoasFq9bkA2N_IyfjZ8olraccrRkLl9oI9KjcIug3n87jza55p_5-5Iy1HttfgHq1-grftCtaBCglmTS_GGGf7moVFcIE1fro-UEOXzxe8LkBZXp3nT9yzzHNnhbrnrwOfv7kk2_Z37Ez-GCZ0uzA1aRZ6NACRD5EtzYhLi7UpsNRghMFrmbU8bm9Jnq3mrouPQ05ij1ZTcEx4IAE-vUSgeplsDKfBnprv9xQ9L-qD_AtspaYO9NATk1MkU" referrerPolicy="no-referrer" alt="Curator Avatar 3" />
+                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="/images/local/asset-0085.png" referrerPolicy="no-referrer" alt="Curator Avatar 1" />
+                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="/images/local/asset-0086.png" referrerPolicy="no-referrer" alt="Curator Avatar 2" />
+                    <img loading="lazy" className="w-10 h-10 rounded-full border-2 border-background object-cover" src="/images/local/asset-0087.png" referrerPolicy="no-referrer" alt="Curator Avatar 3" />
                   </div>
                   <p className="text-on-surface-variant text-sm tracking-wide">Joined by <span className="text-primary font-semibold">1,200+</span> luxury enthusiasts</p>
                 </div>
@@ -4694,6 +5294,7 @@ export default function App() {
                 </div>
 
                 {/* Registration Form */}
+                {authError && <div className="text-error font-body text-sm mb-4 p-3 bg-error/10 border border-error/20 rounded-md text-center">{authError}</div>}
                 <form className="space-y-6" onSubmit={handleRegister}>
                   {/* Full Name */}
                   <div className="space-y-2">
@@ -4872,12 +5473,17 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 relative"
           >
+            {/* FIX: back navigation */}
+            <div className="absolute top-6 left-6 z-30">
+              <BackButton onBack={() => (window.history.length > 1 ? window.history.back() : setView('home'))} />
+            </div>
+
             {/* Hero Background Context */}
             <div className="fixed inset-0 z-0 opacity-20 pointer-events-none">
               <img 
                 className="w-full h-full object-cover" 
                 alt="Abstract ethereal fluid waves" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXHp5bgmsPgmOSfthm8TCBe59JSC-9egcnpQPTaqdL6xtJUdYx3a8YxofQBxktpcsyIcOv_Wo1_va-npYJfwdyHO3OajI69Q64CnCXaflHPXXXUvtRsGadqqHddzBySY-INlL8x8h56TRXTBrP7egLJUTog-AIUyCTb-4DJQHWDB2BqCCMQ4DFIOuFgjBGOkgjBnPA3XfzvBrhb2X_ZgHoClgjgdGUtqfIgENCO81HstMvaN37MG-cxhPoPJZ09QTtZz03b5u794I" 
+                src="/images/local/asset-0088.png" 
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -4927,6 +5533,7 @@ export default function App() {
                           Enter the email address associated with your vault. We will send a secure authentication code to restore your access.
                         </p>
                       </div>
+                      {authError && <div className="text-error font-body text-sm mb-4 p-3 bg-error/10 border border-error/20 rounded-md text-center">{authError}</div>}
                       <form className="space-y-6" onSubmit={handleForgotIdentify}>
                         <div className="space-y-2">
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-outline" htmlFor="forgot-email">
@@ -5029,6 +5636,7 @@ export default function App() {
                         <h2 className="font-headline text-2xl text-on-surface">Restore Access</h2>
                         <p className="text-on-surface-variant text-sm">Create a new master key for your vault.</p>
                       </div>
+                      {authError && <div className="text-error font-body text-sm mb-4 p-3 bg-error/10 border border-error/20 rounded-md text-center">{authError}</div>}
                       <form className="space-y-6" onSubmit={handleForgotRestore}>
                         <div className="space-y-2">
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-outline">New Master Key</label>

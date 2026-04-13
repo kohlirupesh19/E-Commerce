@@ -75,3 +75,35 @@
 body {
   @apply bg-background text-on-background font-body selection:bg-primary selection:text-on-primary;
 }
+
+/* FIX: responsive overflow */
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+/* FIX: checkout address radio highlight */
+.checkout-address-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-outline, #555);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkout-address-radio:checked {
+  border-color: var(--color-primary, #F5C518);
+  background-color: var(--color-primary, #F5C518);
+  box-shadow: inset 0 0 0 4px var(--color-surface, #1a1a1a);
+}
+
+.address-card:has(.checkout-address-radio:checked) {
+  border-color: var(--color-primary, #F5C518);
+  box-shadow: 0 0 0 1px var(--color-primary, #F5C518);
+}

@@ -25,12 +25,16 @@ com/obsidian/curator/dto/response/AuthUserResponse.class
 com/obsidian/curator/security/UserDetailsServiceImpl.class
 com/obsidian/curator/repository/AddressRepository.class
 com/obsidian/curator/entity/enums/OrderStatus.class
+com/obsidian/curator/dto/request/UpdateAddressRequest.class
+com/obsidian/curator/service/impl/AddressServiceImpl.class
 com/obsidian/curator/dto/request/OrderVerifyPaymentRequest.class
 com/obsidian/curator/entity/Payment.class
 com/obsidian/curator/entity/enums/Role.class
 com/obsidian/curator/entity/enums/AddressType.class
 com/obsidian/curator/config/DataSeeder.class
 com/obsidian/curator/entity/enums/NotificationType.class
+com/obsidian/curator/controller/AddressController.class
+com/obsidian/curator/dto/response/AddressDto.class
 com/obsidian/curator/controller/AuthController.class
 com/obsidian/curator/dto/request/ResendOtpRequest.class
 com/obsidian/curator/entity/OrderItem.class
@@ -40,6 +44,7 @@ com/obsidian/curator/service/impl/OrderServiceImpl.class
 com/obsidian/curator/ObsidianCuratorApplication.class
 com/obsidian/curator/controller/AdminCatalogController.class
 com/obsidian/curator/dto/request/ResetPasswordRequest.class
+com/obsidian/curator/dto/request/CreateAddressRequest.class
 com/obsidian/curator/repository/CartRepository.class
 com/obsidian/curator/repository/OtpTokenRepository.class
 com/obsidian/curator/dto/response/AuthTokenResponse.class
@@ -85,6 +90,7 @@ com/obsidian/curator/util/PriceUtil.class
 com/obsidian/curator/security/JwtAuthFilter.class
 com/obsidian/curator/controller/OrderController.class
 com/obsidian/curator/exception/ResourceNotFoundException.class
+com/obsidian/curator/service/AddressService.class
 com/obsidian/curator/repository/PaymentMethodRepository.class
 com/obsidian/curator/util/EmailUtil.class
 com/obsidian/curator/security/JwtUtil.class

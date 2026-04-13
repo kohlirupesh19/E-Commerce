@@ -120,6 +120,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> search(String query) {
         return (List<Map<String, Object>>) getProducts(query, null, null, true, 1, 20, "relevance").get("items");
     }
