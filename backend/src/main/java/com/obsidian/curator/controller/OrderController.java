@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -47,14 +48,14 @@ public class OrderController {
         return verifyPayment(authentication, request);
     }
 
-    @GetMapping("/my")
-    public List<Map<String, Object>> myOrders(Authentication authentication) {
-        return orderService.getMyOrders(authentication.getName());
+    @GetMapping("/me")
+    public List<Map<String, Object>> getMyOrders(Authentication authentication, @RequestParam(required = false) com.obsidian.curator.entity.enums.OrderStatus status) {
+        return orderService.getMyOrders(authentication.getName(), status);
     }
 
     @GetMapping("/mine")
     public List<Map<String, Object>> myOrdersAlias(Authentication authentication) {
-        return myOrders(authentication);
+        return getMyOrders(authentication, null);
     }
 
     @GetMapping("/{id}")

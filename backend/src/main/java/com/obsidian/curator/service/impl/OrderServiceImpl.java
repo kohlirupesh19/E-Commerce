@@ -176,9 +176,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Map<String, Object>> getMyOrders(String email) {
+    public List<Map<String, Object>> getMyOrders(String email, OrderStatus status) {
         User user = getUser(email);
-        return orderRepository.findByUserOrderByCreatedAtDesc(user).stream().map(order -> {
+        List<Order> orders;
+        if (status != null) {
+            orders = orderRepository.findByUserAndStatusOrderByCreatedAtDesc(user, status);
+        } else {
+            orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
+        }
+        return orders.stream().map(order -> {
             Payment payment = paymentRepository.findByOrderId(order.getId()).orElse(null);
             return mapOrder(order, orderItemRepository.findByOrderId(order.getId()), payment, null, null, null);
         }).toList();

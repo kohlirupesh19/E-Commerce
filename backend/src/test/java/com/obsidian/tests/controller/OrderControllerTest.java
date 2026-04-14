@@ -107,7 +107,7 @@ class OrderControllerTest {
         UUID orderId = UUID.randomUUID();
         byte[] invoice = "invoice-content".getBytes(StandardCharsets.UTF_8);
 
-        when(orderService.getMyOrders("user@example.com"))
+        when(orderService.getMyOrders("user@example.com", null))
                 .thenReturn(List.of(Map.of("orderId", orderId.toString(), "status", "CONFIRMED")));
         when(orderService.generateInvoice("user@example.com", orderId)).thenReturn(invoice);
 

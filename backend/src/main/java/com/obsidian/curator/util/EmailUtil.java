@@ -16,10 +16,14 @@ public class EmailUtil {
     }
 
     public void sendText(String to, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(body);
-        mailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("EMAIL ERROR: Could not send email to " + to + ". Reason: " + e.getMessage());
+        }
     }
 }

@@ -6,8 +6,11 @@ import { prisma } from '../../lib/prisma.js';
 import { issueAuthTokens, verifyRefreshToken } from '../../lib/auth-tokens.js';
 import { hashPassword, comparePassword } from '../../utils/password.js';
 import { successResponse } from '../../utils/response.js';
+import { OAuth2Client } from 'google-auth-library';
 import { HttpError } from '../../utils/http-error.js';
 import { env } from '../../config/env.js';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID');
 
 const refreshTokenCookieName = 'obsidian_refresh_token';
 
@@ -205,6 +208,95 @@ authRouter.post('/login', loginLimiter, async (req, res, next) => {
 
     return res.status(200).json(successResponse({
       user: sanitizeUser(updatedUser),
+      accessToken: tokens.accessToken
+    }));
+  } catch (error) {
+    return next(error);
+  }
+});
+
+authRouter.post('/google', async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      throw new HttpError(400, 'Google credential is required.');
+    }
+
+    // Since frontend sends an access_token via useGoogleLogin's default implicit flow, fetch the userinfo.
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${credential}` }
+    });
+
+    if (!userInfoResponse.ok) {
+      throw new HttpError(400, 'Invalid Google credential.');
+    }
+
+    const payload = await userInfoResponse.json();
+    if (!payload || !payload.email) {
+      throw new HttpError(400, 'Unable to retrieve user email from Google.');
+    }
+
+    const { email, name = 'Google User' } = payload;
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      const dummyPassword = crypto.randomBytes(16).toString('hex');
+      const passwordHash = await hashPassword(dummyPassword);
+
+      user = await prisma.$transaction(async (transaction) => {
+        const role = await transaction.role.upsert({
+          where: { name: 'CUSTOMER' },
+          update: {},
+          create: { name: 'CUSTOMER' }
+        });
+
+        const createdUser = await transaction.user.create({
+          data: {
+            name,
+            email,
+            passwordHash,
+            isActive: true
+          }
+        });
+
+        await transaction.userRole.create({
+          data: {
+            userId: createdUser.id,
+            roleId: role.id
+          }
+        });
+
+        return createdUser;
+      });
+    } else {
+      if (!user.isActive) {
+        throw new HttpError(401, 'Account lies dormant.');
+      }
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() }
+      });
+    }
+
+    const tokens = issueAuthTokens(user);
+
+    if (!tokens.refreshTokenExpiresAt) {
+      throw new Error('Refresh token expiration is missing.');
+    }
+
+    await prisma.refreshSession.create({
+      data: {
+        userId: user.id,
+        jti: tokens.refreshJti,
+        tokenHash: hashToken(tokens.refreshToken),
+        expiresAt: tokens.refreshTokenExpiresAt
+      }
+    });
+
+    setRefreshTokenCookie(res, tokens.refreshToken);
+
+    return res.status(200).json(successResponse({
+      user: sanitizeUser(user),
       accessToken: tokens.accessToken
     }));
   } catch (error) {

@@ -8,13 +8,14 @@ import {
   CheckCircle2, Copy, MapPin, Activity, Download, Headphones, Route, ExternalLink, PhoneCall, MessageSquare, Clock, Map,
   Filter, ChevronDown, Box, History, RefreshCw, Layers, Bell, Shield, HelpCircle, Fingerprint, Camera, Home,
   LayoutDashboard, Users, BarChart3, Ticket, TrendingUp, TrendingDown, UserPlus, MoreVertical, Settings,
-  SignalHigh, Trash, Edit, Globe, Watch, LogOut,
+  SignalHigh, Trash, Edit, Edit2, Globe, Watch, LogOut, BellOff,
   CreditCard as CreditCardIcon, Star as StarIcon, Package as PackageIcon, Search as SearchIcon, Truck as TruckIcon, Eye as EyeIcon, Award as AwardIcon, LayoutGrid as LayoutGridIcon, DollarSign as DollarSignIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToNewsletter } from './services/newsletter';
 import BrandMark from './components/BrandMark';
-import { authApi, addressApi } from './lib/api';
+import { authApi, addressApi, orderApi, paymentMethodApi, notificationApi } from './lib/api';
+import { useGoogleLogin } from '@react-oauth/google';
 
 type InfoView =
   | 'private-suite'
@@ -25,7 +26,7 @@ type InfoView =
   | 'terms-of-service'
   | 'curator-concierge';
 
-type View = 'login' | 'register' | 'forgot-password' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons' | InfoView;
+type View = 'login' | 'register' | 'forgot-password' | 'verify-otp' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons' | InfoView;
 
 type InfoPageSection = {
   heading: string;
@@ -301,7 +302,8 @@ const TopNavBar = ({
   onOpenMobileMenu,
   cartCount, 
   showProfileDropdown, 
-  setShowProfileDropdown 
+  setShowProfileDropdown,
+  onLogout 
 }: { 
   view: View, 
   setView: (v: View) => void, 
@@ -309,10 +311,11 @@ const TopNavBar = ({
   onOpenMobileMenu?: () => void,
   cartCount: number,
   showProfileDropdown: boolean,
-  setShowProfileDropdown: (b: boolean) => void
+  setShowProfileDropdown: (b: boolean) => void,
+  onLogout?: () => void
 }) => {
   const { searchTerm, setSearchTerm } = useContext(SearchContext);
-  const showBackButton = view !== 'home';
+  const showBackButton = !['home', 'login', 'register', 'forgot-password', 'verify-otp', 'reset-password', 'checkout-address', 'checkout-payment', 'checkout-review', 'checkout-success', 'product-detail'].includes(view);
   
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-outline-variant/10 px-6 md:px-12 py-4">
@@ -403,10 +406,11 @@ const TopNavBar = ({
                       setView(v);
                       setShowProfileDropdown(false);
                     }} 
-                    onClose={() => setShowProfileDropdown(false)} 
+                    onClose={() => setShowProfileDropdown(false)}
+                    onLogout={onLogout}
                   />
                 )}
-      </AnimatePresence>
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -486,7 +490,8 @@ const ProfileViewLayout = ({
   setShowProfileDropdown,
   title,
   description,
-  children
+  children,
+  onLogout
 }: {
   view: View,
   setView: (v: View) => void,
@@ -495,7 +500,8 @@ const ProfileViewLayout = ({
   setShowProfileDropdown: (b: boolean) => void,
   title: string,
   description: string,
-  children: React.ReactNode
+  children: React.ReactNode,
+  onLogout?: () => void
 }) => {
   return (
     <motion.div
@@ -511,10 +517,11 @@ const ProfileViewLayout = ({
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         showProfileDropdown={showProfileDropdown}
         setShowProfileDropdown={setShowProfileDropdown}
+        onLogout={onLogout}
       />
 
       <div className="flex max-w-[1920px] mx-auto min-h-screen w-full">
-        <ProfileSidebar currentView={view} setView={setView} />
+        <ProfileSidebar currentView={view} setView={setView} onLogout={onLogout} />
         <section className="flex-1 p-8 md:p-16 lg:p-20 overflow-y-auto">
           <header className="mb-16">
             <h1 className="text-5xl md:text-6xl font-headline font-bold text-on-surface tracking-tighter mb-4">{title}</h1>
@@ -527,7 +534,7 @@ const ProfileViewLayout = ({
   );
 };
 
-const ProfileSidebar = ({ currentView, setView }: { currentView: View, setView: (v: View) => void }) => {
+const ProfileSidebar = ({ currentView, setView, onLogout }: { currentView: View, setView: (v: View) => void, onLogout?: () => void }) => {
   const menuItems = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'profile-addresses', label: 'Addresses', icon: MapPin },
@@ -558,8 +565,18 @@ const ProfileSidebar = ({ currentView, setView }: { currentView: View, setView: 
           </a>
         ))}
       </nav>
-      <div className="mt-auto pt-8 border-t border-outline-variant/5">
-        <button className="flex items-center gap-4 px-4 py-3 text-on-surface-variant/40 hover:text-on-surface font-headline text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200">
+      <div className="mt-auto pt-8 border-t border-outline-variant/5 space-y-2">
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            onLogout?.();
+          }}
+          className="flex w-full items-center gap-4 px-4 py-3 text-error hover:bg-error/5 rounded-lg font-headline text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200"
+        >
+          <LogOut size={18} />
+          <span>Sign Out</span>
+        </button>
+        <button className="flex w-full items-center gap-4 px-4 py-3 text-on-surface-variant/40 hover:text-on-surface font-headline text-sm uppercase tracking-widest hover:translate-x-1 transition-transform duration-200">
           <RotateCcw size={18} />
           <span>Clear All</span>
         </button>
@@ -646,6 +663,7 @@ const InfoPageLayout = ({
   cartItems,
   showProfileDropdown,
   setShowProfileDropdown,
+  onLogout,
   content
 }: {
   view: View;
@@ -653,6 +671,7 @@ const InfoPageLayout = ({
   cartItems: any[];
   showProfileDropdown: boolean;
   setShowProfileDropdown: (b: boolean) => void;
+  onLogout?: () => void;
   content: InfoPageCopy;
 }) => {
   return (
@@ -669,6 +688,7 @@ const InfoPageLayout = ({
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         showProfileDropdown={showProfileDropdown}
         setShowProfileDropdown={setShowProfileDropdown}
+        onLogout={onLogout}
       />
 
       <main className="flex-grow max-w-[1280px] mx-auto w-full px-6 md:px-12 py-16 md:py-24">
@@ -788,6 +808,7 @@ const CategoryLayout = ({
   cartItems, 
   showProfileDropdown, 
   setShowProfileDropdown,
+  onLogout,
   onOpenMobileMenu,
   activeCategory = 'all',
   onCategorySelect,
@@ -795,11 +816,13 @@ const CategoryLayout = ({
   title,
   subtitle,
   heroImg,
-  products
+  products,
+  setCartItems
 }: {
   view: View,
   setView: (v: View) => void,
   cartItems: any[],
+  setCartItems: React.Dispatch<React.SetStateAction<any[]>>,
   showProfileDropdown: boolean,
   setShowProfileDropdown: (b: boolean) => void,
   onOpenMobileMenu?: () => void,
@@ -809,6 +832,7 @@ const CategoryLayout = ({
   title: string,
   subtitle: string,
   heroImg: string,
+  onLogout?: () => void,
   products: any[]
 }) => {
   const { searchTerm } = useContext(SearchContext);
@@ -853,6 +877,7 @@ const CategoryLayout = ({
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         showProfileDropdown={showProfileDropdown}
         setShowProfileDropdown={setShowProfileDropdown}
+        onLogout={onLogout}
       />
 
       <CategoryBar 
@@ -879,6 +904,9 @@ const CategoryLayout = ({
         </section>
 
         <div className="max-w-[1920px] mx-auto w-full px-6 md:px-12 py-20">
+          <div className="mb-8">
+            <BackButton onBack={() => setView('shop')} />
+          </div>
           {/* Breadcrumbs & Filter */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-20">
             <nav className="flex items-center gap-2 text-xs uppercase tracking-widest text-primary mb-4 font-body">
@@ -929,7 +957,25 @@ const CategoryLayout = ({
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                    <button className="w-12 h-12 rounded-full bg-on-surface text-background flex items-center justify-center hover:bg-primary transition-colors">
+                    <button 
+                      className="w-12 h-12 rounded-full bg-on-surface text-background flex items-center justify-center hover:bg-primary transition-colors"
+                      onClick={() => {
+                        const newItem = {
+                          id: Date.now(),
+                          productId: product.id,
+                          name: product.name,
+                          price: parseInt(product.price.replace(/[^0-9]/g, '')),
+                          quantity: 1,
+                          img: product.img,
+                          variant: 'Default Selection',
+                          outOfStock: false
+                        };
+                        setCartItems(prev => [...prev, newItem]);
+                        // Optional: Show a quick notification or just switch to cart
+                        setView('cart');
+                        window.scrollTo(0, 0);
+                      }}
+                    >
                       <ShoppingBag size={18} />
                     </button>
                     <button 
@@ -962,7 +1008,7 @@ const CategoryLayout = ({
   );
 };
 
-const ProfileDropdown = ({ setView, onClose }: { setView: (v: View) => void, onClose: () => void }) => {
+const ProfileDropdown = ({ setView, onClose, onLogout }: { setView: (v: View) => void, onClose: () => void, onLogout: () => void }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -976,7 +1022,7 @@ const ProfileDropdown = ({ setView, onClose }: { setView: (v: View) => void, onC
             <User size={20} />
           </div>
           <div>
-            <p className="text-sm font-headline font-bold text-on-surface">Alexander Vance</p>
+            <p className="text-sm font-headline font-bold text-on-surface">Client Profile</p>
             <p className="text-[10px] text-on-surface-variant/60 uppercase tracking-widest">Elite Collector</p>
           </div>
         </div>
@@ -1005,7 +1051,7 @@ const ProfileDropdown = ({ setView, onClose }: { setView: (v: View) => void, onC
         </button>
         <div className="my-2 border-t border-outline-variant/10"></div>
         <button 
-          onClick={() => { setView('login'); onClose(); }}
+          onClick={() => { onLogout(); onClose(); }}
           className="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/5 rounded-lg transition-all group"
         >
           <LogOut size={18} className="group-hover:scale-110 transition-transform" />
@@ -1071,7 +1117,7 @@ export default function App() {
 
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedAddress, setSelectedAddress] = useState<'home' | 'work'>('home');
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [isShopLoading, setIsShopLoading] = useState(false);
   const [shopPage, setShopPage] = useState(1);
@@ -1136,6 +1182,14 @@ export default function App() {
   ]);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [myOrders, setMyOrders] = useState<any[]>([]);
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('ALL');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [userNotifications, setUserNotifications] = useState<any[]>([]);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentFormData, setPaymentFormData] = useState({ type: 'CARD', maskedNumber: '', provider: '', expiryDate: '' });
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -1143,6 +1197,12 @@ export default function App() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordStrengthLabel, setPasswordStrengthLabel] = useState('Weak');
+  const [selectedProductColor, setSelectedProductColor] = useState('Obsidian Black');
+  const [selectedProductSize, setSelectedProductSize] = useState('40MM');
+  const [productQuantity, setProductQuantity] = useState(1);
+  const [activeProductTab, setActiveProductTab] = useState('Detailed Narrative');
   const [rememberMe, setRememberMe] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -1161,8 +1221,21 @@ export default function App() {
   const [resetToken, setResetToken] = useState('');
   const [addresses, setAddresses] = useState<any[]>([]);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [addressFormData, setAddressFormData] = useState({
-    fullName: '', phone: '', pincode: '', addressType: 'HOME', street: '', city: '', state: ''
+  const [addressFormData, setAddressFormData] = useState({ fullName: '', phone: '', pincode: '', addressType: 'HOME', street: '', city: '', state: '' });
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressError, setAddressError] = useState('');
+  const [profileFormData, setProfileFormData] = useState({
+    name: '', email: '', phone: '', dob: '', gender: 'Prefer not to state',
+    twoFactorEnabled: false
+  });
+  const [profileError, setProfileError] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState('');
+  const [securityFormData, setSecurityFormData] = useState({ currentPassword: '', newPassword: '' });
+  const [securityError, setSecurityError] = useState('');
+  const [securitySuccess, setSecuritySuccess] = useState('');
+  const [notifications, setNotifications] = useState({
+    orderUpdates: true, newCollections: true, securityAlerts: true, newsletter: true
   });
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
@@ -1177,6 +1250,13 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    if (localStorage.getItem('accessToken')) {
+      fetchAddresses();
+      fetchProfileData();
+    }
+  }, []);
+
   /* FIX: search debounce */
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -1184,6 +1264,23 @@ export default function App() {
     }, 300);
     return () => window.clearTimeout(timer);
   }, [searchTerm]);
+
+  useEffect(() => {
+    if (!password) {
+      setPasswordStrength(0);
+      setPasswordStrengthLabel('Very Weak');
+      return;
+    }
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+    
+    setPasswordStrength(score);
+    const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    setPasswordStrengthLabel(labels[score]);
+  }, [password]);
 
   /* FIX: category image fallback */
   useEffect(() => {
@@ -1294,27 +1391,65 @@ export default function App() {
   // Forgot Password states
   const [forgotStep, setForgotStep] = useState(1); // 1: Identify, 2: Verify, 3: Restore, 4: Success
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpType, setOtpType] = useState<'REGISTER' | 'FORGOT_PASSWORD'>('REGISTER');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const openProductDetail = (product: any) => {
     setSelectedProduct(product);
     setSelectedImage(0);
+    setSelectedProductColor('Obsidian Black');
+    setSelectedProductSize('40MM');
+    setProductQuantity(1);
+    setActiveProductTab('Detailed Narrative');
     setView('product-detail');
     window.scrollTo(0, 0);
   };
 
-  const clearShopFilters = () => {
-    /* FIX: fully working filter reset */
-    setSelectedShopCategory('all');
-    setSelectedShopCategories([]);
-    setShopMaxPrice('all');
-    setShopMinRating(0);
-    setShopSortBy('relevance');
-    setSearchTerm('');
-    setSelectedBrands([]);
-    setInStockOnly(false);
-    setPriceRange({ min: 0, max: 20000 });
-    setShopPage(1);
+
+
+  const fetchMyOrders = async (status: string = 'ALL') => {
+    setIsLoading(true);
+    try {
+      const data = await orderApi.myOrders(status === 'ALL' ? undefined : status);
+      setMyOrders(data);
+    } catch (err) {
+      console.error('Failed to fetch orders', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (view === 'my-orders' || view === 'profile') {
+      fetchMyOrders(orderStatusFilter);
+    }
+    if (view === 'profile-payments' || view === 'checkout-payment') {
+      fetchPaymentMethods();
+    }
+    if (view === 'profile-notifications') {
+      fetchNotifications();
+    }
+  }, [view, orderStatusFilter]);
+
+  const fetchPaymentMethods = async () => {
+    setIsLoading(true);
+    try {
+      const data = await paymentMethodApi.getAll();
+      setPaymentMethods(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await notificationApi.getAll();
+      setUserNotifications(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const openShopCategory = (category: ShopCategoryFilter) => {
@@ -1346,6 +1481,20 @@ export default function App() {
     }
   };
 
+
+
+  const clearShopFilters = () => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+    setSelectedShopCategory('all');
+    setSelectedShopCategories([]);
+    setSelectedBrands([]);
+    setPriceRange({ min: 0, max: 20000 });
+    setShopMinRating(0);
+    setInStockOnly(false);
+    setShopPage(1);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -1355,11 +1504,88 @@ export default function App() {
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
         fetchAddresses();
+        fetchProfileData();
         setView('home');
         window.scrollTo(0, 0);
       }
     } catch (error: any) {
-      setAuthError(error.message || 'Login failed');
+      if (error.message && (error.message.toLowerCase().includes('verify') || error.message.toLowerCase().includes('otp'))) {
+        setForgotStep(2);
+        setOtpType('REGISTER');
+        setView('verify-otp');
+      } else {
+        setAuthError(error.message || 'Login failed');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setIsLoading(true);
+      setAuthError('');
+      try {
+        // The tokenResponse from implicit flow has `access_token`
+        const response = await authApi.googleLogin(tokenResponse.access_token);
+        if (response.accessToken) {
+          localStorage.setItem('accessToken', response.accessToken);
+          fetchAddresses();
+          fetchProfileData();
+          setView('home');
+          window.scrollTo(0, 0);
+        }
+      } catch (error: any) {
+        setAuthError(error.message || 'Google Login failed');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      setAuthError('Google authentication failed. Please try again.');
+    }
+  });
+
+  const handleLogout = async () => {
+    try {
+      await authApi.login({ email: '', password: '', rememberMe: false }); // dummy if needed, but we mostly just clear local
+      localStorage.removeItem('accessToken');
+      setCartItems([]);
+      setWishlistItems([]);
+      setAddresses([]);
+      setView('login');
+      window.scrollTo(0, 0);
+    } catch (err) {
+      localStorage.removeItem('accessToken');
+      setView('login');
+    }
+  };
+
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsLoading(true);
+    setProfileError('');
+    try {
+      const data = await authApi.uploadAvatar(file);
+      setProfileFormData(prev => ({ ...prev, avatarUrl: data.avatarUrl }));
+    } catch (err: any) {
+      setProfileError(err.message || 'Avatar upload failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddPaymentMethod = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await paymentMethodApi.create(paymentFormData);
+      await fetchPaymentMethods();
+      setShowPaymentForm(false);
+    } catch (err: any) {
+      alert(err.message || 'Payment method failed.');
     } finally {
       setIsLoading(false);
     }
@@ -1368,13 +1594,21 @@ export default function App() {
   const handleAddAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAddressError('');
     try {
-      await addressApi.create(addressFormData);
+      if (isEditingAddress && editingAddressId) {
+        await addressApi.update(editingAddressId, addressFormData);
+      } else {
+        await addressApi.create(addressFormData);
+      }
       await fetchAddresses();
       setShowAddressForm(false);
+      setIsEditingAddress(false);
+      setEditingAddressId(null);
       setAddressFormData({ fullName: '', phone: '', pincode: '', addressType: 'HOME', street: '', city: '', state: '' });
-    } catch(err) {
+    } catch(err: any) {
       console.error(err);
+      setAddressError(err.message || 'Failed to save address. Please check all fields.');
     } finally {
       setIsLoading(false);
     }
@@ -1393,9 +1627,16 @@ export default function App() {
     setIsLoading(true);
     setAuthError('');
     try {
-      await authApi.register({ name, email, phone, password, confirmPassword, agreeTerms });
-      // Usually, after register, user is either logged in or asked to login
-      setView('login');
+      const res = await authApi.register({ name, email, phone, password, confirmPassword, agreeTerms });
+      setOtpType('REGISTER');
+      setForgotStep(2);
+      // Auto-fill OTP if returned by backend (dev mode)
+      const msg = res?.message || '';
+      if (msg.startsWith('OTP_CODE:')) {
+        const code = msg.replace('OTP_CODE:', '');
+        setOtp(code.split('').slice(0, 6));
+      }
+      setView('verify-otp');
       window.scrollTo(0, 0);
     } catch (error: any) {
       setAuthError(error.message || 'Registration failed');
@@ -1409,10 +1650,136 @@ export default function App() {
     setIsLoading(true);
     setAuthError('');
     try {
-      await authApi.forgotPassword(email);
+      const res = await authApi.forgotPassword(email);
+      setOtpType('FORGOT_PASSWORD');
+      // Auto-fill OTP if returned by backend (dev mode)
+      const msg = res?.message || '';
+      if (msg.startsWith('OTP_CODE:')) {
+        const code = msg.replace('OTP_CODE:', '');
+        setOtp(code.split('').slice(0, 6));
+      }
       setForgotStep(2);
     } catch (error: any) {
       setAuthError(error.message || 'Request failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchProfileData = async () => {
+    try {
+      const data = await authApi.me();
+      if (data) {
+        setProfileFormData({
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          dob: data.dob || '',
+          gender: data.gender || 'Prefer not to state',
+          twoFactorEnabled: data.twoFactorEnabled ?? false
+        });
+        setNotifications({
+          orderUpdates: data.orderUpdates ?? true,
+          newCollections: data.newCollections ?? true,
+          securityAlerts: data.securityAlerts ?? true,
+          newsletter: data.newsletter ?? true,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile', err);
+    }
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setProfileError('');
+    setProfileSuccess('');
+    try {
+      await authApi.updateMe({
+        name: profileFormData.name,
+        phone: profileFormData.phone,
+        dob: profileFormData.dob,
+        gender: profileFormData.gender,
+      });
+      setProfileSuccess('Personal manifest updated successfully.');
+      await fetchProfileData();
+    } catch (err: any) {
+      setProfileError(err.message || 'Failed to update profile.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setSecurityError('');
+    setSecuritySuccess('');
+    try {
+      await authApi.changePassword({
+        currentPassword: securityFormData.currentPassword,
+        newPassword: securityFormData.newPassword,
+        confirmPassword: securityFormData.newPassword, // simplify for UI
+      });
+      setSecuritySuccess('Curatorial credentials updated successfully.');
+      setSecurityFormData({ currentPassword: '', newPassword: '' });
+    } catch (err: any) {
+      setSecurityError(err.message || 'Failed to update credentials.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggle2FA = async (enabled: boolean) => {
+    setIsLoading(true);
+    try {
+      await authApi.toggle2fa(enabled);
+      await fetchProfileData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to toggle 2FA.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggleNotification = async (key: keyof typeof notifications, value: boolean) => {
+    const updated = { ...notifications, [key]: value };
+    setNotifications(updated);
+    try {
+      await authApi.updateMe(updated);
+    } catch (err: any) {
+      console.error('Failed to sync notification', err);
+      // Rollback on failure
+      setNotifications(notifications);
+    }
+  };
+
+  const handleEditAddress = (addr: any) => {
+    setAddressFormData({
+      fullName: addr.fullName,
+      phone: addr.phone,
+      pincode: addr.pincode,
+      addressType: addr.addressType,
+      street: addr.street,
+      city: addr.city,
+      state: addr.state
+    });
+    setEditingAddressId(addr.id);
+    setIsEditingAddress(true);
+    setShowAddressForm(true);
+    window.scrollTo(0, 500); // approximate form position
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!confirm('Are you certain you wish to remove this shipping residence?')) return;
+    setIsLoading(true);
+    try {
+      await addressApi.delete(id);
+      await fetchAddresses();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Failed to delete address.');
     } finally {
       setIsLoading(false);
     }
@@ -1429,9 +1796,19 @@ export default function App() {
     setOtpError('');
     setIsLoading(true);
     try {
-      const response = await authApi.verifyForgotOtp(email, enteredOtp);
-      setResetToken(response.resetToken);
-      setForgotStep(3);
+      if (otpType === 'FORGOT_PASSWORD') {
+        const response = await authApi.verifyForgotOtp(email, enteredOtp);
+        setResetToken(response.resetToken);
+        setForgotStep(3);
+      } else {
+        const response = await authApi.verifyOtp({ email, otp: enteredOtp, type: 'REGISTER' });
+        if (response.accessToken) {
+          localStorage.setItem('accessToken', response.accessToken);
+          await fetchAddresses();
+          await fetchProfileData();
+          setView('home');
+        }
+      }
     } catch (error: any) {
       setOtpError(error.message || 'Verification failed');
     } finally {
@@ -1728,6 +2105,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <main className="max-w-[1920px] mx-auto px-8 md:px-12 py-16 flex-grow">
@@ -1979,6 +2357,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <main className="max-w-[1440px] mx-auto px-8 py-12 md:py-20 flex-grow w-full">
@@ -2026,7 +2405,7 @@ export default function App() {
                           type="radio"
                           value={addr.id}
                           checked={selectedAddress === addr.id}
-                          onChange={(e) => setSelectedAddress(e.target.value as 'home' | 'work')}
+                          onChange={(e) => setSelectedAddress(e.target.value)}
                         />
                         <div className="h-full">
                           <div className="flex justify-between items-start mb-4">
@@ -2054,6 +2433,11 @@ export default function App() {
                   {/* Inline Form (Expanded State Concept) */}
                   {showAddressForm && (
                     <form onSubmit={handleAddAddressSubmit} className="pt-8 border-t border-outline-variant/10">
+                      {addressError && (
+                        <div className="mb-6 p-4 bg-error/10 border border-error/20 rounded-lg text-error text-xs uppercase tracking-widest font-bold">
+                          {addressError}
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Full Name</label>
@@ -2097,8 +2481,16 @@ export default function App() {
 
                   <div className="flex justify-start">
                     <button 
-                      className="group flex items-center gap-4 bg-primary text-on-primary px-12 py-5 rounded-lg font-headline font-bold tracking-widest uppercase text-xs overflow-hidden relative transition-all hover:shadow-[0_0_30px_rgba(230,195,100,0.3)] active:scale-95"
+                      className={`group flex items-center gap-4 bg-primary text-on-primary px-12 py-5 rounded-lg font-headline font-bold tracking-widest uppercase text-xs overflow-hidden relative transition-all hover:shadow-[0_0_30px_rgba(230,195,100,0.3)] active:scale-95 ${(!selectedAddress || showAddressForm) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                       onClick={() => {
+                        if (showAddressForm) {
+                          setAddressError('Please save or cancel the address form before continuing.');
+                          return;
+                        }
+                        if (!selectedAddress) {
+                          setAddressError('Please select a shipping residence.');
+                          return;
+                        }
                         setView('checkout-payment');
                         window.scrollTo(0, 0);
                       }}
@@ -2210,6 +2602,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <main className="max-w-[1440px] mx-auto px-8 py-12 md:py-20 flex-grow w-full">
@@ -2367,8 +2760,81 @@ export default function App() {
                             name="payment_method" 
                             type="radio"
                           />
-                          <div className="flex items-center gap-3">
-                            <Wallet className={paymentMethod === 'wallet' ? 'text-primary' : 'text-on-surface-variant'} />
+                          <div className="flex items-center gap-4">
+                            <div className="space-y-4">
+                              {paymentMethods.map((pm) => (
+                                <div 
+                                  key={pm.id}
+                                  onClick={() => setSelectedPayment(pm.id)}
+                                  className={`p-6 rounded-xl border-2 transition-all cursor-pointer relative overflow-hidden group ${selectedPayment === pm.id ? 'border-primary bg-primary/5' : 'border-outline-variant/10 bg-surface-container-lowest/50 hover:border-primary/20'}`}
+                                >
+                                  <div className="flex justify-between items-center relative z-10">
+                                    <div className="flex items-center gap-4">
+                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPayment === pm.id ? 'border-primary bg-primary' : 'border-outline-variant'}`}>
+                                        {selectedPayment === pm.id && <Check size={12} className="text-on-primary" />}
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-headline uppercase tracking-widest">{pm.provider} {pm.type}</p>
+                                        <p className="text-xs text-on-surface-variant font-mono">{pm.maskedNumber}</p>
+                                      </div>
+                                    </div>
+                                    <CreditCardIcon className={`transition-colors ${selectedPayment === pm.id ? 'text-primary' : 'text-on-surface-variant/20'}`} size={24} />
+                                  </div>
+                                </div>
+                              ))}
+
+                              <button 
+                                 onClick={() => setShowPaymentForm(!showPaymentForm)}
+                                 className="w-full p-6 rounded-xl border-2 border-dashed border-outline-variant/20 flex items-center justify-center gap-3 text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all text-sm uppercase tracking-widest font-bold"
+                              >
+                                 <Plus size={18} /> {showPaymentForm ? 'Cancel New Instrument' : 'Initialize New Instrument'}
+                              </button>
+
+                              {showPaymentForm && (
+                                <div className="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
+                                  <form onSubmit={handleAddPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="md:col-span-2 space-y-2">
+                                       <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Payment Provider</label>
+                                       <div className="flex gap-4">
+                                         {['CARD', 'PAYPAL', 'CRYPTO'].map(m => (
+                                           <button 
+                                             key={m}
+                                             type="button"
+                                             onClick={() => setPaymentFormData({...paymentFormData, type: m})}
+                                             className={`px-4 py-2 rounded-lg border text-[10px] uppercase font-bold tracking-widest ${paymentFormData.type === m ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'}`}
+                                           >
+                                             {m}
+                                           </button>
+                                         ))}
+                                       </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Reference Number</label>
+                                      <input 
+                                         required
+                                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                                         placeholder="•••• 1234"
+                                         value={paymentFormData.maskedNumber}
+                                         onChange={e => setPaymentFormData({...paymentFormData, maskedNumber: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Provider Name</label>
+                                      <input 
+                                         required
+                                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                                         placeholder="VISA / Master"
+                                         value={paymentFormData.provider}
+                                         onChange={e => setPaymentFormData({...paymentFormData, provider: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="md:col-span-2 flex justify-end pt-4">
+                                      <button type="submit" className="bg-primary text-on-primary px-10 py-4 rounded-lg font-bold uppercase tracking-widest text-xs">Authorize Instrument</button>
+                                    </div>
+                                  </form>
+                                </div>
+                              )}
+                            </div>
                             <span className={`font-headline text-lg ${paymentMethod === 'wallet' ? 'text-on-surface' : 'text-on-surface-variant'}`}>Digital Wallets</span>
                           </div>
                         </div>
@@ -2537,6 +3003,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <main className="max-w-[1440px] mx-auto px-6 md:px-12 py-12 md:py-20 flex-grow w-full">
@@ -2620,11 +3087,18 @@ export default function App() {
                         </button>
                       </div>
                       <div className="space-y-1 font-body text-on-surface-variant text-sm leading-relaxed font-light">
-                        <p className="text-on-surface font-semibold">Julian Sterling</p>
-                        <p>Penthouse 4B, The Glass Tower</p>
-                        <p>722 Luxury Row, Manhattan</p>
-                        <p>New York, NY 10019</p>
-                        <p>+1 (212) 555-0198</p>
+                        {(() => {
+                          const addr = addresses.find(a => a.id === selectedAddress);
+                          if (!addr) return <p className="italic opacity-40">No destination selected.</p>;
+                           return (
+                             <>
+                               <p className="text-on-surface font-semibold">{addr.fullName}</p>
+                               <p>{addr.street}</p>
+                               <p>{addr.city}, {addr.state} {addr.pincode}</p>
+                               <p>{addr.phone}</p>
+                             </>
+                           );
+                        })()}
                       </div>
                     </div>
 
@@ -2644,16 +3118,22 @@ export default function App() {
                         </button>
                       </div>
                       <div className="space-y-4">
-                        <div className="flex items-center gap-4 bg-surface-container-low/50 p-3 rounded-lg border border-outline-variant/5">
-                          <div className="w-10 h-6 bg-surface-container-highest rounded flex items-center justify-center">
-                            <CreditCard size={16} className="opacity-60" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-mono text-on-surface tracking-widest">•••• 9901</p>
-                            <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-label">Expires 09/27</p>
-                          </div>
-                        </div>
-                        <p className="text-xs font-body text-on-surface-variant italic font-light">Billed to the Manhattan address above.</p>
+                        {(() => {
+                          const pm = paymentMethods.find(p => p.id === selectedPayment);
+                          if (!pm) return <p className="italic opacity-40">No instrument selected.</p>;
+                          return (
+                            <div className="flex items-center gap-4 bg-surface-container-low/50 p-3 rounded-lg border border-outline-variant/5">
+                              <div className="w-10 h-6 bg-surface-container-highest rounded flex items-center justify-center">
+                                <CreditCard size={16} className="opacity-60" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-mono text-on-surface tracking-widest">{pm.maskedNumber}</p>
+                                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-label">{pm.provider} {pm.type}</p>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                        <p className="text-xs font-body text-on-surface-variant italic font-light">Encrypted transaction via Obsidian Private Banking.</p>
                       </div>
                     </div>
                   </div>
@@ -2790,6 +3270,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <main className="flex-grow flex flex-col items-center justify-center px-6 py-12 max-w-[1400px] mx-auto w-full">
@@ -2999,6 +3480,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <main className="max-w-6xl mx-auto px-6 py-12 w-full">
@@ -3261,6 +3743,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <div className="flex max-w-[1920px] mx-auto min-h-screen w-full">
@@ -3300,135 +3783,96 @@ export default function App() {
               {/* Main Content */}
               <main className="flex-1 xl:ml-80 px-8 py-12 md:px-20 lg:py-24">
                 <header className="mb-16">
-                  <h1 className="text-5xl md:text-6xl font-headline font-bold text-on-surface mb-8 tracking-tighter">My Orders</h1>
+                  <h1 className="text-5xl md:text-6xl font-headline font-bold text-on-surface mb-8 tracking-tighter">My Acquisitions</h1>
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                     {/* Tabs */}
                     <div className="flex gap-2 p-1 bg-surface-container-low rounded-xl w-fit overflow-x-auto no-scrollbar">
-                      <button className="px-6 py-2 bg-surface-container-highest text-primary rounded-lg text-sm font-semibold transition-all">All</button>
-                      <button className="px-6 py-2 text-on-surface-variant hover:text-on-surface rounded-lg text-sm transition-all">Active</button>
-                      <button className="px-6 py-2 text-on-surface-variant hover:text-on-surface rounded-lg text-sm transition-all">Delivered</button>
-                      <button className="px-6 py-2 text-on-surface-variant hover:text-on-surface rounded-lg text-sm transition-all">Cancelled</button>
-                      <button className="px-6 py-2 text-on-surface-variant hover:text-on-surface rounded-lg text-sm transition-all">Returns</button>
-                    </div>
-                    {/* Search Bar */}
-                    <div className="relative max-w-md w-full">
-                      <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
-                      <input className="w-full bg-surface-container-highest border-none rounded-xl py-4 pl-12 pr-6 text-sm text-on-surface placeholder:text-outline focus:ring-1 focus:ring-primary" placeholder="Search by order ID or product name" type="text"/>
+                      {['ALL', 'PLACED', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((status) => (
+                        <button 
+                          key={status}
+                          onClick={() => setOrderStatusFilter(status)}
+                          className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${orderStatusFilter === status ? 'bg-surface-container-highest text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
+                        >
+                          {status.charAt(0) + status.slice(1).toLowerCase()}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </header>
 
                 {/* Orders Grid */}
                 <div className="space-y-8">
-                  {/* Order Card 1 */}
-                  <div className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-outline-variant/10">
-                    <div className="p-8 flex flex-col md:flex-row gap-12">
-                      <div className="flex-1 space-y-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-widest text-outline mb-1 font-semibold">Ordered on October 14, 2024</p>
-                            <h3 className="font-mono text-lg text-primary font-bold">#OC-82910-VX</h3>
-                          </div>
-                          <span className="px-3 py-1 bg-secondary-container/20 text-secondary text-[10px] uppercase tracking-widest font-bold rounded-full border border-secondary/20">Active Delivery</span>
-                        </div>
-                        <div className="flex -space-x-4">
-                          <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300">
-                            <img loading="lazy" alt="Luxury silk scarf" className="w-full h-full object-cover" src="/images/local/asset-0060.png" />
-                          </div>
-                          <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300 delay-75">
-                            <img loading="lazy" alt="Designer timepiece" className="w-full h-full object-cover" src="/images/local/asset-0061.png" />
-                          </div>
-                          <div className="w-20 h-24 bg-surface-container-high rounded-lg flex items-center justify-center border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300 delay-150">
-                            <span className="text-xs font-bold text-outline">+1</span>
-                          </div>
-                        </div>
-                        <p className="text-sm text-on-surface-variant font-medium">3 Items total • <span className="text-on-surface">Expected delivery: Oct 20</span></p>
-                      </div>
-                      <div className="md:w-64 flex flex-col justify-between border-t md:border-t-0 md:border-l border-outline-variant/10 pt-8 md:pt-0 md:pl-12">
-                        <div className="mb-8 md:mb-0">
-                          <p className="text-[10px] uppercase tracking-widest text-outline mb-1">Total Amount</p>
-                          <p className="text-3xl font-headline font-bold text-on-surface">$2,450.00</p>
-                        </div>
-                        <div className="space-y-3">
-                          <button 
-                            onClick={() => setView('order-tracking')}
-                            className="w-full py-3 bg-primary text-on-primary rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                          >
-                            <TruckIcon size={14} /> Track Order
-                          </button>
-                          <button className="w-full py-3 glass-panel border border-outline-variant/30 text-on-surface rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-surface-container-highest transition-all">View Details</button>
-                        </div>
-                      </div>
+                  {isLoading ? (
+                    <div className="flex justify-center py-20">
+                      <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                     </div>
-                  </div>
-
-                  {/* Order Card 2 */}
-                  <div className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-outline-variant/10">
-                    <div className="p-8 flex flex-col md:flex-row gap-12 opacity-80 group-hover:opacity-100 transition-opacity">
-                      <div className="flex-1 space-y-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-widest text-outline mb-1 font-semibold">Ordered on September 28, 2024</p>
-                            <h3 className="font-mono text-lg text-outline font-bold">#OC-71204-KL</h3>
+                  ) : myOrders.length > 0 ? (
+                    myOrders.map((order) => (
+                      <div key={order.orderId} className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-outline-variant/10">
+                        <div className="p-8 flex flex-col md:flex-row gap-12">
+                          <div className="flex-1 space-y-6">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-widest text-outline mb-1 font-semibold italic">Ordered on {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                <h3 className="font-mono text-lg text-primary font-bold">#{order.orderId}</h3>
+                              </div>
+                              <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full border ${
+                                order.status === 'DELIVERED' ? 'bg-primary/10 text-primary border-primary/20' : 
+                                order.status === 'CANCELLED' ? 'bg-error/10 text-error border-error/20' : 
+                                'bg-secondary-container/20 text-secondary border-secondary/20'
+                              }`}>
+                                {order.status}
+                              </span>
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                              {order.items.slice(0, 3).map((item: any, idx: number) => (
+                                <div key={idx} className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300">
+                                   <img 
+                                     src={item.productImage || "/images/local/asset-0060.png"} 
+                                     alt="Product" 
+                                     className="w-full h-full object-cover" 
+                                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/local/asset-0060.png"; }}
+                                    />
+                                </div>
+                              ))}
+                              {order.items.length > 3 && (
+                                <div className="w-20 h-24 bg-surface-container-high rounded-lg flex items-center justify-center border-2 border-surface-container-lowest shadow-xl transform group-hover:-translate-y-2 transition-transform duration-300">
+                                  <span className="text-xs font-bold text-outline">+{order.items.length - 3}</span>
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm text-on-surface-variant font-medium">{order.totalItems} Items total • <span className="text-on-surface">Payment: {order.paymentStatus}</span></p>
                           </div>
-                          <span className="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] uppercase tracking-widest font-bold rounded-full">Delivered</span>
-                        </div>
-                        <div className="flex">
-                          <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest shadow-xl">
-                            <img loading="lazy" alt="Bespoke leather boots" className="w-full h-full object-cover" src="/images/local/asset-0062.png" />
+                          <div className="md:w-64 flex flex-col justify-between border-t md:border-t-0 md:border-l border-outline-variant/10 pt-8 md:pt-0 md:pl-12">
+                            <div className="mb-8 md:mb-0">
+                              <p className="text-[10px] uppercase tracking-widest text-outline mb-1">Total Amount</p>
+                              <p className="text-3xl font-headline font-bold text-on-surface">${order.totalAmount.toFixed(2)}</p>
+                            </div>
+                            <div className="space-y-3">
+                              <button 
+                                onClick={() => { setSelectedOrder(order); setView('order-tracking'); }}
+                                className="w-full py-3 bg-primary text-on-primary rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                              >
+                                <TruckIcon size={14} /> Track Order
+                              </button>
+                              <button 
+                                onClick={() => { setSelectedOrder(order); setView('order-detail'); }}
+                                className="w-full py-3 glass-panel border border-outline-variant/30 text-on-surface rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-surface-container-highest transition-all"
+                              >
+                                View Details
+                              </button>
+                            </div>
                           </div>
                         </div>
-                        <p className="text-sm text-on-surface-variant font-medium">1 Item total • <span className="text-on-surface">Delivered Oct 02, 2024</span></p>
                       </div>
-                      <div className="md:w-64 flex flex-col justify-between border-t md:border-t-0 md:border-l border-outline-variant/10 pt-8 md:pt-0 md:pl-12">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-widest text-outline mb-1">Total Amount</p>
-                          <p className="text-3xl font-headline font-bold text-on-surface-variant">$1,100.00</p>
-                        </div>
-                        <div className="space-y-3">
-                          <button className="w-full py-3 bg-surface-container-highest text-primary rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2">
-                            <RotateCcw size={14} /> Reorder
-                          </button>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button className="py-3 glass-panel border border-outline-variant/30 text-on-surface rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-surface-container-highest transition-all">Details</button>
-                            <button className="py-3 glass-panel border border-outline-variant/30 text-on-surface rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-error/10 hover:text-error transition-all">Return</button>
-                          </div>
-                        </div>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="py-20 text-center border-2 border-dashed border-outline-variant/20 rounded-3xl">
+                      <PackageIcon size={48} className="mx-auto text-on-surface-variant/20 mb-4" />
+                      <p className="text-on-surface-variant/60 font-headline text-lg">Your acquisition history is currently blank.</p>
+                      <button onClick={() => setView('shop')} className="mt-6 text-primary font-bold uppercase text-[10px] tracking-widest hover:underline">Explore Boutique</button>
                     </div>
-                  </div>
-
-                  {/* Order Card 3 (Cancelled) */}
-                  <div className="group relative bg-surface-container-lowest/50 rounded-2xl overflow-hidden border border-outline-variant/5">
-                    <div className="p-8 flex flex-col md:flex-row gap-12 opacity-60">
-                      <div className="flex-1 space-y-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-widest text-outline mb-1 font-semibold">Ordered on September 10, 2024</p>
-                            <h3 className="font-mono text-lg text-outline/50 font-bold">#OC-68821-ZM</h3>
-                          </div>
-                          <span className="px-3 py-1 bg-error-container/10 text-error text-[10px] uppercase tracking-widest font-bold rounded-full border border-error/10">Cancelled</span>
-                        </div>
-                        <div className="flex">
-                          <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-surface-container-lowest grayscale shadow-xl">
-                            <img loading="lazy" alt="Crystal decanter" className="w-full h-full object-cover" src="/images/local/asset-0063.png" />
-                          </div>
-                        </div>
-                        <p className="text-sm text-outline font-medium italic">Order was cancelled by customer</p>
-                      </div>
-                      <div className="md:w-64 flex flex-col justify-end border-t md:border-t-0 md:border-l border-outline-variant/10 pt-8 md:pt-0 md:pl-12">
-                        <button className="w-full py-3 glass-panel border border-outline-variant/30 text-outline rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-surface-container-highest hover:text-on-surface transition-all">View Details</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pagination/Load More */}
-                <div className="mt-20 flex justify-center">
-                  <button className="group flex flex-col items-center gap-4 text-outline hover:text-primary transition-all">
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-bold">Discover More Records</span>
-                    <ChevronDown className="animate-bounce" size={24} />
-                  </button>
+                  )}
                 </div>
               </main>
             </div>
@@ -3481,6 +3925,103 @@ export default function App() {
             </footer>
           </motion.div>
         )}
+        {view === 'order-detail' && selectedOrder && (
+          <motion.div
+            key="order-detail"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col min-h-screen bg-background"
+          >
+            <TopNavBar 
+              view={view} 
+              setView={setView} 
+              cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+              showProfileDropdown={showProfileDropdown}
+              setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
+            />
+
+            <main className="max-w-4xl mx-auto w-full px-6 py-12 md:py-24 space-y-12">
+              <button 
+                onClick={() => setView('my-orders')}
+                className="flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest"
+              >
+                <ArrowLeft size={16} /> Back to Acquisitions
+              </button>
+
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-outline-variant/10 pb-8">
+                <div>
+                  <h1 className="text-4xl font-headline font-bold text-on-surface mb-2">Acquisition Dossier</h1>
+                  <p className="font-mono text-primary font-bold">#{selectedOrder.orderId}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Status</p>
+                  <span className="px-4 py-1.5 bg-primary/10 text-primary text-[10px] uppercase tracking-widest font-black rounded-full border border-primary/20">
+                    {selectedOrder.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div className="md:col-span-2 space-y-8">
+                  <h3 className="text-xl font-headline font-semibold">Manifest Items</h3>
+                  <div className="space-y-4">
+                    {selectedOrder.items.map((item: any, idx: number) => (
+                      <div key={idx} className="flex gap-6 p-4 rounded-xl bg-surface-container-low/40 border border-outline-variant/10">
+                        <div className="w-24 h-28 rounded-lg overflow-hidden border border-outline-variant/20">
+                          <img 
+                            src={item.productImage || "/images/local/asset-0060.png"} 
+                            alt={item.productName} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/local/asset-0060.png"; }}
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between py-1">
+                          <div>
+                            <h4 className="font-headline text-lg text-on-surface">{item.productName}</h4>
+                            <p className="text-xs text-on-surface-variant/60">Quantity: {item.quantity}</p>
+                          </div>
+                          <p className="text-primary font-mono font-bold">${item.price.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="p-6 rounded-xl bg-surface-container-highest/20 border border-outline-variant/10 space-y-6">
+                    <h3 className="text-sm font-headline font-bold uppercase tracking-widest text-primary border-b border-primary/10 pb-4">Acquisition Summary</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-on-surface-variant/60">Subtotal</span>
+                        <span className="text-on-surface">${selectedOrder.totalAmount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-on-surface-variant/60">Shipping</span>
+                        <span className="text-primary font-bold">Complimentary</span>
+                      </div>
+                      <div className="flex justify-between text-sm pt-4 border-t border-outline-variant/10">
+                        <span className="font-bold uppercase tracking-widest text-[10px]">Total</span>
+                        <span className="text-xl font-headline font-bold text-on-surface">${selectedOrder.totalAmount.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-xl border border-outline-variant/10 space-y-4">
+                    <h3 className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/60">Shipping Information</h3>
+                    <div className="text-xs space-y-1">
+                      <p className="font-bold text-on-surface">{selectedOrder.fullName}</p>
+                      <p className="text-on-surface-variant">{selectedOrder.shippingAddress}</p>
+                      <p className="text-on-surface-variant">{selectedOrder.city}, {selectedOrder.state} {selectedOrder.pincode}</p>
+                      <p className="text-on-surface-variant/60 pt-2 font-mono">{selectedOrder.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </motion.div>
+        )}
         {view === 'wishlist' && (
           <ProfileViewLayout
             view={view}
@@ -3488,6 +4029,7 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Curated Wishlist"
             description="A digital sanctuary for your most coveted acquisitions. Refined, timeless, and awaiting your final directive."
           >
@@ -3570,6 +4112,7 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Personal Vault"
             description="Refine your curatorial identity. Manage your private profile details and shipping preferences for an unparalleled boutique experience."
           >
@@ -3583,14 +4126,22 @@ export default function App() {
                   <div className="flex flex-col md:flex-row gap-10 items-start md:items-center relative z-10">
                     <div className="relative group/avatar">
                       <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-primary/20 p-1">
-                        <img loading="lazy" className="w-full h-full object-cover rounded-full" alt="Curator Identity" src="/images/local/asset-0064.png" referrerPolicy="no-referrer" />
+                        <img 
+                          loading="lazy" 
+                          className="w-full h-full object-cover rounded-full" 
+                          alt="Curator Identity" 
+                          src={profileFormData.avatarUrl || "/images/local/asset-0064.png"} 
+                          referrerPolicy="no-referrer" 
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/local/asset-0064.png"; }}
+                        />
                       </div>
-                      <button className="absolute bottom-2 right-2 bg-primary text-on-primary p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center">
+                      <label className="absolute bottom-2 right-2 bg-primary text-on-primary p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center cursor-pointer">
                         <Camera size={16} />
-                      </button>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                      </label>
                     </div>
                     <div className="flex-1 space-y-2">
-                      <h3 className="text-2xl font-headline text-on-surface">Curator Identity</h3>
+                      <h3 className="text-2xl font-headline text-on-surface">{profileFormData.name || 'Curator Identity'}</h3>
                       <p className="text-on-surface-variant text-sm uppercase tracking-widest">Member since Oct 2023</p>
                       <div className="flex gap-3 mt-4">
                         <span className="px-4 py-1.5 bg-surface-container-highest/50 border border-outline-variant/30 text-primary text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2">
@@ -3603,15 +4154,38 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mt-12">
+
+                  {profileError && (
+                    <div className="mt-8 p-4 bg-error/10 border border-error/20 rounded-lg text-error text-xs uppercase tracking-widest font-bold">
+                      {profileError}
+                    </div>
+                  )}
+                  {profileSuccess && (
+                    <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-lg text-primary text-xs uppercase tracking-widest font-bold">
+                      {profileSuccess}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mt-12">
                     <div className="space-y-2">
                       <label className="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Full Name</label>
-                      <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" type="text" defaultValue="Alexander Vance"/>
+                      <input 
+                        value={profileFormData.name}
+                        onChange={(e) => setProfileFormData({...profileFormData, name: e.target.value})}
+                        className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" 
+                        type="text" 
+                        placeholder="Alexander Vance"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Private Email</label>
                       <div className="relative">
-                        <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" type="email" defaultValue="a.vance@obsidian-curator.com"/>
+                        <input 
+                          value={profileFormData.email}
+                          readOnly
+                          className="w-full bg-transparent border-b border-outline-variant opacity-50 cursor-not-allowed py-4 px-1 text-on-surface font-headline text-lg outline-none" 
+                          type="email"
+                        />
                         <span className="absolute right-0 top-1/2 -translate-y-1/2 text-primary">
                           <CheckCircle2 size={14} fill="currentColor" />
                         </span>
@@ -3619,27 +4193,43 @@ export default function App() {
                     </div>
                     <div className="space-y-2">
                       <label className="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Phone Connection</label>
-                      <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" type="tel" defaultValue="+1 (555) 001-2834"/>
+                      <input 
+                        value={profileFormData.phone}
+                        onChange={(e) => setProfileFormData({...profileFormData, phone: e.target.value})}
+                        className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" 
+                        type="tel" 
+                        placeholder="+1 (555) 001-2834"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Date of Origin</label>
-                      <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" placeholder="MM/DD/YYYY" type="text" defaultValue="05/12/1988"/>
+                      <input 
+                        value={profileFormData.dob}
+                        onChange={(e) => setProfileFormData({...profileFormData, dob: e.target.value})}
+                        className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none" 
+                        placeholder="YYYY-MM-DD" 
+                        type="date"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="block text-[10px] uppercase tracking-[0.2em] text-on-surface-variant ml-1 font-bold">Identity Preference</label>
-                      <select className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none appearance-none">
-                        <option className="bg-background">Prefer not to state</option>
-                        <option selected className="bg-background">Masculine</option>
-                        <option className="bg-background">Feminine</option>
-                        <option className="bg-background">Non-binary</option>
+                      <select 
+                        value={profileFormData.gender}
+                        onChange={(e) => setProfileFormData({...profileFormData, gender: e.target.value})}
+                        className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 transition-colors py-4 px-1 text-on-surface font-headline text-lg outline-none appearance-none"
+                      >
+                        <option value="Prefer not to state" className="bg-background">Prefer not to state</option>
+                        <option value="Masculine" className="bg-background">Masculine</option>
+                        <option value="Feminine" className="bg-background">Feminine</option>
+                        <option value="Non-binary" className="bg-background">Non-binary</option>
                       </select>
                     </div>
-                  </div>
-                  <div className="mt-16 flex justify-end">
-                    <button className="px-10 py-4 bg-primary text-on-primary rounded-lg font-headline font-bold uppercase tracking-widest hover:bg-primary-container transition-all shadow-[0_4px_24px_rgba(230,195,100,0.15)] active:scale-95">
-                      Save Manifest
-                    </button>
-                  </div>
+                    <div className="md:col-span-2 mt-16 flex justify-end">
+                      <button type="submit" className="px-10 py-4 bg-primary text-on-primary rounded-lg font-headline font-bold uppercase tracking-widest hover:bg-primary-container transition-all shadow-[0_4px_24px_rgba(230,195,100,0.15)] active:scale-95">
+                        Save Manifest
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
                 {/* Recent Acquisitions Section */}
@@ -3701,20 +4291,20 @@ export default function App() {
                     </button>
                   </div>
                   <div className="space-y-6">
-                    <div className="p-4 rounded-lg bg-surface-container-low border border-outline-variant/20 flex gap-4">
-                      <Home className="text-primary-container" size={20} />
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <p className="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Primary Estate</p>
-                          <div className="flex gap-3 text-on-surface-variant">
-                            <RotateCcw size={14} className="cursor-pointer hover:text-primary" />
-                            <Trash2 size={14} className="cursor-pointer hover:text-error" />
-                          </div>
+                    {addresses.length > 0 ? (
+                      <div className="p-4 rounded-lg bg-surface-container-low border border-outline-variant/20 flex gap-4">
+                        <Home className="text-primary-container" size={20} />
+                        <div className="flex-1">
+                          <p className="text-xs uppercase tracking-widest text-on-surface-variant mb-1">
+                            {addresses[0].addressType} {addresses[0].isDefault ? '(Primary)' : ''}
+                          </p>
+                          <p className="text-on-surface text-sm">{addresses[0].street}</p>
+                          <p className="text-on-surface/60 text-xs">{addresses[0].city}, {addresses[0].state} {addresses[0].pincode}</p>
                         </div>
-                        <p className="text-on-surface text-sm">742 Evergreen Terrace</p>
-                        <p className="text-on-surface/60 text-xs">Springfield, OR 97403</p>
                       </div>
-                    </div>
+                    ) : (
+                      <p className="text-xs text-on-surface-variant/40 italic">No residences recorded.</p>
+                    )}
                   </div>
                 </div>
                 {/* Security Highlight */}
@@ -3784,18 +4374,35 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Private Residences"
             description="Manage your global shipping destinations. Curate your primary estates and metropolitan suites for seamless acquisition delivery."
           >
             <div className="flex flex-col gap-8">
               <div className="flex justify-end">
-                <button type="button" onClick={() => setShowAddressForm(!showAddressForm)} className="px-6 py-3 bg-primary text-on-primary rounded-lg font-headline text-xs uppercase tracking-widest hover:bg-primary-container transition-all">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    if (!showAddressForm) {
+                      setAddressFormData({ fullName: '', phone: '', pincode: '', addressType: 'HOME', street: '', city: '', state: '' });
+                      setIsEditingAddress(false);
+                      setEditingAddressId(null);
+                    }
+                    setShowAddressForm(!showAddressForm);
+                  }} 
+                  className="px-6 py-3 bg-primary text-on-primary rounded-lg font-headline text-xs uppercase tracking-widest hover:bg-primary-container transition-all"
+                >
                   {showAddressForm ? 'Cancel' : 'Add New Residence'}
                 </button>
               </div>
 
               {showAddressForm && (
                 <form onSubmit={handleAddAddressSubmit} className="pt-8 border-t border-outline-variant/10">
+                  {addressError && (
+                    <div className="mb-6 p-4 bg-error/10 border border-error/20 rounded-lg text-error text-xs uppercase tracking-widest font-bold">
+                      {addressError}
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-headline uppercase tracking-widest text-on-surface-variant ml-1">Full Name</label>
@@ -3831,7 +4438,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="mt-8 flex justify-end gap-4">
-                    <button type="submit" className="px-6 py-3 bg-primary text-on-primary rounded font-headline text-xs tracking-widest uppercase">Save Address</button>
+                    <button type="submit" className="px-6 py-3 bg-primary text-on-primary rounded font-headline text-xs tracking-widest uppercase">{isEditingAddress ? 'Update Residence' : 'Save Address'}</button>
                   </div>
                 </form>
               )}
@@ -3840,8 +4447,18 @@ export default function App() {
                 {addresses.map((addr) => (
                   <div key={addr.id} className="p-8 rounded-xl bg-surface-container-lowest border border-primary/20 relative group">
                     <div className="absolute top-4 right-4 flex gap-2">
-                      <button className="p-2 text-on-surface-variant hover:text-primary transition-colors"><RotateCcw size={16} /></button>
-                      <button className="p-2 text-on-surface-variant hover:text-error transition-colors"><Trash2 size={16} /></button>
+                      <button 
+                        onClick={() => handleEditAddress(addr)}
+                        className="p-2 text-on-surface-variant hover:text-primary transition-colors"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteAddress(addr.id)}
+                        className="p-2 text-on-surface-variant hover:text-error transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                     <div className="flex gap-6 items-start">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -3868,42 +4485,102 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Payment Methods"
             description="Secure your financial conduits. Manage your encrypted payment instruments for swift and secure transactions."
           >
             <div className="flex flex-col gap-8">
               <div className="flex justify-end">
-                <button className="px-6 py-3 bg-primary text-on-primary rounded-lg font-headline text-xs uppercase tracking-widest hover:bg-primary-container transition-all">
-                  Add Payment Method
+                <button 
+                  onClick={() => setShowPaymentForm(!showPaymentForm)}
+                  className="px-6 py-3 bg-primary text-on-primary rounded-lg font-headline text-xs uppercase tracking-widest hover:bg-primary-container transition-all"
+                >
+                  {showPaymentForm ? 'Cancel' : 'Add Payment Method'}
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-8 rounded-xl bg-gradient-to-br from-[#1a1a1f] to-[#2a2a30] border border-outline-variant/20 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-10">
-                    <CreditCardIcon size={120} />
-                  </div>
-                  <div className="relative z-10 flex flex-col h-full justify-between gap-12">
-                    <div className="flex justify-between items-start">
-                      <div className="w-12 h-8 bg-surface-container-highest/30 rounded flex items-center justify-center">
-                        <div className="w-8 h-5 bg-primary/20 rounded-sm"></div>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-widest text-primary font-bold">Primary Card</span>
+
+              {showPaymentForm && (
+                <div className="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
+                  <h4 className="font-headline text-xl mb-6">Initialize New Instrument</h4>
+                  <form onSubmit={handleAddPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2 space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Payment Provider</label>
+                       <div className="flex gap-4">
+                         {['CARD', 'PAYPAL', 'CRYPTO'].map(m => (
+                           <button 
+                             key={m}
+                             type="button"
+                             onClick={() => setPaymentFormData({...paymentFormData, type: m})}
+                             className={`px-4 py-2 rounded-lg border text-[10px] uppercase font-bold tracking-widest ${paymentFormData.type === m ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'}`}
+                           >
+                             {m}
+                           </button>
+                         ))}
+                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <p className="text-2xl font-mono tracking-[0.2em] text-on-surface">•••• •••• •••• 8824</p>
-                      <div className="flex justify-between items-end">
-                        <div className="space-y-1">
-                          <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">Card Holder</p>
-                          <p className="text-sm font-headline uppercase">Alexander Vance</p>
-                        </div>
-                        <div className="space-y-1 text-right">
-                          <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">Expires</p>
-                          <p className="text-sm font-headline">12/26</p>
-                        </div>
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Reference Number / Masked Card</label>
+                      <input 
+                         required
+                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                         placeholder="•••• 1234"
+                         value={paymentFormData.maskedNumber}
+                         onChange={e => setPaymentFormData({...paymentFormData, maskedNumber: e.target.value})}
+                      />
                     </div>
-                  </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Provider Name</label>
+                      <input 
+                         required
+                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                         placeholder="VISA / Master"
+                         value={paymentFormData.provider}
+                         onChange={e => setPaymentFormData({...paymentFormData, provider: e.target.value})}
+                      />
+                    </div>
+                    <div className="md:col-span-2 flex justify-end pt-4">
+                      <button type="submit" className="bg-primary text-on-primary px-10 py-4 rounded-lg font-bold uppercase tracking-widest text-xs">Authorize Instrument</button>
+                    </div>
+                  </form>
                 </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-on-surface">
+                {paymentMethods.map((pm) => (
+                  <div key={pm.id} className="p-8 rounded-xl bg-gradient-to-br from-[#1a1a1f] to-[#2a2a30] border border-outline-variant/20 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-10">
+                      <CreditCardIcon size={120} />
+                    </div>
+                    <div className="relative z-10 flex flex-col h-full justify-between gap-12">
+                      <div className="flex justify-between items-start">
+                        <div className="w-12 h-8 bg-surface-container-highest/30 rounded flex items-center justify-center">
+                          <div className="w-8 h-5 bg-primary/20 rounded-sm"></div>
+                        </div>
+                        <span className="text-[10px] uppercase tracking-widest text-primary font-bold">{pm.type}</span>
+                      </div>
+                      <div className="space-y-4">
+                        <p className="text-2xl font-mono tracking-[0.2em]">{pm.maskedNumber}</p>
+                        <div className="flex justify-between items-end">
+                          <div className="space-y-1">
+                            <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">Provider</p>
+                            <p className="text-sm font-headline uppercase">{pm.provider}</p>
+                          </div>
+                          {pm.expiryDate && (
+                            <div className="space-y-1 text-right">
+                              <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">Expires</p>
+                              <p className="text-sm font-headline">{pm.expiryDate}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {paymentMethods.length === 0 && (
+                  <div className="md:col-span-2 py-20 text-center border-2 border-dashed border-outline-variant/20 rounded-3xl">
+                    <CreditCardIcon size={48} className="mx-auto text-on-surface-variant/20 mb-4" />
+                    <p className="text-on-surface-variant/60 font-headline">No stored instruments.</p>
+                  </div>
+                )}
               </div>
             </div>
           </ProfileViewLayout>
@@ -3916,33 +4593,76 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Notification Center"
             description="Control your digital correspondence. Tailor your alerts for new acquisitions, order updates, and exclusive curatorial insights."
           >
-            <div className="bg-surface-container-lowest/50 backdrop-blur-xl rounded-xl border border-outline-variant/10 overflow-hidden">
-              <div className="divide-y divide-outline-variant/10">
-                {[
-                  { title: 'Order Updates', desc: 'Receive alerts regarding your acquisition status and delivery.', icon: Package },
-                  { title: 'New Collections', desc: 'Be the first to know when new curated series are unveiled.', icon: Sparkles },
-                  { title: 'Security Alerts', desc: 'Critical notifications regarding your vault access and identity.', icon: Lock },
-                  { title: 'Newsletter', desc: 'Monthly insights into the world of digital luxury and curation.', icon: Mail }
-                ].map((item, i) => (
-                  <div key={i} className="p-8 flex items-center justify-between hover:bg-surface-container-low/30 transition-colors">
-                    <div className="flex gap-6 items-center">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <item.icon size={20} />
+            <div className="space-y-12">
+              <div className="bg-surface-container-lowest/50 backdrop-blur-xl rounded-xl border border-outline-variant/10 overflow-hidden">
+                <div className="p-6 border-b border-outline-variant/10">
+                  <h3 className="text-xl font-headline font-semibold">Preferences</h3>
+                </div>
+                <div className="divide-y divide-outline-variant/10">
+                  {[
+                    { key: 'orderUpdates', title: 'Order Updates', desc: 'Receive alerts regarding your acquisition status and delivery.', icon: Package },
+                    { key: 'newCollections', title: 'New Collections', desc: 'Be the first to know when new curated series are unveiled.', icon: Sparkles },
+                    { key: 'securityAlerts', title: 'Security Alerts', desc: 'Critical notifications regarding your vault access and identity.', icon: Lock },
+                    { key: 'newsletter', title: 'Newsletter', desc: 'Monthly insights into the world of digital luxury and curation.', icon: Mail }
+                  ].map((item) => (
+                    <div key={item.key} className="p-8 flex items-center justify-between hover:bg-surface-container-low/30 transition-colors">
+                      <div className="flex gap-6 items-center">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          <item.icon size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-headline text-on-surface">{item.title}</h4>
+                          <p className="text-sm text-on-surface-variant font-light">{item.desc}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-lg font-headline text-on-surface">{item.title}</h4>
-                        <p className="text-sm text-on-surface-variant font-light">{item.desc}</p>
+                      <div className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={!!(notifications as any)[item.key]} 
+                          onChange={(e) => handleToggleNotification(item.key as any, e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                       </div>
                     </div>
-                    <div className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked={i < 3} />
-                      <div className="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                 <h3 className="text-2xl font-headline font-semibold px-2">Acquisition Feed</h3>
+                 <div className="space-y-4">
+                    {userNotifications.map((notif) => (
+                      <div key={notif.id} className={`p-6 rounded-xl border border-outline-variant/10 transition-all ${notif.read ? 'bg-surface-container-lowest/30 opacity-60' : 'bg-surface-container-lowest shadow-lg border-primary/20'}`}>
+                        <div className="flex justify-between items-start mb-2">
+                           <h4 className="font-headline font-bold text-on-surface">{notif.title}</h4>
+                           <span className="text-[10px] text-on-surface-variant font-mono">{new Date(notif.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-sm text-on-surface-variant leading-relaxed">{notif.message}</p>
+                        {!notif.read && (
+                          <button 
+                            onClick={async () => {
+                              await notificationApi.markAsRead(notif.id);
+                              fetchNotifications();
+                            }}
+                            className="mt-4 text-[10px] uppercase tracking-widest text-primary font-bold hover:underline"
+                          >
+                            Mark as Read
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {userNotifications.length === 0 && (
+                      <div className="py-20 text-center border-2 border-dashed border-outline-variant/20 rounded-3xl">
+                        <BellOff size={48} className="mx-auto text-on-surface-variant/20 mb-4" />
+                        <p className="text-on-surface-variant/60 font-headline">Your feed is current.</p>
+                      </div>
+                    )}
+                 </div>
               </div>
             </div>
           </ProfileViewLayout>
@@ -3955,6 +4675,7 @@ export default function App() {
             cartItems={cartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Vault Security"
             description="Fortify your digital presence. Manage your credentials, active sessions, and multi-factor authentication protocols."
           >
@@ -3966,17 +4687,39 @@ export default function App() {
                   </div>
                   <h4 className="text-xl font-headline">Change Password</h4>
                 </div>
-                <div className="space-y-6">
+                <form onSubmit={handleChangePassword} className="space-y-6">
+                  {securityError && (
+                    <div className="p-4 bg-error/10 border border-error/20 rounded-lg text-error text-[10px] uppercase tracking-widest font-bold">
+                      {securityError}
+                    </div>
+                  )}
+                  {securitySuccess && (
+                    <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg text-primary text-[10px] uppercase tracking-widest font-bold">
+                      {securitySuccess}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Current Password</label>
-                    <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary py-3 outline-none" type="password" />
+                    <input 
+                      required
+                      value={securityFormData.currentPassword}
+                      onChange={(e) => setSecurityFormData({...securityFormData, currentPassword: e.target.value})}
+                      className="w-full bg-transparent border-b border-outline-variant focus:border-primary py-3 outline-none" 
+                      type="password" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">New Password</label>
-                    <input className="w-full bg-transparent border-b border-outline-variant focus:border-primary py-3 outline-none" type="password" />
+                    <input 
+                      required
+                      value={securityFormData.newPassword}
+                      onChange={(e) => setSecurityFormData({...securityFormData, newPassword: e.target.value})}
+                      className="w-full bg-transparent border-b border-outline-variant focus:border-primary py-3 outline-none" 
+                      type="password" 
+                    />
                   </div>
-                  <button className="w-full py-4 bg-surface-container-highest text-on-surface font-headline text-xs uppercase tracking-widest rounded-lg hover:bg-primary hover:text-on-primary transition-all">Update Credentials</button>
-                </div>
+                  <button type="submit" className="w-full py-4 bg-surface-container-highest text-on-surface font-headline text-xs uppercase tracking-widest rounded-lg hover:bg-primary hover:text-on-primary transition-all">Update Credentials</button>
+                </form>
               </div>
               <div className="p-8 rounded-xl bg-surface-container-lowest border border-outline-variant/10 space-y-8">
                 <div className="flex items-center gap-4">
@@ -3987,8 +4730,13 @@ export default function App() {
                 </div>
                 <p className="text-on-surface-variant text-sm font-light leading-relaxed">Add an extra layer of security to your account by requiring more than just a password to log in.</p>
                 <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 flex items-center justify-between">
-                  <span className="text-sm font-headline">Status: <span className="text-primary uppercase tracking-widest font-bold">Active</span></span>
-                  <button className="text-xs text-on-surface-variant hover:text-error transition-colors uppercase tracking-widest font-bold">Deactivate</button>
+                  <span className="text-sm font-headline">Status: <span className={`uppercase tracking-widest font-bold ${profileFormData.twoFactorEnabled ? 'text-primary' : 'text-on-surface-variant/40'}`}>{profileFormData.twoFactorEnabled ? 'Active' : 'Disabled'}</span></span>
+                  <button 
+                    onClick={() => handleToggle2FA(!profileFormData.twoFactorEnabled)}
+                    className={`text-xs uppercase tracking-widest font-bold transition-colors ${profileFormData.twoFactorEnabled ? 'text-on-surface-variant hover:text-error' : 'text-primary hover:brightness-110'}`}
+                  >
+                    {profileFormData.twoFactorEnabled ? 'Deactivate' : 'Activate Portal'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -4000,8 +4748,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             title="Concierge Support"
             description="Our dedicated team is at your disposal. Access our curated knowledge base or connect with a personal concierge for assistance."
           >
@@ -4029,8 +4779,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="timepieces"
             onCategorySelect={openShopCategory}
@@ -4047,8 +4799,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="jewelry"
             onCategorySelect={openShopCategory}
@@ -4065,8 +4819,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="leather"
             onCategorySelect={openShopCategory}
@@ -4083,8 +4839,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="fashion"
             onCategorySelect={openShopCategory}
@@ -4101,8 +4859,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="home"
             onCategorySelect={openShopCategory}
@@ -4119,8 +4879,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="beauty"
             onCategorySelect={openShopCategory}
@@ -4137,8 +4899,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="sports"
             onCategorySelect={openShopCategory}
@@ -4155,8 +4919,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="books"
             onCategorySelect={openShopCategory}
@@ -4173,8 +4939,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             onOpenMobileMenu={() => setIsCategoryMenuOpen(true)}
             activeCategory="toys"
             onCategorySelect={openShopCategory}
@@ -4191,8 +4959,10 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
+            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
+            onLogout={handleLogout}
             content={infoPageContent[view]}
           />
         )}
@@ -4214,6 +4984,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
             
             <CategoryBar 
@@ -4558,9 +5329,13 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
-            <main className="max-w-[1440px] mx-auto px-8 pt-12 flex-grow">
+            <main className="max-w-[1440px] mx-auto px-8 pt-12 flex-grow w-full">
+              <div className="mb-8">
+                <BackButton onBack={() => setView('shop')} />
+              </div>
               {/* Breadcrumbs */}
               <nav className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/40 mb-8">
                 <span className="hover:text-primary cursor-pointer" onClick={() => setView('home')}>Home</span>
@@ -4641,18 +5416,33 @@ export default function App() {
                     <div>
                       <span className="block text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-4">Case Finish</span>
                       <div className="flex gap-4">
-                        <button className="w-8 h-8 rounded-full bg-[#131317] border-2 border-primary ring-2 ring-primary/20 ring-offset-2 ring-offset-background"></button>
-                        <button className="w-8 h-8 rounded-full bg-[#E5E4E2] border-2 border-transparent hover:border-primary/50 transition-all"></button>
-                        <button className="w-8 h-8 rounded-full bg-[#B76E79] border-2 border-transparent hover:border-primary/50 transition-all"></button>
+                        {[
+                          { name: 'Obsidian Black', color: '#131317' },
+                          { name: 'Platinum Silver', color: '#E5E4E2' },
+                          { name: 'Rose Gold', color: '#B76E79' }
+                        ].map((variant) => (
+                          <button 
+                            key={variant.name}
+                            onClick={() => setSelectedProductColor(variant.name)}
+                            className={`w-8 h-8 rounded-full border-2 transition-all ${selectedProductColor === variant.name ? 'border-primary ring-2 ring-primary/20 ring-offset-2 ring-offset-background' : 'border-transparent hover:border-primary/50'}`}
+                            style={{ backgroundColor: variant.color }}
+                            title={variant.name}
+                          ></button>
+                        ))}
                       </div>
                     </div>
                     <div>
                       <span className="block text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-4">Strap Size</span>
                       <div className="grid grid-cols-4 gap-2">
-                        <button className="py-3 px-4 rounded-lg bg-surface-container-highest border border-primary text-primary text-xs font-bold tracking-widest">40MM</button>
-                        <button className="py-3 px-4 rounded-lg bg-surface-container-low border border-outline-variant/20 text-on-surface-variant text-xs font-bold tracking-widest hover:border-primary transition-colors">42MM</button>
-                        <button className="py-3 px-4 rounded-lg bg-surface-container-low border border-outline-variant/20 text-on-surface-variant text-xs font-bold tracking-widest hover:border-primary transition-colors">44MM</button>
-                        <button className="py-3 px-4 rounded-lg bg-surface-container-lowest border border-outline-variant/10 text-on-surface-variant/20 text-xs font-bold tracking-widest cursor-not-allowed">46MM</button>
+                        {['40MM', '42MM', '44MM', '46MM'].map((size) => (
+                          <button 
+                            key={size}
+                            onClick={() => size !== '46MM' && setSelectedProductSize(size)}
+                            className={`py-3 px-4 rounded-lg border transition-all text-xs font-bold tracking-widest ${selectedProductSize === size ? 'bg-surface-container-highest border-primary text-primary' : size === '46MM' ? 'bg-surface-container-lowest border-outline-variant/10 text-on-surface-variant/20 cursor-not-allowed' : 'bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:border-primary'}`}
+                          >
+                            {size}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -4661,11 +5451,17 @@ export default function App() {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center bg-surface-container rounded-lg border border-outline-variant/20 overflow-hidden">
-                        <button className="p-4 text-on-surface hover:bg-surface-container-highest transition-colors">
+                        <button 
+                          onClick={() => setProductQuantity(Math.max(1, productQuantity - 1))}
+                          className="p-4 text-on-surface hover:bg-surface-container-highest transition-colors"
+                        >
                           <Minus size={16} />
                         </button>
-                        <span className="w-12 text-center font-mono font-bold">1</span>
-                        <button className="p-4 text-on-surface hover:bg-surface-container-highest transition-colors">
+                        <span className="w-12 text-center font-mono font-bold">{productQuantity}</span>
+                        <button 
+                          onClick={() => setProductQuantity(productQuantity + 1)}
+                          className="p-4 text-on-surface hover:bg-surface-container-highest transition-colors"
+                        >
                           <Plus size={16} />
                         </button>
                       </div>
@@ -4684,11 +5480,12 @@ export default function App() {
                         onClick={() => {
                           const newItem = {
                             id: Date.now(),
+                            productId: selectedProduct?.id,
                             name: selectedProduct?.name || 'The Midnight Eclipse Perpetual',
                             price: parseInt((selectedProduct?.price || '$4,250.00').replace(/[^0-9]/g, '')),
-                            quantity: 1,
+                            quantity: productQuantity,
                             img: selectedProduct?.img || '/images/local/asset-0073.png',
-                            variant: '40MM / Obsidian Black',
+                            variant: `${selectedProductSize} / ${selectedProductColor}`,
                             outOfStock: false
                           };
                           setCartItems(prev => [...prev, newItem]);
@@ -4761,10 +5558,11 @@ export default function App() {
               {/* Tabs Section */}
               <section className="mb-32">
                 <div className="flex border-b border-outline-variant/10 gap-12 mb-12 overflow-x-auto no-scrollbar">
-                  {['Detailed Narrative', 'Technical Specifications', 'Collector Reviews', 'Inquiries (12)'].map((tab, i) => (
+                  {['Detailed Narrative', 'Technical Specifications', 'Collector Reviews', 'Inquiries (12)'].map((tab) => (
                     <button 
                       key={tab}
-                      className={`pb-6 border-b-2 font-headline text-lg transition-all whitespace-nowrap ${i === 0 ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant/40 hover:text-on-surface'}`}
+                      onClick={() => setActiveProductTab(tab)}
+                      className={`pb-6 border-b-2 font-headline text-lg transition-all whitespace-nowrap ${activeProductTab === tab ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant/40 hover:text-on-surface'}`}
                     >
                       {tab}
                     </button>
@@ -4772,38 +5570,118 @@ export default function App() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
                   <div className="prose prose-invert">
-                    <h3 className="font-headline text-3xl text-on-surface mb-6">A Masterpiece of Temporal Art</h3>
-                    <p className="text-on-surface-variant leading-relaxed mb-6 font-body text-lg font-light">
-                      The Midnight Eclipse is not merely a timepiece; it is a manifestation of celestial mechanics captured within a 42mm obsidian vessel. Each component is hand-finished by master horologists in our private atelier, ensuring that every second is measured with unprecedented grace.
-                    </p>
-                    <ul className="space-y-4 text-on-surface-variant font-body list-none p-0">
-                      <li className="flex items-center gap-4"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> Hand-polished Grade 5 Obsidian glass dial</li>
-                      <li className="flex items-center gap-4"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> In-house Caliber-88 Perpetual Movement</li>
-                      <li className="flex items-center gap-4"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> 72-hour power reserve with moon-phase display</li>
-                    </ul>
-                  </div>
-                  <div className="bg-surface-container-low p-10 rounded-3xl border border-outline-variant/10">
-                    <div className="flex justify-between items-center mb-8">
-                      <h4 className="font-headline text-2xl">Ratings Overview</h4>
-                      <div className="text-center">
-                        <p className="text-4xl font-headline text-primary">4.8</p>
-                        <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold">Out of 5 Stars</p>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      {[85, 10, 3, 1, 1].map((val, i) => (
-                        <div key={i} className="flex items-center gap-4">
-                          <span className="text-[10px] font-mono w-4 font-bold">{5 - i}</span>
-                          <div className="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: `${val}%` }}></div>
-                          </div>
-                          <span className="text-[10px] text-on-surface-variant/40 font-bold w-8">{val}%</span>
+                    {activeProductTab === 'Detailed Narrative' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-16 col-span-2">
+                        <div className="space-y-6">
+                          <h3 className="font-headline text-3xl text-on-surface mb-6">A Masterpiece of Temporal Art</h3>
+                          <p className="text-on-surface-variant leading-relaxed font-body text-lg font-light">
+                            The {selectedProduct?.name} represents the absolute pinnacle of artisanal engineering. Every curve of its titanium housing is hand-sculpted over ninety hours, ensuring a tactile experience as profound as its visual majesty.
+                          </p>
+                          <p className="text-on-surface-variant leading-relaxed font-body text-lg font-light">
+                            This creation is not merely a tool for measurement; it is an inheritance of precision, a statement of intent for the modern connoisseur who understands that time is the ultimate luxury.
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                    <button className="w-full mt-10 py-4 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-primary/5 transition-all">
-                      Read All Reviews
-                    </button>
+                        <div className="bg-surface-container-highest/20 p-8 rounded-2xl border border-outline-variant/10">
+                          <p className="text-on-surface-variant leading-relaxed mb-8 font-body text-lg font-light">
+                            Each component is hand-finished by master horologists in our private atelier, ensuring that every second is measured with unprecedented grace.
+                          </p>
+                          <ul className="space-y-4 text-on-surface-variant font-body list-none p-0">
+                            <li className="flex items-center gap-4"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> Hand-polished Grade 5 Obsidian glass dial</li>
+                            <li className="flex items-center gap-4"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> In-house Caliber-88 Perpetual Movement</li>
+                            <li className="flex items-center gap-4"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> 72-hour power reserve with moon-phase display</li>
+                          </ul>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {activeProductTab === 'Technical Specifications' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-12">
+                          {[
+                            { label: 'Movement', value: 'Caliber OC-992 Automatic' },
+                            { label: 'Case Material', value: 'Grade 5 Brushed Titanium' },
+                            { label: 'Diameter', value: '42.5mm' },
+                            { label: 'Power Reserve', value: '72 Hours' },
+                            { label: 'Water Resistance', value: '10 ATM / 100 Meters' },
+                            { label: 'Crystal', value: 'Anti-Reflective Sapphire' },
+                            { label: 'Strap', value: 'Full-Grain Tuscan Leather' },
+                            { label: 'Complications', value: 'Moon Phase, Date, Power Reserve' },
+                            { label: 'Origin', value: 'Switzerland' }
+                          ].map((spec, i) => (
+                            <div key={i} className="border-b border-outline-variant/10 pb-6">
+                              <p className="text-[10px] uppercase tracking-widest text-primary font-bold mb-2">{spec.label}</p>
+                              <p className="text-xl font-headline text-on-surface">{spec.value}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {activeProductTab === 'Collector Reviews' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-16 col-span-2">
+                        <div className="lg:col-span-2 space-y-12">
+                          {[
+                            { author: 'Julian V.', date: 'Oct 12, 2024', text: 'An absolute triumph of design. The weight is perfect, and the dial has a depth that photos simply cannot capture.', rating: 5 },
+                            { author: 'Elena R.', date: 'Sep 28, 2024', text: 'Incredible hospitality during the acquisition process. The piece itself is a work of art.', rating: 5 }
+                          ].map((review, i) => (
+                            <div key={i} className="space-y-4 pb-8 border-b border-outline-variant/10">
+                              <div className="flex justify-between items-center">
+                                <div className="flex gap-1 text-primary">
+                                  {[...Array(review.rating)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                                </div>
+                                <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/40">{review.date}</span>
+                              </div>
+                              <p className="text-on-surface-variant font-body italic text-lg leading-relaxed">"{review.text}"</p>
+                              <p className="text-sm font-bold text-on-surface uppercase tracking-widest">— {review.author}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="space-y-8">
+                          <div className="bg-surface-container-low p-10 rounded-3xl border border-outline-variant/10">
+                            <div className="flex justify-between items-center mb-10">
+                              <h4 className="font-headline text-2xl">Ratings Overview</h4>
+                              <div className="text-center">
+                                <p className="text-5xl font-headline text-primary">4.8</p>
+                                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold mt-1">Global Average</p>
+                              </div>
+                            </div>
+                            <div className="space-y-6">
+                              {[85, 10, 3, 1, 1].map((val, i) => (
+                                <div key={i} className="flex items-center gap-4">
+                                  <span className="text-xs font-mono w-4 font-bold">{5 - i}</span>
+                                  <div className="flex-grow h-2 bg-surface-container rounded-full overflow-hidden">
+                                    <div className="h-full bg-primary" style={{ width: `${val}%` }}></div>
+                                  </div>
+                                  <span className="text-[10px] text-on-surface-variant/40 font-bold w-10 text-right">{val}%</span>
+                                </div>
+                              ))}
+                            </div>
+                            <button className="w-full mt-10 py-5 bg-transparent border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-primary/5 transition-all">
+                              Read All 142 Reviews
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {activeProductTab === 'Inquiries (12)' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-2">
+                        <div className="max-w-2xl mx-auto p-12 bg-surface-container-highest/10 rounded-3xl border border-outline-variant/10 text-center">
+                          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-8">
+                            <div className="font-headline text-2xl">?</div>
+                          </div>
+                          <h4 className="font-headline text-3xl mb-6">Curatorial Concierge</h4>
+                          <p className="text-on-surface-variant mb-10 text-lg font-light leading-relaxed">
+                            Should you require specific technical documentation or wish to discuss bespoke customization, 
+                            our master curators are available for formal consultation.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button className="px-10 py-4 bg-primary text-on-primary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-all">Submit Inquiry</button>
+                            <button className="px-10 py-4 bg-transparent border border-outline-variant/30 text-on-surface rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-surface-container-highest transition-all">Direct Contact</button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
                 </div>
               </section>
@@ -4942,6 +5820,7 @@ export default function App() {
               cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               showProfileDropdown={showProfileDropdown}
               setShowProfileDropdown={setShowProfileDropdown}
+              onLogout={handleLogout}
             />
 
             <CategoryBar 
@@ -5050,6 +5929,9 @@ export default function App() {
 
               {/* Main Content Area */}
               <main className="flex-1 px-8 md:px-12 py-12">
+                <div className="mb-8">
+                  <BackButton onBack={() => setView('home')} />
+                </div>
                 {/* Header & Context */}
                 <header className="mb-12">
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -5359,10 +6241,6 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="min-h-screen flex flex-col md:flex-row overflow-hidden"
           >
-            {/* FIX: back navigation */}
-            <div className="absolute top-6 left-6 z-30">
-              <BackButton onBack={() => (window.history.length > 1 ? window.history.back() : setView('home'))} />
-            </div>
 
             {/* Left Side: Editorial Image & Quote */}
             <section className="hidden md:flex md:w-7/12 relative items-end p-20 overflow-hidden">
@@ -5528,22 +6406,16 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Social Logins */}
-                <div className="grid grid-cols-2 gap-4">
-                  <button className="flex items-center justify-center gap-3 py-4 bg-surface-container border border-outline-variant/10 rounded-lg hover:bg-surface-container-high transition-colors group">
+                {/* Social Login */}
+                <div className="grid grid-cols-1">
+                  <button type="button" onClick={() => googleLogin()} className="flex items-center justify-center gap-3 py-4 bg-surface-container border border-outline-variant/10 rounded-lg hover:bg-surface-container-high transition-colors group">
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#e4e1e7"></path>
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#e4e1e7"></path>
                       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#e4e1e7"></path>
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#e4e1e7"></path>
                     </svg>
-                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Google</span>
-                  </button>
-                  <button className="flex items-center justify-center gap-3 py-4 bg-surface-container border border-outline-variant/10 rounded-lg hover:bg-surface-container-high transition-colors group">
-                    <svg className="w-4 h-4" fill="#e4e1e7" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
-                    </svg>
-                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Facebook</span>
+                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Sign in with Google</span>
                   </button>
                 </div>
 
@@ -5582,10 +6454,6 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="min-h-screen flex flex-col md:flex-row"
           >
-            {/* FIX: back navigation */}
-            <div className="absolute top-6 left-6 z-30">
-              <BackButton onBack={() => (window.history.length > 1 ? window.history.back() : setView('home'))} />
-            </div>
 
             {/* Left Side: Visual Narrative */}
             <section className="relative hidden md:flex md:w-1/2 lg:w-[60%] overflow-hidden items-center justify-center">
@@ -5704,7 +6572,7 @@ export default function App() {
                       <label className="block text-xs font-label uppercase tracking-widest text-on-surface-variant ml-1" htmlFor="confirm_password">Confirm Password</label>
                       <div className="relative">
                         <input
-                          className="w-full bg-surface-container-highest/30 border-none border-b border-outline-variant/30 text-on-surface px-4 py-4 rounded-lg focus:ring-1 focus:ring-primary focus:bg-surface-container-highest/50 transition-all placeholder:text-on-surface-variant/40 outline-none"
+                          className={`w-full bg-surface-container-highest/30 border-none border-b ${confirmPassword && password !== confirmPassword ? 'border-error' : 'border-outline-variant/30'} text-on-surface px-4 py-4 rounded-lg focus:ring-1 focus:ring-primary focus:bg-surface-container-highest/50 transition-all placeholder:text-on-surface-variant/40 outline-none`}
                           id="confirm_password"
                           placeholder="••••••••"
                           type="password"
@@ -5713,6 +6581,11 @@ export default function App() {
                           required
                         />
                       </div>
+                      {confirmPassword && (
+                        <p className={`text-[10px] ml-1 uppercase tracking-widest font-bold ${password === confirmPassword ? 'text-green-500' : 'text-error'}`}>
+                          {password === confirmPassword ? 'Passwords Match' : 'Passwords Do Not Match'}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -5720,12 +6593,15 @@ export default function App() {
                   <div className="space-y-2 px-1">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-medium">Security Strength</span>
-                      <span className="text-[10px] uppercase tracking-wider text-primary font-bold">Strong</span>
+                      <span className={`text-[10px] uppercase tracking-wider font-bold ${passwordStrength >= 3 ? 'text-primary' : passwordStrength === 2 ? 'text-yellow-500' : 'text-error'}`}>
+                        {passwordStrengthLabel}
+                      </span>
                     </div>
                     <div className="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden flex gap-0.5">
-                      <div className="h-full w-1/3 bg-primary"></div>
-                      <div className="h-full w-1/3 bg-primary"></div>
-                      <div className="h-full w-1/4 bg-primary opacity-50"></div>
+                      <div className={`h-full flex-1 transition-all duration-500 ${passwordStrength >= 1 ? (passwordStrength >= 3 ? 'bg-primary' : passwordStrength === 2 ? 'bg-yellow-500' : 'bg-error') : 'bg-transparent'}`}></div>
+                      <div className={`h-full flex-1 transition-all duration-500 ${passwordStrength >= 2 ? (passwordStrength >= 3 ? 'bg-primary' : 'bg-yellow-500') : 'bg-transparent'}`}></div>
+                      <div className={`h-full flex-1 transition-all duration-500 ${passwordStrength >= 3 ? 'bg-primary' : 'bg-transparent'}`}></div>
+                      <div className={`h-full flex-1 transition-all duration-500 ${passwordStrength >= 4 ? 'bg-primary opacity-50' : 'bg-transparent'}`}></div>
                     </div>
                   </div>
 
@@ -5776,15 +6652,11 @@ export default function App() {
                   <div className="flex-grow border-t border-outline-variant/20"></div>
                 </div>
 
-                {/* Social Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  <button className="flex items-center justify-center gap-3 px-4 py-4 rounded-lg bg-surface-container-highest/20 hover:bg-surface-container-highest/40 border border-outline-variant/10 transition-colors group">
+                {/* Social Login */}
+                <div className="grid grid-cols-1">
+                  <button type="button" onClick={() => googleLogin()} className="flex items-center justify-center gap-3 px-4 py-4 rounded-lg bg-surface-container-highest/20 hover:bg-surface-container-highest/40 border border-outline-variant/10 transition-colors group">
                     <svg className="w-5 h-5 opacity-70 group-hover:opacity-100" fill="currentColor" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></svg>
-                    <span className="text-xs font-semibold tracking-wider uppercase">Google</span>
-                  </button>
-                  <button className="flex items-center justify-center gap-3 px-4 py-4 rounded-lg bg-surface-container-highest/20 hover:bg-surface-container-highest/40 border border-outline-variant/10 transition-colors group">
-                    <svg className="w-5 h-5 opacity-70 group-hover:opacity-100" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33V21.88C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z"></path></svg>
-                    <span className="text-xs font-semibold tracking-wider uppercase">Apple</span>
+                    <span className="text-xs font-semibold tracking-wider uppercase">Sign up with Google</span>
                   </button>
                 </div>
 
@@ -5810,6 +6682,73 @@ export default function App() {
           </motion.main>
         )}
 
+        {view === 'verify-otp' && (
+          <motion.main
+            key="verify-otp"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 relative"
+          >
+            <div className="fixed inset-0 z-0 opacity-20 pointer-events-none">
+              <img className="w-full h-full object-cover" alt="Abstract fluid waves" src="/images/local/asset-0088.png" referrerPolicy="no-referrer" />
+            </div>
+
+            <div className="relative z-10 w-full max-w-md glass-morphism rounded-xl ghost-border p-8 md:p-12 space-y-8 text-center shadow-2xl">
+              <div className="space-y-3">
+                <div className="flex justify-center mb-6">
+                  <BrandMark className="w-12 h-12" />
+                </div>
+                <h2 className="font-headline text-3xl font-bold text-on-surface">Identity Verification</h2>
+                <p className="text-on-surface-variant font-light">
+                  A verification code has been dispatched to <span className="text-primary font-semibold">{email}</span>.
+                </p>
+              </div>
+
+              <form onSubmit={handleForgotVerify} className="space-y-10">
+                <div className="flex justify-center gap-3">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={`verify-otp-${idx}`}
+                      id={`otp-${idx}`}
+                      className="w-12 h-16 text-center text-2xl font-headline bg-surface-container-highest border border-outline-variant/30 text-primary rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                      maxLength={1}
+                      type="text"
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      required
+                    />
+                  ))}
+                </div>
+                {otpError && (
+                  <p className="text-xs text-error font-semibold">{otpError}</p>
+                )}
+                <button 
+                  className="w-full bg-primary hover:bg-secondary-container text-on-primary py-4 rounded-lg uppercase tracking-widest font-bold text-xs transition-all active:scale-[0.98] disabled:opacity-50"
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Verifying Identity..." : "Verify Access"}
+                </button>
+              </form>
+
+              <div className="pt-4">
+                <p className="text-xs text-on-surface-variant/60 uppercase tracking-widest">
+                  Didn't receive the code? 
+                  <button 
+                    onClick={() => authApi.resendOtp(email, otpType)}
+                    className="text-primary font-bold ml-2 hover:underline underline-offset-4"
+                  >
+                    Resend Code
+                  </button>
+                </p>
+              </div>
+
+            </div>
+          </motion.main>
+        )}
+
         {view === 'forgot-password' && (
           <motion.main
             key="forgot-password"
@@ -5819,10 +6758,6 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 relative"
           >
-            {/* FIX: back navigation */}
-            <div className="absolute top-6 left-6 z-30">
-              <BackButton onBack={() => (window.history.length > 1 ? window.history.back() : setView('home'))} />
-            </div>
 
             {/* Hero Background Context */}
             <div className="fixed inset-0 z-0 opacity-20 pointer-events-none">
@@ -5917,15 +6852,6 @@ export default function App() {
                           </button>
                         </div>
                       </form>
-                      <div className="text-center">
-                        <button 
-                          onClick={() => setView('login')}
-                          className="text-xs uppercase tracking-widest font-bold text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2 mx-auto"
-                        >
-                          <ArrowLeft size={14} />
-                          Back to Entrance
-                        </button>
-                      </div>
                     </motion.div>
                   )}
 

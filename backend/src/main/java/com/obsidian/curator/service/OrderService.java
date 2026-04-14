@@ -11,7 +11,7 @@ public interface OrderService {
     Map<String, Object> createOrder(String email, OrderCreateRequest request);
     Map<String, Object> verifyPayment(String email, OrderVerifyPaymentRequest request);
     Map<String, Object> getOrder(String email, UUID orderId);
-    List<Map<String, Object>> getMyOrders(String email);
+    List<Map<String, Object>> getMyOrders(String email, com.obsidian.curator.entity.enums.OrderStatus status);
     Map<String, Object> cancelOrder(String email, UUID orderId);
     Map<String, Object> requestReturn(String email, UUID orderId);
     Map<String, Object> reorder(String email, UUID orderId);

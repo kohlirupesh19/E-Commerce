@@ -107,23 +107,6 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 
-    private void seedAddress(User admin) {
-        if (addressRepository.count() > 0) {
-            return;
-        }
-        Address address = new Address();
-        address.setUser(admin);
-        address.setFullName("Obsidian Admin");
-        address.setPhone("9999999999");
-        address.setAddressType(AddressType.WORK);
-        address.setStreet("1 Curator Plaza");
-        address.setCity("Mumbai");
-        address.setState("MH");
-        address.setPincode("400001");
-        address.setIsDefault(true);
-        addressRepository.save(address);
-    }
-
     private void seedCoupons() {
         couponRepository.findByCodeIgnoreCase("WELCOME10").orElseGet(() -> {
             Coupon coupon = new Coupon();
@@ -177,5 +160,21 @@ public class DataSeeder implements CommandLineRunner {
         product.setIsFeatured(featured);
         product.setImages(images);
         productRepository.save(product);
+    }
+
+    private void seedAddress(User admin) {
+        if (addressRepository.findByUser(admin).isEmpty()) {
+            Address address = new Address();
+            address.setUser(admin);
+            address.setFullName(" Julian Sterling");
+            address.setPhone("+1 (212) 555-0198");
+            address.setAddressType(AddressType.HOME);
+            address.setStreet("722 Luxury Row, Manhattan");
+            address.setCity("New York");
+            address.setState("NY");
+            address.setPincode("10019");
+            address.setIsDefault(true);
+            addressRepository.save(address);
+        }
     }
 }

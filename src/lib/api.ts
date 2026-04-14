@@ -55,6 +55,33 @@ export const requestJson = async <T,>(
   return payload as T;
 };
 
+export const requestFormData = async <T,>(
+  path: string,
+  method: string,
+  formData: FormData,
+  fallbackError = 'Upload failed. Please try again.',
+): Promise<T> => {
+  const token = getStoredToken();
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    credentials: 'include',
+    headers: {
+      ...authHeader,
+    },
+    body: formData,
+  });
+
+  const text = await response.text();
+  const payload = parsePayload(text);
+
+  if (!response.ok) {
+    throw new Error(getApiErrorMessage(payload, fallbackError));
+  }
+
+  return payload as T;
+};
+
 export const authApi = {
   login: (body: { email: string; password: string; rememberMe: boolean }) =>
     requestJson<{ accessToken?: string; user?: any }>(
@@ -64,6 +91,15 @@ export const authApi = {
         body: JSON.stringify(body),
       },
       'Unable to sign in right now.',
+    ),
+  googleLogin: (credential: string) =>
+    requestJson<{ accessToken?: string; user?: any }>(
+      '/api/auth/google',
+      {
+        method: 'POST',
+        body: JSON.stringify({ credential }),
+      },
+      'Unable to sign in with Google right now.',
     ),
   register: (body: {
     name: string;
@@ -92,6 +128,51 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  me: () => requestJson<any>('/api/auth/me', { method: 'GET' }),
+  updateMe: (body: {
+    name?: string;
+    phone?: string;
+    dob?: string;
+    gender?: string;
+    avatar?: string;
+    orderUpdates?: boolean;
+    newCollections?: boolean;
+    securityAlerts?: boolean;
+    newsletter?: boolean;
+  }) =>
+    requestJson<any>('/api/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  changePassword: (body: any) =>
+    requestJson<any>('/api/auth/me/change-password', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  toggle2fa: (enabled: boolean) =>
+    requestJson<any>('/api/auth/me/2fa', {
+      method: 'PATCH',
+      body: JSON.stringify({ enabled }),
+    }),
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return requestFormData<any>('/api/auth/me/avatar', 'POST', formData);
+  },
+  verifyOtp: (body: { email: string; otp: string; type: string }) =>
+    requestJson<{ accessToken?: string; user?: any }>(
+      '/api/auth/verify-otp',
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+      },
+      'Verification failed.',
+    ),
+  resendOtp: (email: string, type: string) =>
+    requestJson<{ message?: string }>('/api/auth/resend-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, type }),
+    }),
 };
 
 export const orderApi = {
@@ -110,7 +191,8 @@ export const orderApi = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
-  myOrders: () => requestJson<any[]>('/api/orders/my', { method: 'GET' }),
+  myOrders: (status?: string) =>
+    requestJson<any[]>(`/api/orders/me${status ? `?status=${status}` : ''}`, { method: 'GET' }),
   byId: (orderId: string) => requestJson<any>(`/api/orders/${orderId}`, { method: 'GET' }),
   cancel: (orderId: string) => requestJson<any>(`/api/orders/${orderId}/cancel`, { method: 'POST' }),
   reorder: (orderId: string) => requestJson<any>(`/api/orders/${orderId}/reorder`, { method: 'POST' }),
@@ -170,9 +252,20 @@ export const cartApi = {
 };
 
 export const wishlistApi = {
-  get: () => requestJson<any[]>('/api/wishlist', { method: 'GET' }),
   toggle: (productId: string) => 
     requestJson<any>('/api/wishlist/toggle', { method: 'POST', body: JSON.stringify({ productId }) })
+};
+
+export const notificationApi = {
+  getAll: () => requestJson<any[]>('/api/notifications', { method: 'GET' }),
+  markAsRead: (id: string) => requestJson<any>(`/api/notifications/${id}/read`, { method: 'PATCH' }),
+  unreadCount: () => requestJson<number>('/api/notifications/unread-count', { method: 'GET' }),
+};
+
+export const paymentMethodApi = {
+  getAll: () => requestJson<any[]>('/api/payments', { method: 'GET' }),
+  create: (body: any) => requestJson<any>('/api/payments', { method: 'POST', body: JSON.stringify(body) }),
+  delete: (id: string) => requestJson<any>(`/api/payments/${id}`, { method: 'DELETE' }),
 };
 
 export const adminApi = {
