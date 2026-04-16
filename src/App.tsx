@@ -14,7 +14,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToNewsletter } from './services/newsletter';
 import BrandMark from './components/BrandMark';
-import { authApi, addressApi, orderApi, paymentMethodApi, notificationApi } from './lib/api';
+import { authApi, addressApi, cartApi, orderApi, paymentMethodApi, notificationApi, productApi } from './lib/api';
 import { useGoogleLogin } from '@react-oauth/google';
 
 type InfoView =
@@ -1182,14 +1182,17 @@ export default function App() {
   ]);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState('');
+  const [checkoutError, setCheckoutError] = useState('');
   const [myOrders, setMyOrders] = useState<any[]>([]);
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('ALL');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [userNotifications, setUserNotifications] = useState<any[]>([]);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [paymentFormData, setPaymentFormData] = useState({ type: 'CARD', maskedNumber: '', provider: '', expiryDate: '' });
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [paymentFormData, setPaymentFormData] = useState({ cardHolderName: '', cardNumber: '', expiryDate: '', cvv: '', isDefault: false });
+  const [selectedPayment, setSelectedPayment] = useState<string>('');
 
   // Form states
   const [email, setEmail] = useState('');
@@ -1245,6 +1248,12 @@ export default function App() {
     try {
       const data = await addressApi.getAll();
       setAddresses(data);
+      if (data.length > 0 && !data.some((addr: any) => addr.id === selectedAddress)) {
+        const defaultAddress = data.find((addr: any) => addr.isDefault);
+        setSelectedAddress((defaultAddress || data[0]).id);
+      } else if (data.length === 0) {
+        setSelectedAddress('');
+      }
     } catch(err) {
       console.error(err);
     }
@@ -1419,9 +1428,152 @@ export default function App() {
     }
   };
 
+  const extractOrderId = (order: any): string | undefined => order?.orderId || order?.id;
+
+  const syncBackendCartFromLocal = async () => {
+    const normalizedLocalItems = cartItems
+      .filter((item) => !item.outOfStock && item.quantity > 0)
+      .map((item) => ({
+        ...item,
+        normalizedName: item.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      }));
+
+    if (normalizedLocalItems.length === 0) {
+      throw new Error('Cart is empty. Add at least one item before checkout.');
+    }
+
+    const productsResponse = await productApi.getAll({ page: 1, limit: 200, available: true, sort: 'relevance' });
+    const products = Array.isArray(productsResponse)
+      ? productsResponse
+      : Array.isArray(productsResponse?.items)
+        ? productsResponse.items
+        : [];
+
+    if (products.length === 0) {
+      throw new Error('No purchasable products available in backend catalog.');
+    }
+
+    await cartApi.clear();
+
+    const unresolvedItems: string[] = [];
+
+    for (const localItem of normalizedLocalItems) {
+      const matchedProduct = products.find((product: any) => {
+        const normalizedProductName = String(product?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return normalizedProductName === localItem.normalizedName
+          || normalizedProductName.includes(localItem.normalizedName)
+          || localItem.normalizedName.includes(normalizedProductName);
+      });
+
+      if (!matchedProduct?.id) {
+        unresolvedItems.push(localItem.name);
+        continue;
+      }
+
+      await cartApi.addItem({
+        productId: matchedProduct.id,
+        quantity: localItem.quantity,
+      });
+    }
+
+    if (unresolvedItems.length > 0) {
+      throw new Error(`Unable to map these cart items to backend products: ${unresolvedItems.join(', ')}`);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    setIsDownloadingInvoice(true);
+    setInvoiceError('');
+    try {
+      let orderId = extractOrderId(selectedOrder);
+
+      if (!orderId) {
+        const orders = await orderApi.myOrders();
+        if (orders.length > 0) {
+          const latestOrder = [...orders].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )[0];
+          setSelectedOrder(latestOrder);
+          orderId = extractOrderId(latestOrder);
+        }
+      }
+
+      if (!orderId) {
+        throw new Error('No confirmed order found for invoice download.');
+      }
+
+      const pdfBlob = await orderApi.invoice(orderId);
+      const objectUrl = window.URL.createObjectURL(pdfBlob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = `invoice-${orderId}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (error: any) {
+      setInvoiceError(error?.message || 'Unable to download invoice.');
+    } finally {
+      setIsDownloadingInvoice(false);
+    }
+  };
+
+  const handleFinalizeAcquisition = async () => {
+    if (!agreeTerms) {
+      setCheckoutError('Please accept terms before finalizing your acquisition.');
+      return;
+    }
+    if (!selectedAddress) {
+      setCheckoutError('Please select a delivery address.');
+      setView('checkout-address');
+      return;
+    }
+    if (paymentMethod === 'wallet' && !selectedPayment) {
+      setCheckoutError('Please select a payment instrument before finalizing.');
+      setView('checkout-payment');
+      return;
+    }
+
+    const paymentMethodMap: Record<string, 'CARD' | 'UPI' | 'NETBANKING' | 'WALLET' | 'COD'> = {
+      card: 'CARD',
+      upi: 'UPI',
+      netbanking: 'NETBANKING',
+      wallet: 'WALLET',
+      cod: 'COD',
+    };
+
+    setIsLoading(true);
+    setCheckoutError('');
+    try {
+      await syncBackendCartFromLocal();
+
+      const createdOrder = await orderApi.create({
+        addressId: selectedAddress,
+        paymentMethod: paymentMethodMap[paymentMethod] || 'CARD',
+      });
+
+      const orderId = extractOrderId(createdOrder);
+      if (orderId) {
+        const fullOrder = await orderApi.byId(orderId);
+        setSelectedOrder(fullOrder);
+      }
+
+      setCartItems([]);
+      setView('checkout-success');
+      window.scrollTo(0, 0);
+    } catch (error: any) {
+      setCheckoutError(error?.message || 'Unable to finalize order. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (view === 'my-orders' || view === 'profile') {
       fetchMyOrders(orderStatusFilter);
+    }
+    if (view === 'profile-addresses' || view === 'checkout-address') {
+      fetchAddresses();
     }
     if (view === 'profile-payments' || view === 'checkout-payment') {
       fetchPaymentMethods();
@@ -1436,6 +1588,12 @@ export default function App() {
     try {
       const data = await paymentMethodApi.getAll();
       setPaymentMethods(data);
+      if (data.length > 0 && !data.some((pm: any) => pm.id === selectedPayment)) {
+        const defaultPayment = data.find((pm: any) => pm.isDefault);
+        setSelectedPayment((defaultPayment || data[0]).id);
+      } else if (data.length === 0) {
+        setSelectedPayment('');
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -1581,9 +1739,13 @@ export default function App() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await paymentMethodApi.create(paymentFormData);
+      const created = await paymentMethodApi.create(paymentFormData);
       await fetchPaymentMethods();
+      if (created?.id) {
+        setSelectedPayment(created.id);
+      }
       setShowPaymentForm(false);
+      setPaymentFormData({ cardHolderName: '', cardNumber: '', expiryDate: '', cvv: '', isDefault: false });
     } catch (err: any) {
       alert(err.message || 'Payment method failed.');
     } finally {
@@ -1596,10 +1758,14 @@ export default function App() {
     setIsLoading(true);
     setAddressError('');
     try {
+      let savedAddress: any;
       if (isEditingAddress && editingAddressId) {
-        await addressApi.update(editingAddressId, addressFormData);
+        savedAddress = await addressApi.update(editingAddressId, addressFormData);
       } else {
-        await addressApi.create(addressFormData);
+        savedAddress = await addressApi.create(addressFormData);
+      }
+      if (savedAddress?.id) {
+        setSelectedAddress(savedAddress.id);
       }
       await fetchAddresses();
       setShowAddressForm(false);
@@ -2773,8 +2939,8 @@ export default function App() {
                                         {selectedPayment === pm.id && <Check size={12} className="text-on-primary" />}
                                       </div>
                                       <div>
-                                        <p className="text-sm font-headline uppercase tracking-widest">{pm.provider} {pm.type}</p>
-                                        <p className="text-xs text-on-surface-variant font-mono">{pm.maskedNumber}</p>
+                                        <p className="text-sm font-headline uppercase tracking-widest">Card</p>
+                                        <p className="text-xs text-on-surface-variant font-mono">{pm.maskedCardNumber}</p>
                                       </div>
                                     </div>
                                     <CreditCardIcon className={`transition-colors ${selectedPayment === pm.id ? 'text-primary' : 'text-on-surface-variant/20'}`} size={24} />
@@ -2792,39 +2958,44 @@ export default function App() {
                               {showPaymentForm && (
                                 <div className="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
                                   <form onSubmit={handleAddPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="md:col-span-2 space-y-2">
-                                       <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Payment Provider</label>
-                                       <div className="flex gap-4">
-                                         {['CARD', 'PAYPAL', 'CRYPTO'].map(m => (
-                                           <button 
-                                             key={m}
-                                             type="button"
-                                             onClick={() => setPaymentFormData({...paymentFormData, type: m})}
-                                             className={`px-4 py-2 rounded-lg border text-[10px] uppercase font-bold tracking-widest ${paymentFormData.type === m ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'}`}
-                                           >
-                                             {m}
-                                           </button>
-                                         ))}
-                                       </div>
-                                    </div>
                                     <div className="space-y-2">
-                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Reference Number</label>
+                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Card Holder Name</label>
                                       <input 
                                          required
                                          className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
-                                         placeholder="•••• 1234"
-                                         value={paymentFormData.maskedNumber}
-                                         onChange={e => setPaymentFormData({...paymentFormData, maskedNumber: e.target.value})}
+                                         placeholder="Alex Johnson"
+                                         value={paymentFormData.cardHolderName}
+                                         onChange={e => setPaymentFormData({...paymentFormData, cardHolderName: e.target.value})}
                                       />
                                     </div>
                                     <div className="space-y-2">
-                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Provider Name</label>
+                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Card Number</label>
                                       <input 
                                          required
                                          className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
-                                         placeholder="VISA / Master"
-                                         value={paymentFormData.provider}
-                                         onChange={e => setPaymentFormData({...paymentFormData, provider: e.target.value})}
+                                         placeholder="4111 1111 1111 1111"
+                                         value={paymentFormData.cardNumber}
+                                         onChange={e => setPaymentFormData({...paymentFormData, cardNumber: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Expiry (MM/YY)</label>
+                                      <input 
+                                         required
+                                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                                         placeholder="12/29"
+                                         value={paymentFormData.expiryDate}
+                                         onChange={e => setPaymentFormData({...paymentFormData, expiryDate: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">CVV</label>
+                                      <input 
+                                         required
+                                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                                         placeholder="123"
+                                         value={paymentFormData.cvv}
+                                         onChange={e => setPaymentFormData({...paymentFormData, cvv: e.target.value})}
                                       />
                                     </div>
                                     <div className="md:col-span-2 flex justify-end pt-4">
@@ -2833,6 +3004,7 @@ export default function App() {
                                   </form>
                                 </div>
                               )}
+
                             </div>
                             <span className={`font-headline text-lg ${paymentMethod === 'wallet' ? 'text-on-surface' : 'text-on-surface-variant'}`}>Digital Wallets</span>
                           </div>
@@ -3126,8 +3298,8 @@ export default function App() {
                                 <CreditCard size={16} className="opacity-60" />
                               </div>
                               <div>
-                                <p className="text-sm font-mono text-on-surface tracking-widest">{pm.maskedNumber}</p>
-                                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-label">{pm.provider} {pm.type}</p>
+                                <p className="text-sm font-mono text-on-surface tracking-widest">{pm.maskedCardNumber}</p>
+                                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-label">{pm.cardHolderName}</p>
                               </div>
                             </div>
                           );
@@ -3192,19 +3364,15 @@ export default function App() {
                         </div>
                       </div>
                       <button 
-                        disabled={!agreeTerms}
+                        disabled={!agreeTerms || isLoading}
                         className={`w-full py-5 rounded-lg font-headline tracking-widest uppercase text-xs shadow-[0_12px_24px_rgba(230,195,100,0.15)] transition-all active:scale-[0.98] ${agreeTerms ? 'bg-primary text-on-primary hover:bg-primary-container' : 'bg-surface-container-highest text-on-surface-variant/40 cursor-not-allowed'}`}
-                        onClick={() => {
-                          setIsLoading(true);
-                          setTimeout(() => {
-                            setIsLoading(false);
-                            setCartItems([]);
-                            setView('checkout-success');
-                          }, 3000);
-                        }}
+                        onClick={handleFinalizeAcquisition}
                       >
-                        Finalize Acquisition
+                        {isLoading ? 'Finalizing...' : 'Finalize Acquisition'}
                       </button>
+                      {checkoutError && (
+                        <p className="text-error text-xs font-label tracking-wide">{checkoutError}</p>
+                      )}
                       <div className="flex items-center justify-center gap-2 text-[10px] text-on-surface-variant uppercase tracking-widest font-label">
                         <Lock size={12} className="text-primary" />
                         Secure Encrypted Transaction
@@ -3341,9 +3509,13 @@ export default function App() {
                       <Activity size={18} />
                       Track Order
                     </button>
-                    <button className="glass-panel text-on-surface px-10 py-4 rounded-lg border border-outline-variant/30 font-label text-xs uppercase tracking-widest hover:bg-surface-container-highest transition-colors flex items-center gap-3">
+                    <button
+                      onClick={handleDownloadInvoice}
+                      disabled={isDownloadingInvoice}
+                      className="glass-panel text-on-surface px-10 py-4 rounded-lg border border-outline-variant/30 font-label text-xs uppercase tracking-widest hover:bg-surface-container-highest transition-colors flex items-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
                       <Download size={18} />
-                      Download Invoice
+                      {isDownloadingInvoice ? 'Downloading...' : 'Download Invoice'}
                     </button>
                     <button 
                       onClick={() => setView('home')}
@@ -3352,6 +3524,9 @@ export default function App() {
                       Continue Shopping
                     </button>
                   </div>
+                  {invoiceError && (
+                    <p className="text-error text-xs font-label tracking-wide">{invoiceError}</p>
+                  )}
                 </div>
 
                 {/* Items Sidebar Column */}
@@ -4503,38 +4678,43 @@ export default function App() {
                   <h4 className="font-headline text-xl mb-6">Initialize New Instrument</h4>
                   <form onSubmit={handleAddPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2 space-y-2">
-                       <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Payment Provider</label>
-                       <div className="flex gap-4">
-                         {['CARD', 'PAYPAL', 'CRYPTO'].map(m => (
-                           <button 
-                             key={m}
-                             type="button"
-                             onClick={() => setPaymentFormData({...paymentFormData, type: m})}
-                             className={`px-4 py-2 rounded-lg border text-[10px] uppercase font-bold tracking-widest ${paymentFormData.type === m ? 'border-primary bg-primary/10 text-primary' : 'border-outline-variant text-on-surface-variant'}`}
-                           >
-                             {m}
-                           </button>
-                         ))}
-                       </div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Card Holder Name</label>
+                       <input 
+                          required
+                          className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                          placeholder="Alex Johnson"
+                          value={paymentFormData.cardHolderName}
+                          onChange={e => setPaymentFormData({...paymentFormData, cardHolderName: e.target.value})}
+                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Reference Number / Masked Card</label>
+                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Card Number</label>
                       <input 
                          required
                          className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
-                         placeholder="•••• 1234"
-                         value={paymentFormData.maskedNumber}
-                         onChange={e => setPaymentFormData({...paymentFormData, maskedNumber: e.target.value})}
+                         placeholder="4111 1111 1111 1111"
+                         value={paymentFormData.cardNumber}
+                         onChange={e => setPaymentFormData({...paymentFormData, cardNumber: e.target.value})}
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Provider Name</label>
+                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">Expiry (MM/YY)</label>
                       <input 
                          required
                          className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
-                         placeholder="VISA / Master"
-                         value={paymentFormData.provider}
-                         onChange={e => setPaymentFormData({...paymentFormData, provider: e.target.value})}
+                         placeholder="12/29"
+                         value={paymentFormData.expiryDate}
+                         onChange={e => setPaymentFormData({...paymentFormData, expiryDate: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest font-bold opacity-40">CVV</label>
+                      <input 
+                         required
+                         className="w-full bg-surface-container-highest border-0 border-b border-outline-variant py-3 px-2 focus:border-primary outline-none" 
+                         placeholder="123"
+                         value={paymentFormData.cvv}
+                         onChange={e => setPaymentFormData({...paymentFormData, cvv: e.target.value})}
                       />
                     </div>
                     <div className="md:col-span-2 flex justify-end pt-4">
@@ -4554,14 +4734,14 @@ export default function App() {
                         <div className="w-12 h-8 bg-surface-container-highest/30 rounded flex items-center justify-center">
                           <div className="w-8 h-5 bg-primary/20 rounded-sm"></div>
                         </div>
-                        <span className="text-[10px] uppercase tracking-widest text-primary font-bold">{pm.type}</span>
+                        <span className="text-[10px] uppercase tracking-widest text-primary font-bold">CARD</span>
                       </div>
                       <div className="space-y-4">
-                        <p className="text-2xl font-mono tracking-[0.2em]">{pm.maskedNumber}</p>
+                        <p className="text-2xl font-mono tracking-[0.2em]">{pm.maskedCardNumber}</p>
                         <div className="flex justify-between items-end">
                           <div className="space-y-1">
-                            <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">Provider</p>
-                            <p className="text-sm font-headline uppercase">{pm.provider}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">Cardholder</p>
+                            <p className="text-sm font-headline uppercase">{pm.cardHolderName}</p>
                           </div>
                           {pm.expiryDate && (
                             <div className="space-y-1 text-right">

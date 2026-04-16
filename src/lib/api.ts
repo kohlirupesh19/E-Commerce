@@ -208,11 +208,16 @@ export const orderApi = {
   reorder: (orderId: string) => requestJson<any>(`/api/orders/${orderId}/reorder`, { method: 'POST' }),
   invoice: async (orderId: string): Promise<Blob> => {
     const token = getStoredToken();
-    const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/invoice`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/invoice`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+    } catch {
+      throw new Error('Unable to reach the API server. Please make sure backend is running and CORS is configured for this origin.');
+    }
     if (!response.ok) {
       throw new Error('Unable to download invoice.');
     }
