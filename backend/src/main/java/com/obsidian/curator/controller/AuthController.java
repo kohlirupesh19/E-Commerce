@@ -37,6 +37,11 @@ public class AuthController {
         return authService.login(request, response);
     }
 
+    @PostMapping("/google")
+    public AuthTokenResponse googleLogin(@Valid @RequestBody GoogleLoginRequest request, HttpServletResponse response) {
+        return authService.googleLogin(request, response);
+    }
+
     @PostMapping("/refresh-token")
     public AccessTokenResponse refreshToken(HttpServletRequest request) {
         return authService.refreshToken(request);

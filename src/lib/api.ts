@@ -35,15 +35,20 @@ export const requestJson = async <T,>(
 ): Promise<T> => {
   const token = getStoredToken();
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    credentials: 'include',
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeader,
-      ...(init?.headers || {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      credentials: 'include',
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader,
+        ...(init?.headers || {}),
+      },
+    });
+  } catch {
+    throw new Error('Unable to reach the API server. Please make sure backend is running and CORS is configured for this origin.');
+  }
 
   const text = await response.text();
   const payload = parsePayload(text);
@@ -63,14 +68,19 @@ export const requestFormData = async <T,>(
 ): Promise<T> => {
   const token = getStoredToken();
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method,
-    credentials: 'include',
-    headers: {
-      ...authHeader,
-    },
-    body: formData,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      credentials: 'include',
+      headers: {
+        ...authHeader,
+      },
+      body: formData,
+    });
+  } catch {
+    throw new Error('Unable to reach the API server. Please make sure backend is running and CORS is configured for this origin.');
+  }
 
   const text = await response.text();
   const payload = parsePayload(text);

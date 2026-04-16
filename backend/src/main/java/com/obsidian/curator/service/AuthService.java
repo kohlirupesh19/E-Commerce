@@ -10,6 +10,7 @@ public interface AuthService {
     AuthTokenResponse verifyOtp(VerifyOtpRequest request, HttpServletResponse response);
     MessageResponse resendOtp(ResendOtpRequest request);
     AuthTokenResponse login(LoginRequest request, HttpServletResponse response);
+    AuthTokenResponse googleLogin(GoogleLoginRequest request, HttpServletResponse response);
     AccessTokenResponse refreshToken(HttpServletRequest request);
     MessageResponse logout(HttpServletRequest request, HttpServletResponse response);
     MessageResponse forgotPassword(ForgotPasswordRequest request);

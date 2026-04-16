@@ -27,11 +27,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +50,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Value("${jwt.refresh-token-expiry}")
     private long refreshTokenExpiryMs;
+
+    private final RestClient restClient = RestClient.create();
 
     @Override
     @Transactional
@@ -127,6 +132,62 @@ public class AuthServiceImpl implements AuthService {
         if (!Boolean.TRUE.equals(user.getIsVerified())) {
             throw new UnauthorizedException("Please verify your email first");
         }
+
+        return issueTokens(user, response);
+    }
+
+    @Override
+    @Transactional
+    public AuthTokenResponse googleLogin(GoogleLoginRequest request, HttpServletResponse response) {
+        Map<String, Object> profile;
+        try {
+            profile = restClient.get()
+                    .uri("https://www.googleapis.com/oauth2/v3/userinfo")
+                    .headers(headers -> headers.setBearerAuth(request.getCredential()))
+                    .retrieve()
+                    .body(Map.class);
+        } catch (Exception ex) {
+            throw new UnauthorizedException("Google authentication failed");
+        }
+
+        if (profile == null) {
+            throw new UnauthorizedException("Google authentication failed");
+        }
+
+        String email = profile.get("email") instanceof String value ? value.trim().toLowerCase() : null;
+        Boolean emailVerified = profile.get("email_verified") instanceof Boolean value ? value : null;
+        String name = profile.get("name") instanceof String value ? value.trim() : null;
+        String picture = profile.get("picture") instanceof String value ? value.trim() : null;
+
+        if (email == null || email.isBlank()) {
+            throw new UnauthorizedException("Google account email is unavailable");
+        }
+        if (!Boolean.TRUE.equals(emailVerified)) {
+            throw new UnauthorizedException("Google email is not verified");
+        }
+
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setName((name == null || name.isBlank()) ? "Google User" : name);
+                    newUser.setEmail(email);
+                    newUser.setAvatarUrl((picture == null || picture.isBlank()) ? null : picture);
+                    newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+                    newUser.setRole(Role.USER);
+                    newUser.setIsVerified(true);
+                    return userRepository.save(newUser);
+                });
+
+        if (!Boolean.TRUE.equals(user.getIsVerified())) {
+            user.setIsVerified(true);
+        }
+        if ((user.getName() == null || user.getName().isBlank()) && name != null && !name.isBlank()) {
+            user.setName(name);
+        }
+        if ((user.getAvatarUrl() == null || user.getAvatarUrl().isBlank()) && picture != null && !picture.isBlank()) {
+            user.setAvatarUrl(picture);
+        }
+        userRepository.save(user);
 
         return issueTokens(user, response);
     }
