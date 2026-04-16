@@ -20,9 +20,5 @@ public class MeResponse {
     private LocalDate dob;
     private String gender;
     private Boolean twoFactorEnabled;
-    private Boolean orderUpdates;
-    private Boolean newCollections;
-    private Boolean securityAlerts;
-    private Boolean newsletter;
     private Instant createdAt;
 }

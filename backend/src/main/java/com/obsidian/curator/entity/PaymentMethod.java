@@ -17,48 +17,33 @@ public class PaymentMethod {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = true, length = 4)
+    @Column(nullable = false, length = 4)
     private String cardLast4;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String cardBrand;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private Integer expiryMonth;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private Integer expiryYear;
 
     @Column(nullable = false)
-    private String cardHolderName;
+    private String cardholderName;
 
     @Column(nullable = false)
-    private String cardNumber;
-
-    @Column(nullable = false)
-    private String expiryDate;
-
-    @Column(nullable = false)
-    private String cvv;
-
-    @Column(nullable = false)
-    private Boolean isDefault = false;
+    private Boolean isPrimary = false;
 
     private String razorpayToken;
-
-    @Column(nullable = false)
-    private java.time.Instant createdAt;
 
     @PrePersist
     public void prePersist() {
         if (id == null) {
             id = UUID.randomUUID();
         }
-        if (isDefault == null) {
-            isDefault = false;
-        }
-        if (createdAt == null) {
-            createdAt = java.time.Instant.now();
+        if (isPrimary == null) {
+            isPrimary = false;
         }
     }
 }

@@ -178,11 +178,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Map<String, Object>> getMyOrders(String email, OrderStatus status) {
         User user = getUser(email);
-        List<Order> orders;
+        List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
         if (status != null) {
-            orders = orderRepository.findByUserAndStatusOrderByCreatedAtDesc(user, status);
-        } else {
-            orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
+            orders = orders.stream()
+                    .filter(order -> order.getStatus() == status)
+                    .toList();
         }
         return orders.stream().map(order -> {
             Payment payment = paymentRepository.findByOrderId(order.getId()).orElse(null);

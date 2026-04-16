@@ -16,7 +16,6 @@ import com.obsidian.curator.repository.RefreshTokenRepository;
 import com.obsidian.curator.repository.UserRepository;
 import com.obsidian.curator.security.JwtUtil;
 import com.obsidian.curator.service.AuthService;
-import com.obsidian.curator.service.FileStorageService;
 import com.obsidian.curator.util.EmailUtil;
 import com.obsidian.curator.util.OtpUtil;
 import io.jsonwebtoken.Claims;
@@ -30,10 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.*;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
-import org.springframework.core.ParameterizedTypeReference;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +44,6 @@ public class AuthServiceImpl implements AuthService {
     private final OtpUtil otpUtil;
     private final EmailUtil emailUtil;
     private final JwtUtil jwtUtil;
-    private final FileStorageService fileStorageService;
 
     @Value("${jwt.refresh-token-expiry}")
     private long refreshTokenExpiryMs;
@@ -73,10 +70,10 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
         user.setIsVerified(false);
-        user = userRepository.saveAndFlush(user);
-        
-        String otpCode = createAndSendOtp(user, OtpType.REGISTER);
-        return new MessageResponse("OTP_CODE:" + otpCode);
+        userRepository.save(user);
+
+        createAndSendOtp(user, OtpType.REGISTER);
+        return new MessageResponse("OTP sent to email");
     }
 
     @Override
@@ -113,8 +110,8 @@ public class AuthServiceImpl implements AuthService {
         active.forEach(token -> token.setIsUsed(true));
         otpTokenRepository.saveAll(active);
 
-        String otpCode = createAndSendOtp(user, request.getType());
-        return new MessageResponse("OTP_CODE:" + otpCode);
+        createAndSendOtp(user, request.getType());
+        return new MessageResponse("OTP sent to email");
     }
 
     @Override
@@ -165,8 +162,7 @@ public class AuthServiceImpl implements AuthService {
     public MessageResponse forgotPassword(ForgotPasswordRequest request) {
         Optional<User> user = userRepository.findByEmailIgnoreCase(request.getEmail());
         if (user.isPresent()) {
-            String otpCode = createAndSendOtp(user.get(), OtpType.FORGOT_PASSWORD);
-            return new MessageResponse("OTP_CODE:" + otpCode);
+            createAndSendOtp(user.get(), OtpType.FORGOT_PASSWORD);
         }
         return new MessageResponse("Reset code sent if email exists");
     }
@@ -225,22 +221,8 @@ public class AuthServiceImpl implements AuthService {
         if (request.getDob() != null) user.setDateOfBirth(request.getDob());
         if (request.getGender() != null) user.setGender(request.getGender());
         if (request.getAvatar() != null) user.setAvatarUrl(request.getAvatar());
-        if (request.getOrderUpdates() != null) user.setOrderUpdates(request.getOrderUpdates());
-        if (request.getNewCollections() != null) user.setNewCollections(request.getNewCollections());
-        if (request.getSecurityAlerts() != null) user.setSecurityAlerts(request.getSecurityAlerts());
-        if (request.getNewsletter() != null) user.setNewsletter(request.getNewsletter());
 
         userRepository.save(Objects.requireNonNull(user));
-        return mapMe(user);
-    }
-
-    @Override
-    @Transactional
-    public MeResponse uploadAvatar(String email, org.springframework.web.multipart.MultipartFile file) {
-        User user = getUserByEmail(email);
-        String avatarUrl = fileStorageService.uploadFile(file);
-        user.setAvatarUrl(avatarUrl);
-        userRepository.save(user);
         return mapMe(user);
     }
 
@@ -270,49 +252,6 @@ public class AuthServiceImpl implements AuthService {
         user.setTwoFactorEnabled(request.getEnabled());
         userRepository.save(Objects.requireNonNull(user));
         return new MessageResponse("2FA updated");
-    }
-
-    @Override
-    @Transactional
-    public AuthTokenResponse googleLogin(GoogleLoginRequest request, HttpServletResponse response) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(request.getCredential());
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        try {
-            ResponseEntity<Map<String, Object>> userInfoResponse = restTemplate.exchange(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
-                    HttpMethod.GET,
-                    entity,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-
-            Map<String, Object> payload = userInfoResponse.getBody();
-            if (payload == null || payload.get("email") == null) {
-                throw new UnauthorizedException("Unable to retrieve user email from Google");
-            }
-
-            String email = ((String) payload.get("email")).trim().toLowerCase();
-            String name = (String) payload.get("name");
-            String avatar = (String) payload.get("picture");
-
-            User user = userRepository.findByEmailIgnoreCase(email)
-                    .orElseGet(() -> {
-                        User newUser = new User();
-                        newUser.setEmail(email);
-                        newUser.setName(name != null ? name : "Google User");
-                        newUser.setAvatarUrl(avatar);
-                        newUser.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString()));
-                        newUser.setRole(Role.USER);
-                        newUser.setIsVerified(true);
-                        return userRepository.save(newUser);
-                    });
-
-            return issueTokens(user, response);
-        } catch (Exception e) {
-            throw new UnauthorizedException("Google authentication failed: " + e.getMessage());
-        }
     }
 
     private AuthTokenResponse issueTokens(User user, HttpServletResponse response) {
@@ -368,21 +307,15 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(cookie);
     }
 
-    private String createAndSendOtp(User user, OtpType type) {
+    private void createAndSendOtp(User user, OtpType type) {
         OtpToken otpToken = new OtpToken();
         otpToken.setUser(user);
         otpToken.setOtpType(type);
         otpToken.setOtpCode(otpUtil.generate6DigitOtp());
         otpToken.setExpiresAt(Instant.now().plusSeconds(5 * 60));
-        otpTokenRepository.saveAndFlush(otpToken);
-
-        System.out.println("====================================================");
-        System.out.println("LOGGING OTP FOR " + type + " - USER: " + user.getEmail());
-        System.out.println("CODE: " + otpToken.getOtpCode());
-        System.out.println("====================================================");
+        otpTokenRepository.save(otpToken);
 
         emailUtil.sendOtpEmail(user.getEmail(), otpToken.getOtpCode());
-        return otpToken.getOtpCode();
     }
 
     private User getUserByEmail(String email) {
@@ -401,10 +334,6 @@ public class AuthServiceImpl implements AuthService {
                 .dob(user.getDateOfBirth())
                 .gender(user.getGender())
                 .twoFactorEnabled(user.getTwoFactorEnabled())
-                .orderUpdates(user.getOrderUpdates())
-                .newCollections(user.getNewCollections())
-                .securityAlerts(user.getSecurityAlerts())
-                .newsletter(user.getNewsletter())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

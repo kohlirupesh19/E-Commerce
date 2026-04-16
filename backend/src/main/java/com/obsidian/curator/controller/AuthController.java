@@ -22,11 +22,6 @@ public class AuthController {
         return authService.register(request);
     }
 
-    @PostMapping("/google")
-    public AuthTokenResponse googleLogin(@Valid @RequestBody GoogleLoginRequest request, HttpServletResponse response) {
-        return authService.googleLogin(request, response);
-    }
-
     @PostMapping("/verify-otp")
     public AuthTokenResponse verifyOtp(@Valid @RequestBody VerifyOtpRequest request, HttpServletResponse response) {
         return authService.verifyOtp(request, response);
@@ -75,11 +70,6 @@ public class AuthController {
     @PutMapping("/me")
     public MeResponse updateMe(Authentication authentication, @RequestBody UpdateMeRequest request) {
         return authService.updateMe(authentication.getName(), request);
-    }
-
-    @PostMapping(value = "/me/avatar", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
-    public MeResponse uploadAvatar(Authentication authentication, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
-        return authService.uploadAvatar(authentication.getName(), file);
     }
 
     @PutMapping("/me/change-password")

@@ -17,8 +17,6 @@ public interface AuthService {
     MessageResponse resetPassword(ResetPasswordRequest request);
     MeResponse me(String email);
     MeResponse updateMe(String email, UpdateMeRequest request);
-    MeResponse uploadAvatar(String email, org.springframework.web.multipart.MultipartFile file);
     MessageResponse changePassword(String email, ChangePasswordRequest request);
     MessageResponse toggle2fa(String email, Toggle2FARequest request);
-    AuthTokenResponse googleLogin(GoogleLoginRequest request, HttpServletResponse response);
 }

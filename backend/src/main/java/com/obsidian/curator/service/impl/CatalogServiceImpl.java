@@ -120,9 +120,26 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> search(String query) {
-        return (List<Map<String, Object>>) getProducts(query, null, null, true, 1, 20, "relevance").get("items");
+        Object items = getProducts(query, null, null, true, 1, 20, "relevance").get("items");
+        if (items instanceof List<?> rawItems) {
+            List<Map<String, Object>> safeItems = new ArrayList<>();
+            for (Object item : rawItems) {
+                if (!(item instanceof Map<?, ?> rawMap)) {
+                    continue;
+                }
+
+                Map<String, Object> typedMap = new LinkedHashMap<>();
+                for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
+                    if (entry.getKey() instanceof String key) {
+                        typedMap.put(key, entry.getValue());
+                    }
+                }
+                safeItems.add(typedMap);
+            }
+            return safeItems;
+        }
+        return List.of();
     }
 
     @Override

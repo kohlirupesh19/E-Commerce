@@ -13,6 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,7 +32,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     @Override
     public List<PaymentMethodDto> getUserPaymentMethods(String email) {
         User user = getUserByEmail(email);
-        return paymentMethodRepository.findByUserOrderByCreatedAtDesc(user)
+        return paymentMethodRepository.findByUser(user)
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -40,17 +45,25 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         if (Boolean.TRUE.equals(request.getIsDefault())) {
             List<PaymentMethod> existing = paymentMethodRepository.findByUser(user);
-            existing.forEach(pm -> pm.setIsDefault(false));
+            existing.forEach(pm -> pm.setIsPrimary(false));
             paymentMethodRepository.saveAll(existing);
         }
 
+        String normalizedCardNumber = request.getCardNumber().replaceAll("\\s+", "");
+        if (normalizedCardNumber.length() < 4) {
+            throw new ResourceNotFoundException("Invalid card number");
+        }
+
+        YearMonth expiry = parseExpiry(request.getExpiryDate());
+
         PaymentMethod pm = new PaymentMethod();
         pm.setUser(user);
-        pm.setCardHolderName(request.getCardHolderName());
-        pm.setCardNumber(request.getCardNumber());
-        pm.setExpiryDate(request.getExpiryDate());
-        pm.setCvv(request.getCvv());
-        pm.setIsDefault(request.getIsDefault());
+        pm.setCardholderName(request.getCardHolderName());
+        pm.setCardLast4(normalizedCardNumber.substring(normalizedCardNumber.length() - 4));
+        pm.setCardBrand(detectBrand(normalizedCardNumber));
+        pm.setExpiryMonth(expiry.getMonthValue());
+        pm.setExpiryYear(expiry.getYear());
+        pm.setIsPrimary(Boolean.TRUE.equals(request.getIsDefault()));
 
         PaymentMethod saved = paymentMethodRepository.save(pm);
         return mapToDto(saved);
@@ -77,17 +90,49 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     }
 
     private PaymentMethodDto mapToDto(PaymentMethod pm) {
-        String last4 = "0000";
-        if (pm.getCardNumber() != null && pm.getCardNumber().length() >= 4) {
-            last4 = pm.getCardNumber().substring(pm.getCardNumber().length() - 4);
-        }
+        String last4 = pm.getCardLast4() == null ? "0000" : pm.getCardLast4();
+        String expiryDate = String.format("%02d/%02d", pm.getExpiryMonth(), pm.getExpiryYear() % 100);
 
         return PaymentMethodDto.builder()
                 .id(pm.getId())
-                .cardHolderName(pm.getCardHolderName())
+                .cardHolderName(pm.getCardholderName())
                 .maskedCardNumber("**** **** **** " + last4)
-                .expiryDate(pm.getExpiryDate())
-                .isDefault(pm.getIsDefault())
+                .expiryDate(expiryDate)
+                .isDefault(pm.getIsPrimary())
                 .build();
+    }
+
+    private YearMonth parseExpiry(String expiryDate) {
+        String normalized = expiryDate == null ? "" : expiryDate.trim();
+        DateTimeFormatter fourDigitYear = DateTimeFormatter.ofPattern("MM/uuuu");
+        DateTimeFormatter twoDigitYear = new DateTimeFormatterBuilder()
+                .appendPattern("MM/")
+                .appendValueReduced(ChronoField.YEAR, 2, 2, 2000)
+                .toFormatter();
+
+        try {
+            if (normalized.matches("\\d{2}/\\d{2}")) {
+                return YearMonth.parse(normalized, twoDigitYear);
+            }
+            return YearMonth.parse(normalized, fourDigitYear);
+        } catch (DateTimeParseException ex) {
+            throw new ResourceNotFoundException("Invalid expiry date format. Use MM/YY");
+        }
+    }
+
+    private String detectBrand(String cardNumber) {
+        if (cardNumber.startsWith("4")) {
+            return "VISA";
+        }
+        if (cardNumber.matches("^5[1-5].*")) {
+            return "MASTERCARD";
+        }
+        if (cardNumber.matches("^3[47].*")) {
+            return "AMEX";
+        }
+        if (cardNumber.matches("^6(?:011|5).*")) {
+            return "DISCOVER";
+        }
+        return "CARD";
     }
 }

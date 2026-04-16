@@ -101,8 +101,8 @@
 </head>
 <body class="bg-background selection:bg-primary selection:text-on-primary">
 <!-- TopNavBar -->
-<header class="bg-[#131317]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 no-line tonal-transition bg-gradient-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
-<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto">
+<header class="bg-[#131317]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 no-line tonal-transition bg-linear-to-b from-[#131317] to-transparent shadow-[0_8px_32px_rgba(230,195,100,0.04)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-480 mx-auto">
 <div class="text-2xl font-bold tracking-tighter text-[#e6c364] font-['Noto_Serif']">
                 The Obsidian Curator
             </div>
@@ -132,9 +132,9 @@
 </header>
 <main>
 <!-- Hero Banner: Asymmetric Layout -->
-<section class="relative min-h-[921px] flex items-center px-8 md:px-20 py-20 overflow-hidden">
-<div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none"></div>
-<div class="max-w-[1920px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<section class="relative min-h-230.25 flex items-center px-8 md:px-20 py-20 overflow-hidden">
+<div class="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none"></div>
+<div class="max-w-480 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 <div class="z-10">
 <span class="inline-block px-4 py-1 rounded-full bg-surface-container-highest text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-6">New Era of Commerce</span>
 <h1 class="text-6xl md:text-8xl font-black text-on-surface leading-[0.9] mb-8 tracking-tighter">
@@ -155,9 +155,9 @@
 </div>
 <div class="relative flex justify-center items-center">
 <div class="absolute w-[120%] h-[120%] bg-primary/5 blur-[120px] rounded-full"></div>
-<div class="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/10 group">
+<div class="relative w-full aspect-square md:aspect-4/5 rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/10 group">
 <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" data-alt="Minimalist high-end white digital watch on a dark volcanic rock surface with golden ambient side lighting and cinematic shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_llE45W0HkI_1DaKHqIRFybzWfdmRrSP4o_5YaBTEngwCN07GrVPGKXz36N1WvS78lhaMCa1yszjkpbfhfxln1otPQdPxoWQ-WywHcsxuYILqUrKhh1PnLNdpNV1zv1EO_7R8-TCRKq_DHwXdG_jagWgo3ut86EiqhwkNxOe2Oxr1ZICwCy-j0uV4FGfJBXBeZcstmQ5g8Q1We1cg6h850_RqsFkxfX-TEGXbQyjJgLeNUreHAxr_trXn6a9ASYD1lI6BAGCFNKE"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
+<div class="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent opacity-60"></div>
 <div class="absolute bottom-8 left-8">
 <span class="text-primary text-xs tracking-widest uppercase font-bold">Featured Arrival</span>
 <h3 class="text-2xl font-headline mt-2 text-white">The Onyx Chrono X1</h3>
@@ -167,7 +167,7 @@
 </div>
 </section>
 <!-- Category Grid: Bento Style -->
-<section class="py-24 px-8 max-w-[1920px] mx-auto">
+<section class="py-24 px-8 max-w-480 mx-auto">
 <div class="flex justify-between items-end mb-16">
 <div>
 <h2 class="text-4xl font-headline text-on-surface">Curated Categories</h2>
@@ -246,8 +246,8 @@
 </section>
 <!-- Flash Sale Banner -->
 <section class="w-full py-12 bg-error-container/20 border-y border-primary/10 relative overflow-hidden mb-24">
-<div class="absolute inset-0 bg-gradient-to-r from-error-container/40 to-primary/10 opacity-30"></div>
-<div class="max-w-[1920px] mx-auto px-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="absolute inset-0 bg-linear-to-r from-error-container/40 to-primary/10 opacity-30"></div>
+<div class="max-w-480 mx-auto px-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
 <div class="flex items-center gap-6">
 <div class="text-primary flex items-center gap-2">
 <span class="material-symbols-outlined text-4xl" data-icon="bolt" data-weight="fill">bolt</span>
@@ -267,7 +267,7 @@
 </section>
 <!-- Featured Products Strip -->
 <section class="py-24 overflow-hidden">
-<div class="px-8 max-w-[1920px] mx-auto mb-12">
+<div class="px-8 max-w-480 mx-auto mb-12">
 <h2 class="text-4xl font-headline">Editorial Selections</h2>
 <p class="text-on-surface-variant mt-2">Objects of desire, hand-picked for the modern collector</p>
 </div>
@@ -335,7 +335,7 @@
 </section>
 <!-- Brand Logos Strip (Simplified Marquee) -->
 <section class="py-12 border-y border-outline-variant/10">
-<div class="max-w-[1920px] mx-auto px-8 overflow-hidden flex items-center gap-20 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+<div class="max-w-480 mx-auto px-8 overflow-hidden flex items-center gap-20 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
 <span class="font-headline font-black text-2xl tracking-tighter whitespace-nowrap">VOGUE</span>
 <span class="font-headline font-black text-2xl tracking-tighter whitespace-nowrap">HARRODS</span>
 <span class="font-headline font-black text-2xl tracking-tighter whitespace-nowrap">GUCCI</span>
@@ -347,7 +347,7 @@
 </div>
 </section>
 <!-- Testimonials -->
-<section class="py-24 px-8 max-w-[1920px] mx-auto">
+<section class="py-24 px-8 max-w-480 mx-auto">
 <div class="text-center mb-16">
 <h2 class="text-4xl font-headline mb-4">Voices of the Suite</h2>
 <p class="text-on-surface-variant max-w-lg mx-auto">Hear from our inner circle of collectors and style enthusiasts who have redefined their daily essentials.</p>
@@ -425,7 +425,7 @@
                         </button>
 </div>
 </div>
-<div class="flex-shrink-0 z-10 bg-white/5 p-6 rounded-3xl border border-white/10 shadow-2xl">
+<div class="shrink-0 z-10 bg-white/5 p-6 rounded-3xl border border-white/10 shadow-2xl">
 <div class="w-48 h-48 bg-white p-4 rounded-2xl flex items-center justify-center">
 <!-- Simulated QR Code with CSS Grid -->
 <div class="grid grid-cols-4 grid-rows-4 gap-2 w-full h-full">
@@ -441,8 +441,8 @@
 </section>
 </main>
 <!-- Footer -->
-<footer class="bg-[#0e0e12] w-full mt-20 border-t border-[#F5F5F0]/5 pt-16 font-['Noto_Serif'] text-xs leading-relaxed">
-<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+<footer class="bg-surface-container-lowest w-full mt-20 border-t border-[#F5F5F0]/5 pt-16 font-['Noto_Serif'] text-xs leading-relaxed">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
 <div class="md:col-span-1">
 <div class="text-lg font-bold text-[#e6c364] mb-4">The Obsidian Curator</div>
 <p class="text-[#F5F5F0]/40 max-w-xs">Elevating the standard of digital commerce through intentional curation and timeless aesthetics.</p>

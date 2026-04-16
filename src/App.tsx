@@ -26,7 +26,7 @@ type InfoView =
   | 'terms-of-service'
   | 'curator-concierge';
 
-type View = 'login' | 'register' | 'forgot-password' | 'verify-otp' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons' | InfoView;
+type View = 'login' | 'register' | 'forgot-password' | 'verify-otp' | 'home' | 'shop' | 'product-detail' | 'cart' | 'checkout-address' | 'checkout-payment' | 'checkout-review' | 'checkout-success' | 'order-tracking' | 'order-detail' | 'my-orders' | 'profile' | 'wishlist' | 'category-timepieces' | 'category-jewelry' | 'category-leather' | 'category-fashion' | 'category-home' | 'category-beauty' | 'category-sports' | 'category-books' | 'category-toys' | 'profile-addresses' | 'profile-payments' | 'profile-notifications' | 'profile-security' | 'profile-help' | 'admin-dashboard' | 'admin-products' | 'admin-orders' | 'admin-customers' | 'admin-customer-profile' | 'admin-coupons' | InfoView;
 
 type InfoPageSection = {
   heading: string;
@@ -319,7 +319,7 @@ const TopNavBar = ({
   
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-outline-variant/10 px-6 md:px-12 py-4">
-      <div className="max-w-[1920px] mx-auto flex items-center justify-between">
+      <div className="max-w-480 mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* FIX: back navigation */}
           {showBackButton && (
@@ -432,7 +432,7 @@ const CategoryBar = ({
 }) => {
   return (
     <div className="hidden lg:block w-full bg-background border-b border-outline-variant/10 sticky top-20 z-40">
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 py-8">
+      <div className="max-w-480 mx-auto px-6 md:px-12 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
           {shopCategoryOptions.map((cat) => {
             const isActive = activeCategory === cat.id || view === cat.view;
@@ -520,7 +520,7 @@ const ProfileViewLayout = ({
         onLogout={onLogout}
       />
 
-      <div className="flex max-w-[1920px] mx-auto min-h-screen w-full">
+      <div className="flex max-w-480 mx-auto min-h-screen w-full">
         <ProfileSidebar currentView={view} setView={setView} onLogout={onLogout} />
         <section className="flex-1 p-8 md:p-16 lg:p-20 overflow-y-auto">
           <header className="mb-16">
@@ -618,7 +618,7 @@ const Footer = ({ onNavigate }: { onNavigate?: (view: View) => void }) => {
 
   return (
     <footer className="w-full mt-20 bg-surface-container-lowest border-t border-outline-variant/5 pt-16">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
         <div className="col-span-1 md:col-span-1">
           <div className="text-lg font-bold text-primary mb-4 font-headline tracking-tight">The Obsidian Curator</div>
           <p className="text-on-surface-variant/40 font-headline text-xs leading-relaxed max-w-xs">An exclusive sanctuary for the world's most distinguished collectors and curators of fine luxury goods.</p>
@@ -691,7 +691,7 @@ const InfoPageLayout = ({
         onLogout={onLogout}
       />
 
-      <main className="flex-grow max-w-[1280px] mx-auto w-full px-6 md:px-12 py-16 md:py-24">
+      <main className="grow max-w-7xl mx-auto w-full px-6 md:px-12 py-16 md:py-24">
         <button
           type="button"
           onClick={() => {
@@ -889,7 +889,7 @@ const CategoryLayout = ({
 
       <main className="flex flex-col">
         {/* FIX: hero mobile responsiveness */}
-        <section className="relative h-[100svh] md:h-[60vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-svh md:h-[60vh] flex items-center justify-center overflow-hidden">
           <img 
             src={heroImg} 
             alt={title}
@@ -903,7 +903,7 @@ const CategoryLayout = ({
           </div>
         </section>
 
-        <div className="max-w-[1920px] mx-auto w-full px-6 md:px-12 py-20">
+        <div className="max-w-480 mx-auto w-full px-6 md:px-12 py-20">
           <div className="mb-8">
             <BackButton onBack={() => setView('shop')} />
           </div>
@@ -948,7 +948,7 @@ const CategoryLayout = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-20">
             {filteredProducts.map((product) => (
               <div key={product.id} className="group flex flex-col gap-6">
-                <div className="aspect-[3/4] overflow-hidden bg-surface-container-lowest relative rounded-sm">
+                <div className="aspect-3/4 overflow-hidden bg-surface-container-lowest relative rounded-sm">
                   <img 
                     src={product.img} 
                     alt={product.name}
@@ -1008,13 +1008,13 @@ const CategoryLayout = ({
   );
 };
 
-const ProfileDropdown = ({ setView, onClose, onLogout }: { setView: (v: View) => void, onClose: () => void, onLogout: () => void }) => {
+const ProfileDropdown = ({ setView, onClose, onLogout }: { setView: (v: View) => void, onClose: () => void, onLogout?: () => void }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-      className="absolute right-0 mt-4 w-64 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl z-[100] overflow-hidden"
+      className="absolute right-0 mt-4 w-64 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl z-100 overflow-hidden"
     >
       <div className="p-4 border-b border-outline-variant/10 bg-surface-container-highest/30">
         <div className="flex items-center gap-3">
@@ -1051,7 +1051,7 @@ const ProfileDropdown = ({ setView, onClose, onLogout }: { setView: (v: View) =>
         </button>
         <div className="my-2 border-t border-outline-variant/10"></div>
         <button 
-          onClick={() => { onLogout(); onClose(); }}
+          onClick={() => { onLogout?.(); onClose(); }}
           className="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/5 rounded-lg transition-all group"
         >
           <LogOut size={18} className="group-hover:scale-110 transition-transform" />
@@ -1099,7 +1099,7 @@ export default function App() {
     const normalized = pathName.replace(/^\//, '');
     const allViews: View[] = [
       'login', 'register', 'forgot-password', 'home', 'shop', 'product-detail', 'cart', 'checkout-address',
-      'checkout-payment', 'checkout-review', 'checkout-success', 'order-tracking', 'my-orders', 'profile',
+      'checkout-payment', 'checkout-review', 'checkout-success', 'order-tracking', 'order-detail', 'my-orders', 'profile',
       'wishlist', 'category-timepieces', 'category-jewelry', 'category-leather', 'category-fashion',
       'category-home', 'category-beauty', 'category-sports', 'category-books', 'category-toys',
       'profile-addresses', 'profile-payments', 'profile-notifications', 'profile-security', 'profile-help',
@@ -1227,7 +1227,7 @@ export default function App() {
   const [addressError, setAddressError] = useState('');
   const [profileFormData, setProfileFormData] = useState({
     name: '', email: '', phone: '', dob: '', gender: 'Prefer not to state',
-    twoFactorEnabled: false
+    twoFactorEnabled: false, avatarUrl: ''
   });
   const [profileError, setProfileError] = useState('');
   const [profileSuccess, setProfileSuccess] = useState('');
@@ -1676,7 +1676,8 @@ export default function App() {
           phone: data.phone || '',
           dob: data.dob || '',
           gender: data.gender || 'Prefer not to state',
-          twoFactorEnabled: data.twoFactorEnabled ?? false
+          twoFactorEnabled: data.twoFactorEnabled ?? false,
+          avatarUrl: data.avatarUrl || ''
         });
         setNotifications({
           orderUpdates: data.orderUpdates ?? true,
@@ -2014,9 +2015,7 @@ export default function App() {
   return (
     <SearchContext.Provider value={{ searchTerm, setSearchTerm }}>
     <div className="min-h-screen bg-background text-on-background font-body selection:bg-primary/30 relative overflow-hidden">
-      {/* Overlay Grain Texture */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[100] bg-[url('/images/local/asset-0044.png')]"></div>
-
+      
       {/* Background Decoration */}
       <div className="fixed top-0 right-0 -z-10 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4"></div>
       <div className="fixed bottom-0 left-0 -z-10 w-[30vw] h-[30vw] bg-primary/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4"></div>
@@ -2035,7 +2034,7 @@ export default function App() {
               onClick={() => setIsCategoryMenuOpen(false)}
             />
             <motion.aside
-              className="fixed left-0 top-0 h-full w-full sm:w-[420px] bg-surface-container-lowest border-r border-outline-variant/20 z-50 lg:hidden overflow-y-auto"
+              className="fixed left-0 top-0 h-full w-full sm:w-105 bg-surface-container-lowest border-r border-outline-variant/20 z-50 lg:hidden overflow-y-auto"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -2108,7 +2107,7 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <main className="max-w-[1920px] mx-auto px-8 md:px-12 py-16 flex-grow">
+            <main className="max-w-480 mx-auto px-8 md:px-12 py-16 grow">
               <header className="mb-16">
                 <h1 className="font-headline text-5xl md:text-6xl text-on-background tracking-tight mb-4">Your Selection</h1>
                 <p className="text-on-surface-variant max-w-xl text-lg font-light leading-relaxed">
@@ -2303,11 +2302,11 @@ export default function App() {
             </main>
 
             {/* Footer */}
-            <footer className="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16 font-headline text-xs leading-relaxed">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+            <footer className="w-full mt-20 bg-surface-container-lowest border-t border-[#F5F5F0]/5 pt-16 font-headline text-xs leading-relaxed">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
                 <div className="col-span-1 md:col-span-1">
                   <div className="text-lg font-bold text-primary mb-4">The Obsidian Curator</div>
-                  <p className="text-[#F5F5F0]/40 max-w-[200px]">The definitive destination for the rarest acquisitions and bespoke luxury items.</p>
+                  <p className="text-[#F5F5F0]/40 max-w-50">The definitive destination for the rarest acquisitions and bespoke luxury items.</p>
                 </div>
                 <div>
                   <h5 className="text-primary uppercase tracking-widest mb-6 text-[10px]">Concierge</h5>
@@ -2360,7 +2359,7 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <main className="max-w-[1440px] mx-auto px-8 py-12 md:py-20 flex-grow w-full">
+            <main className="max-w-360 mx-auto px-8 py-12 md:py-20 grow w-full">
               {/* Progress Indicator */}
               <nav className="mb-20 flex justify-center overflow-x-auto pb-4 no-scrollbar">
                 <div className="flex items-center gap-4">
@@ -2368,17 +2367,17 @@ export default function App() {
                     <div className="w-10 h-10 rounded-full border border-primary bg-primary text-on-primary flex items-center justify-center font-headline font-bold">1</div>
                     <span className="font-headline text-primary tracking-wide text-sm uppercase">Address</span>
                   </div>
-                  <div className="w-16 h-[1px] bg-outline-variant/30 shrink-0"></div>
+                  <div className="w-16 h-px bg-outline-variant/30 shrink-0"></div>
                   <div className="flex items-center gap-3 shrink-0 opacity-40">
                     <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">2</div>
                     <span className="font-headline tracking-wide text-sm uppercase">Payment</span>
                   </div>
-                  <div className="w-16 h-[1px] bg-outline-variant/30 shrink-0"></div>
+                  <div className="w-16 h-px bg-outline-variant/30 shrink-0"></div>
                   <div className="flex items-center gap-3 shrink-0 opacity-40">
                     <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">3</div>
                     <span className="font-headline tracking-wide text-sm uppercase">Review</span>
                   </div>
-                  <div className="w-16 h-[1px] bg-outline-variant/30 shrink-0"></div>
+                  <div className="w-16 h-px bg-outline-variant/30 shrink-0"></div>
                   <div className="flex items-center gap-3 shrink-0 opacity-40">
                     <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">4</div>
                     <span className="font-headline tracking-wide text-sm uppercase">Confirm</span>
@@ -2507,7 +2506,7 @@ export default function App() {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16"></div>
                     <h2 className="text-xl font-headline text-on-surface mb-8 tracking-wide italic">Order Summary</h2>
                     {/* Summary Items */}
-                    <div className="space-y-6 mb-8 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
+                    <div className="space-y-6 mb-8 max-h-75 overflow-y-auto pr-2 no-scrollbar">
                       {cartItems.map((item) => (
                         <div key={item.id} className="flex justify-between items-center group">
                           <div className="flex items-center gap-4">
@@ -2555,8 +2554,8 @@ export default function App() {
             </main>
 
             {/* Footer (Minimal) */}
-            <footer className="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16">
-              <div className="max-w-[1920px] mx-auto px-12 py-20">
+            <footer className="w-full mt-20 bg-surface-container-lowest border-t border-[#F5F5F0]/5 pt-16">
+              <div className="max-w-480 mx-auto px-12 py-20">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                   <div className="md:col-span-2">
                     <div className="text-lg font-bold text-primary mb-4 font-headline uppercase tracking-widest">The Obsidian Curator</div>
@@ -2605,7 +2604,7 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <main className="max-w-[1440px] mx-auto px-8 py-12 md:py-20 flex-grow w-full">
+            <main className="max-w-360 mx-auto px-8 py-12 md:py-20 grow w-full">
               {/* Progress Indicator */}
               <nav className="mb-20 flex justify-center overflow-x-auto pb-4 no-scrollbar">
                 <div className="flex items-center gap-4">
@@ -2613,17 +2612,17 @@ export default function App() {
                     <div className="w-10 h-10 rounded-full border border-primary bg-primary text-on-primary flex items-center justify-center font-headline font-bold">1</div>
                     <span className="font-headline text-primary tracking-wide text-sm uppercase">Address</span>
                   </div>
-                  <div className="w-16 h-[1px] bg-primary shrink-0"></div>
+                  <div className="w-16 h-px bg-primary shrink-0"></div>
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="w-10 h-10 rounded-full border border-primary bg-primary text-on-primary flex items-center justify-center font-headline font-bold">2</div>
                     <span className="font-headline text-primary tracking-wide text-sm uppercase">Payment</span>
                   </div>
-                  <div className="w-16 h-[1px] bg-outline-variant/30 shrink-0"></div>
+                  <div className="w-16 h-px bg-outline-variant/30 shrink-0"></div>
                   <div className="flex items-center gap-3 shrink-0 opacity-40">
                     <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">3</div>
                     <span className="font-headline tracking-wide text-sm uppercase">Review</span>
                   </div>
-                  <div className="w-16 h-[1px] bg-outline-variant/30 shrink-0"></div>
+                  <div className="w-16 h-px bg-outline-variant/30 shrink-0"></div>
                   <div className="flex items-center gap-3 shrink-0 opacity-40">
                     <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center font-headline font-bold">4</div>
                     <span className="font-headline tracking-wide text-sm uppercase">Confirm</span>
@@ -2883,10 +2882,10 @@ export default function App() {
                   <div className="sticky top-32 space-y-8">
                     <div className="bg-surface-container-highest/20 backdrop-blur-xl rounded-xl p-8 border border-outline-variant/10 shadow-2xl">
                       <h2 className="text-xl font-headline mb-8 pb-4 border-b border-outline-variant/10">Order Summary</h2>
-                      <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                      <div className="space-y-6 mb-8 max-h-100 overflow-y-auto pr-2 no-scrollbar">
                         {cartItems.map((item) => (
                           <div key={item.id} className="flex gap-4">
-                            <div className="w-20 h-24 bg-surface-container-highest rounded overflow-hidden flex-shrink-0">
+                            <div className="w-20 h-24 bg-surface-container-highest rounded overflow-hidden shrink-0">
                               <img loading="lazy" className="w-full h-full object-cover" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                             </div>
                             <div className="flex flex-col justify-between py-1">
@@ -2956,8 +2955,8 @@ export default function App() {
             </main>
 
             {/* Footer (Minimal) */}
-            <footer className="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16">
-              <div className="max-w-[1920px] mx-auto px-12 py-20">
+            <footer className="w-full mt-20 bg-surface-container-lowest border-t border-[#F5F5F0]/5 pt-16">
+              <div className="max-w-480 mx-auto px-12 py-20">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                   <div className="md:col-span-2">
                     <div className="text-lg font-bold text-primary mb-4 font-headline uppercase tracking-widest">The Obsidian Curator</div>
@@ -3006,11 +3005,11 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <main className="max-w-[1440px] mx-auto px-6 md:px-12 py-12 md:py-20 flex-grow w-full">
+            <main className="max-w-360 mx-auto px-6 md:px-12 py-12 md:py-20 grow w-full">
               {/* Progress Indicator */}
               <div className="mb-16 max-w-2xl mx-auto">
                 <div className="flex justify-between items-center relative">
-                  <div className="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant -z-10"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-outline-variant -z-10"></div>
                   <div className="flex flex-col items-center gap-3 bg-background px-4">
                     <span className="w-8 h-8 rounded-full border border-primary text-primary flex items-center justify-center text-xs font-mono">01</span>
                     <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Shipping</span>
@@ -3047,7 +3046,7 @@ export default function App() {
                     <div className="space-y-6">
                       {cartItems.map((item) => !item.outOfStock && (
                         <div key={item.id} className="flex gap-6 items-center p-4 rounded-xl bg-surface-container-low/30 hover:bg-surface-container-high/50 transition-colors group border border-outline-variant/10">
-                          <div className="w-24 h-24 rounded-lg overflow-hidden bg-surface-container-highest flex-shrink-0">
+                          <div className="w-24 h-24 rounded-lg overflow-hidden bg-surface-container-highest shrink-0">
                             <img 
                               alt={item.name} 
                               className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
@@ -3055,7 +3054,7 @@ export default function App() {
                               referrerPolicy="no-referrer"
                             />
                           </div>
-                          <div className="flex-grow">
+                          <div className="grow">
                             <h3 className="font-headline text-lg text-on-surface">{item.name}</h3>
                             <p className="text-sm text-on-surface-variant font-body font-light">{item.variant}</p>
                             <p className="text-xs font-mono mt-2 text-primary">SKU: OC-{item.id.toString().padStart(3, '0')}</p>
@@ -3159,7 +3158,7 @@ export default function App() {
                         </div>
                       </div>
                       <div className="pt-6 border-t border-outline-variant/10 flex justify-between items-baseline">
-                        <span className="font-headline text-xl text-on-surface uppercase tracking-widest text-xs">Grand Total</span>
+                        <span className="font-headline text-on-surface uppercase tracking-widest text-xs">Grand Total</span>
                         <span className="font-headline text-3xl text-primary tracking-tighter font-bold">
                           ${(cartItems.reduce((acc, item) => acc + (item.outOfStock ? 0 : item.price * item.quantity), 0) * 1.08 + 125).toLocaleString()}.00
                         </span>
@@ -3194,7 +3193,7 @@ export default function App() {
                       </div>
                       <button 
                         disabled={!agreeTerms}
-                        className={`w-full py-5 rounded-lg font-headline text-lg tracking-widest uppercase text-xs shadow-[0_12px_24px_rgba(230,195,100,0.15)] transition-all active:scale-[0.98] ${agreeTerms ? 'bg-primary text-on-primary hover:bg-primary-container' : 'bg-surface-container-highest text-on-surface-variant/40 cursor-not-allowed'}`}
+                        className={`w-full py-5 rounded-lg font-headline tracking-widest uppercase text-xs shadow-[0_12px_24px_rgba(230,195,100,0.15)] transition-all active:scale-[0.98] ${agreeTerms ? 'bg-primary text-on-primary hover:bg-primary-container' : 'bg-surface-container-highest text-on-surface-variant/40 cursor-not-allowed'}`}
                         onClick={() => {
                           setIsLoading(true);
                           setTimeout(() => {
@@ -3223,8 +3222,8 @@ export default function App() {
             </main>
 
             {/* Footer (Minimal) */}
-            <footer className="w-full mt-20 bg-[#0e0e12] border-t border-[#F5F5F0]/5 pt-16">
-              <div className="max-w-[1920px] mx-auto px-12 py-20">
+            <footer className="w-full mt-20 bg-surface-container-lowest border-t border-[#F5F5F0]/5 pt-16">
+              <div className="max-w-480 mx-auto px-12 py-20">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                   <div className="md:col-span-2">
                     <div className="text-lg font-bold text-primary mb-4 font-headline uppercase tracking-widest">The Obsidian Curator</div>
@@ -3273,7 +3272,7 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <main className="flex-grow flex flex-col items-center justify-center px-6 py-12 max-w-[1400px] mx-auto w-full">
+            <main className="grow flex flex-col items-center justify-center px-6 py-12 max-w-350 mx-auto w-full">
               {/* Hero Confirmation Section */}
               <section className="w-full text-center mb-16">
                 <div className="mb-8 flex justify-center">
@@ -3365,7 +3364,7 @@ export default function App() {
                     <div className="space-y-8">
                       {/* Item 1 */}
                       <div className="flex gap-6 group">
-                        <div className="w-20 h-24 bg-surface-container-highest rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <div className="w-20 h-24 bg-surface-container-highest rounded-lg overflow-hidden shrink-0 relative">
                           <img 
                             alt="Luxury Item" 
                             className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500" 
@@ -3383,7 +3382,7 @@ export default function App() {
                       </div>
                       {/* Item 2 */}
                       <div className="flex gap-6 group">
-                        <div className="w-20 h-24 bg-surface-container-highest rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <div className="w-20 h-24 bg-surface-container-highest rounded-lg overflow-hidden shrink-0 relative">
                           <img 
                             alt="Luxury Item" 
                             className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500" 
@@ -3401,7 +3400,7 @@ export default function App() {
                       </div>
                       {/* Item 3 */}
                       <div className="flex gap-6 group">
-                        <div className="w-20 h-24 bg-surface-container-highest rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <div className="w-20 h-24 bg-surface-container-highest rounded-lg overflow-hidden shrink-0 relative">
                           <img 
                             alt="Luxury Item" 
                             className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500" 
@@ -3451,7 +3450,7 @@ export default function App() {
 
             {/* Footer suppression for transactional focus, but keeping brand identity */}
             <footer className="w-full py-12 px-12 mt-20 border-t border-outline-variant/5">
-              <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="max-w-480 mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
                 <div className="text-on-surface-variant text-xs font-label uppercase tracking-[0.3em]">
                   © 2024 THE OBSIDIAN CURATOR
                 </div>
@@ -3502,10 +3501,10 @@ export default function App() {
 
               {/* Visual Stepper */}
               <section className="mb-20 overflow-x-auto pb-8">
-                <div className="relative min-w-[800px] py-12">
+                <div className="relative min-w-200 py-12">
                   {/* Progress Line */}
-                  <div className="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant -translate-y-1/2"></div>
-                  <div className="absolute top-1/2 left-0 w-3/5 h-[1px] bg-primary -translate-y-1/2"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-outline-variant -translate-y-1/2"></div>
+                  <div className="absolute top-1/2 left-0 w-3/5 h-px bg-primary -translate-y-1/2"></div>
                   <div className="relative z-10 flex justify-between">
                     {/* Step 1: Placed */}
                     <div className="flex flex-col items-center">
@@ -3691,7 +3690,7 @@ export default function App() {
 
             {/* Footer */}
             <footer className="bg-surface-container-lowest w-full mt-20 border-t border-outline-variant/5 pt-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto font-headline text-xs leading-relaxed">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto font-headline text-xs leading-relaxed">
                 <div className="col-span-1">
                   <div className="text-lg font-bold text-primary mb-4">The Obsidian Curator</div>
                   <p className="text-on-surface-variant max-w-xs">Curating the world's finest artifacts for the discerning soul. Experience the pinnacle of digital luxury.</p>
@@ -3746,9 +3745,9 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <div className="flex max-w-[1920px] mx-auto min-h-screen w-full">
+            <div className="flex max-w-480 mx-auto min-h-screen w-full">
               {/* SideNavBar */}
-              <aside className="fixed left-0 top-0 h-full w-80 z-[60] bg-surface-container-lowest flex flex-col p-6 gap-8 border-r border-outline-variant/10 shadow-[20px_0_60px_rgba(0,0,0,0.5)] hidden xl:flex pt-24">
+              <aside className="fixed left-0 top-0 h-full w-80 z-60 bg-surface-container-lowest flex-col p-6 gap-8 border-r border-outline-variant/10 shadow-[20px_0_60px_rgba(0,0,0,0.5)] hidden xl:flex pt-24">
                 <div>
                   <div className="flex flex-col mb-12">
                     <span className="text-primary font-black font-headline text-sm uppercase tracking-widest">Filter Gallery</span>
@@ -3879,7 +3878,7 @@ export default function App() {
 
             {/* Footer */}
             <footer className="w-full mt-20 bg-surface-container-lowest border-t border-outline-variant/5 pt-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
                 <div className="col-span-1 md:col-span-1">
                   <p className="text-lg font-bold text-primary mb-4 font-headline tracking-tighter">The Obsidian Curator</p>
                   <p className="text-on-surface-variant/40 text-xs leading-relaxed font-headline">
@@ -3904,7 +3903,7 @@ export default function App() {
                   <h4 className="text-primary text-xs uppercase tracking-widest font-bold mb-6 font-headline">Newsletter</h4>
                   <form className="relative" onSubmit={handleNewsletterSubmit}>
                     <input
-                      className="w-full bg-surface-container-low border-b border-outline-variant/30 text-xs py-2 focus:border-primary transition-all bg-transparent outline-none"
+                      className="w-full border-b border-outline-variant/30 text-xs py-2 focus:border-primary transition-all bg-transparent outline-none"
                       placeholder="Concierge Email"
                       type="email"
                       value={newsletterEmail}
@@ -4051,7 +4050,7 @@ export default function App() {
                       animate={{ opacity: 1, y: 0 }}
                       className="group relative flex flex-col space-y-6"
                     >
-                      <div className="aspect-[4/5] overflow-hidden bg-surface-container-lowest rounded-sm relative">
+                      <div className="aspect-4/5 overflow-hidden bg-surface-container-lowest rounded-sm relative">
                         <img 
                           alt={item.name} 
                           className="w-full h-full object-cover grayscale-[0.2] group-hover:scale-105 transition-transform duration-700 ease-out" 
@@ -4308,7 +4307,7 @@ export default function App() {
                   </div>
                 </div>
                 {/* Security Highlight */}
-                <div className="bg-gradient-to-br from-surface-container-highest to-surface-container-low p-8 rounded-xl border border-primary/10">
+                <div className="bg-linear-to-br from-surface-container-highest to-surface-container-low p-8 rounded-xl border border-primary/10">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                       <Lock className="text-primary" size={20} />
@@ -4546,7 +4545,7 @@ export default function App() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-on-surface">
                 {paymentMethods.map((pm) => (
-                  <div key={pm.id} className="p-8 rounded-xl bg-gradient-to-br from-[#1a1a1f] to-[#2a2a30] border border-outline-variant/20 relative overflow-hidden group">
+                  <div key={pm.id} className="p-8 rounded-xl bg-linear-to-br from-[#1a1a1f] to-[#2a2a30] border border-outline-variant/20 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-6 opacity-10">
                       <CreditCardIcon size={120} />
                     </div>
@@ -4626,7 +4625,7 @@ export default function App() {
                           checked={!!(notifications as any)[item.key]} 
                           onChange={(e) => handleToggleNotification(item.key as any, e.target.checked)}
                         />
-                        <div className="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        <div className="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                       </div>
                     </div>
                   ))}
@@ -4748,7 +4747,6 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
-            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
             onLogout={handleLogout}
@@ -4959,7 +4957,6 @@ export default function App() {
             view={view}
             setView={setView}
             cartItems={cartItems}
-            setCartItems={setCartItems}
             showProfileDropdown={showProfileDropdown}
             setShowProfileDropdown={setShowProfileDropdown}
             onLogout={handleLogout}
@@ -4993,11 +4990,11 @@ export default function App() {
               onCategorySelect={openShopCategory}
             />
 
-            <main className="flex-grow">
+            <main className="grow">
               {/* FIX: hero mobile responsiveness */}
-              <section className="relative min-h-[100svh] flex items-center px-4 md:px-20 py-12 md:py-20 overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none"></div>
-                <div className="max-w-[1920px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <section className="relative min-h-svh flex items-center px-4 md:px-20 py-12 md:py-20 overflow-hidden">
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none"></div>
+                <div className="max-w-480 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                   <motion.div 
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -5036,7 +5033,7 @@ export default function App() {
                   >
                     <div className="absolute w-[120%] h-[120%] bg-primary/5 blur-[120px] rounded-full"></div>
                     <div 
-                      className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/10 group cursor-pointer"
+                      className="relative w-full aspect-square md:aspect-4/5 rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/10 group cursor-pointer"
                       onClick={() => {
                         setSelectedProduct({
                           brand: 'AUREL & CO',
@@ -5056,7 +5053,6 @@ export default function App() {
                         src="/images/local/asset-0065.png" 
                         onError={(e) => { (e.currentTarget as HTMLImageElement).src = IMAGE_FALLBACK_URL; }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
                       <div className="absolute bottom-8 left-8">
                         <span className="text-primary text-[10px] tracking-widest uppercase font-bold">Featured Arrival</span>
                         <h3 className="text-2xl font-headline mt-2 text-white">The Onyx Chrono X1</h3>
@@ -5067,7 +5063,7 @@ export default function App() {
               </section>
 
               {/* FIX: category images mapping */}
-              <section className="py-24 px-6 md:px-12 max-w-[1920px] mx-auto">
+              <section className="py-24 px-6 md:px-12 max-w-480 mx-auto">
                 <div className="flex justify-between items-end mb-16">
                   <div>
                     <h2 className="text-4xl font-headline text-on-surface">Curated Categories</h2>
@@ -5112,7 +5108,7 @@ export default function App() {
 
               {/* Flash Sale Banner */}
               <section className="w-full py-12 bg-primary/5 border-y border-primary/10 relative overflow-hidden mb-24">
-                <div className="max-w-[1920px] mx-auto px-6 md:px-12 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="max-w-480 mx-auto px-6 md:px-12 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                   <div className="flex items-center gap-6">
                     <div className="text-primary flex items-center gap-3">
                       <Zap className="fill-primary" size={32} />
@@ -5137,7 +5133,7 @@ export default function App() {
 
               {/* Editorial Selections */}
               <section className="py-24 overflow-hidden">
-                <div className="px-6 md:px-12 max-w-[1920px] mx-auto mb-12">
+                <div className="px-6 md:px-12 max-w-480 mx-auto mb-12">
                   <h2 className="text-4xl font-headline">Editorial Selections</h2>
                   <p className="text-on-surface-variant mt-2 font-body">Objects of desire, hand-picked for the modern collector</p>
                 </div>
@@ -5194,7 +5190,7 @@ export default function App() {
 
               {/* Brand Logos */}
               <section className="py-12 border-y border-outline-variant/10 bg-surface-container-lowest/50">
-                <div className="max-w-[1920px] mx-auto px-6 md:px-12 overflow-hidden flex items-center justify-between gap-12 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700 flex-wrap">
+                <div className="max-w-480 mx-auto px-6 md:px-12 overflow-hidden flex items-center justify-between gap-12 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700 flex-wrap">
                   {['VOGUE', 'HARRODS', 'GUCCI', 'ROLEX', 'CARTIER', 'HERMÈS', 'APPLE', 'TESLA'].map(brand => (
                     <span key={brand} className="font-headline font-black text-2xl tracking-tighter whitespace-nowrap">{brand}</span>
                   ))}
@@ -5202,7 +5198,7 @@ export default function App() {
               </section>
 
               {/* Testimonials */}
-              <section className="py-24 px-6 md:px-12 max-w-[1920px] mx-auto">
+              <section className="py-24 px-6 md:px-12 max-w-480 mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl font-headline mb-4">Voices of the Suite</h2>
                   <p className="text-on-surface-variant max-w-lg mx-auto font-body">Hear from our inner circle of collectors and style enthusiasts who have redefined their daily essentials.</p>
@@ -5254,7 +5250,7 @@ export default function App() {
                       </button>
                     </div>
                   </div>
-                  <div className="flex-shrink-0 z-10 bg-white/5 p-6 rounded-3xl border border-white/10 shadow-2xl">
+                  <div className="shrink-0 z-10 bg-white/5 p-6 rounded-3xl border border-white/10 shadow-2xl">
                     <div className="w-48 h-48 bg-white p-4 rounded-2xl flex items-center justify-center">
                       <div className="grid grid-cols-4 grid-rows-4 gap-2 w-full h-full">
                         <div className="bg-black"></div><div className="bg-black"></div><div className="bg-white"></div><div className="bg-black"></div>
@@ -5271,7 +5267,7 @@ export default function App() {
 
             {/* Footer */}
             <footer className="bg-surface-container-lowest w-full border-t border-outline-variant/10 pt-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-6 md:px-12 py-20 max-w-[1920px] mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-6 md:px-12 py-20 max-w-480 mx-auto">
                 <div className="md:col-span-1">
                   <div className="text-xl font-bold text-primary mb-4 font-headline tracking-tighter">The Obsidian Curator</div>
                   <p className="text-on-surface-variant/60 text-sm max-w-xs font-body leading-relaxed">Elevating the standard of digital commerce through intentional curation and timeless aesthetics.</p>
@@ -5332,7 +5328,7 @@ export default function App() {
               onLogout={handleLogout}
             />
 
-            <main className="max-w-[1440px] mx-auto px-8 pt-12 flex-grow w-full">
+            <main className="max-w-360 mx-auto px-8 pt-12 grow w-full">
               <div className="mb-8">
                 <BackButton onBack={() => setView('shop')} />
               </div>
@@ -5367,7 +5363,7 @@ export default function App() {
                       <div 
                         key={i}
                         onClick={() => setSelectedImage(i)}
-                        className={`w-24 h-24 flex-shrink-0 rounded-lg border-2 transition-all overflow-hidden cursor-pointer ${selectedImage === i ? 'border-primary' : 'border-outline-variant/20 hover:border-primary/50'}`}
+                        className={`w-24 h-24 shrink-0 rounded-lg border-2 transition-all overflow-hidden cursor-pointer ${selectedImage === i ? 'border-primary' : 'border-outline-variant/20 hover:border-primary/50'}`}
                       >
                         <img 
                           className="w-full h-full object-cover" 
@@ -5465,7 +5461,7 @@ export default function App() {
                           <Plus size={16} />
                         </button>
                       </div>
-                      <div className="flex gap-4 flex-grow">
+                      <div className="flex gap-4 grow">
                         <button className="p-4 rounded-lg border border-outline-variant/20 hover:text-primary transition-all">
                           <Heart size={20} />
                         </button>
@@ -5568,10 +5564,10 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
-                  <div className="prose prose-invert">
+                <div className="w-full">
+                  <div>
                     {activeProductTab === 'Detailed Narrative' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-16 col-span-2">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                         <div className="space-y-6">
                           <h3 className="font-headline text-3xl text-on-surface mb-6">A Masterpiece of Temporal Art</h3>
                           <p className="text-on-surface-variant leading-relaxed font-body text-lg font-light">
@@ -5595,7 +5591,7 @@ export default function App() {
                     )}
 
                     {activeProductTab === 'Technical Specifications' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-2">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-12">
                           {[
                             { label: 'Movement', value: 'Caliber OC-992 Automatic' },
@@ -5618,8 +5614,8 @@ export default function App() {
                     )}
 
                     {activeProductTab === 'Collector Reviews' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-16 col-span-2">
-                        <div className="lg:col-span-2 space-y-12">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+                        <div className="lg:col-span-3 space-y-12">
                           {[
                             { author: 'Julian V.', date: 'Oct 12, 2024', text: 'An absolute triumph of design. The weight is perfect, and the dial has a depth that photos simply cannot capture.', rating: 5 },
                             { author: 'Elena R.', date: 'Sep 28, 2024', text: 'Incredible hospitality during the acquisition process. The piece itself is a work of art.', rating: 5 }
@@ -5636,7 +5632,7 @@ export default function App() {
                             </div>
                           ))}
                         </div>
-                        <div className="space-y-8">
+                        <div className="lg:col-span-2 space-y-8">
                           <div className="bg-surface-container-low p-10 rounded-3xl border border-outline-variant/10">
                             <div className="flex justify-between items-center mb-10">
                               <h4 className="font-headline text-2xl">Ratings Overview</h4>
@@ -5649,7 +5645,7 @@ export default function App() {
                               {[85, 10, 3, 1, 1].map((val, i) => (
                                 <div key={i} className="flex items-center gap-4">
                                   <span className="text-xs font-mono w-4 font-bold">{5 - i}</span>
-                                  <div className="flex-grow h-2 bg-surface-container rounded-full overflow-hidden">
+                                  <div className="grow h-2 bg-surface-container rounded-full overflow-hidden">
                                     <div className="h-full bg-primary" style={{ width: `${val}%` }}></div>
                                   </div>
                                   <span className="text-[10px] text-on-surface-variant/40 font-bold w-10 text-right">{val}%</span>
@@ -5665,7 +5661,7 @@ export default function App() {
                     )}
 
                     {activeProductTab === 'Inquiries (12)' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-2">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <div className="max-w-2xl mx-auto p-12 bg-surface-container-highest/10 rounded-3xl border border-outline-variant/10 text-center">
                           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-8">
                             <div className="font-headline text-2xl">?</div>
@@ -5690,7 +5686,7 @@ export default function App() {
               <section className="mb-32">
                 <h2 className="text-3xl font-headline mb-12 flex items-center gap-4">
                   Frequently Curated Together
-                  <span className="h-[1px] flex-grow bg-gradient-to-r from-outline-variant/20 to-transparent"></span>
+                  <span className="h-px grow bg-linear-to-r from-outline-variant/20 to-transparent"></span>
                 </h2>
                 <div className="bg-surface-container-low p-10 rounded-3xl flex flex-col lg:flex-row items-center gap-12 border border-outline-variant/10">
                   <div className="flex items-center gap-8 flex-wrap justify-center">
@@ -5744,8 +5740,8 @@ export default function App() {
                     { brand: 'Objets', name: 'Tonal Desk Chronometer', price: '$950.00', img: '/images/local/asset-0081.png' },
                     { brand: 'Forge', name: 'The Ironclad GMT', price: '$3,100.00', img: '/images/local/asset-0082.png' },
                   ].map((item, i) => (
-                    <div key={i} className="w-72 flex-shrink-0 group cursor-pointer" onClick={() => { setSelectedProduct(item); setSelectedImage(0); window.scrollTo(0, 0); }}>
-                      <div className="aspect-[4/5] bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6 border border-outline-variant/10">
+                    <div key={i} className="w-72 shrink-0 group cursor-pointer" onClick={() => { setSelectedProduct(item); setSelectedImage(0); window.scrollTo(0, 0); }}>
+                      <div className="aspect-4/5 bg-surface-container-lowest rounded-2xl overflow-hidden relative mb-6 border border-outline-variant/10">
                         <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={item.img} alt={item.name} referrerPolicy="no-referrer" />
                         <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-primary">
                           <Heart size={16} />
@@ -5762,7 +5758,7 @@ export default function App() {
 
             {/* Footer */}
             <footer className="bg-surface-container-lowest w-full border-t border-outline-variant/10 pt-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
                 <div className="col-span-1">
                   <div className="text-xl font-bold text-primary mb-4 font-headline tracking-tighter">The Obsidian Curator</div>
                   <p className="text-on-surface-variant/60 text-sm max-w-xs font-body leading-relaxed">Refining the digital acquisition experience through intentional design and unparalleled quality.</p>
@@ -5830,9 +5826,9 @@ export default function App() {
               onCategorySelect={openShopCategory}
             />
 
-            <div className="flex flex-1 max-w-[1920px] mx-auto w-full">
+            <div className="flex flex-1 max-w-480 mx-auto w-full">
               {/* SideNavBar (Filter Gallery) */}
-              <aside className="hidden lg:flex flex-col p-8 gap-8 bg-surface-container-lowest border-r border-outline-variant/10 w-80 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
+              <aside className="hidden lg:flex flex-col p-8 gap-8 bg-surface-container-lowest border-r border-outline-variant/10 w-80 sticky top-18.25 h-[calc(100vh-73px)] overflow-y-auto">
                 <div className="mb-4">
                   <h2 className="text-primary font-black text-xl mb-1 font-headline">Filter Gallery</h2>
                   <p className="text-on-surface-variant/40 normal-case tracking-normal text-xs italic font-body">Refine your selection</p>
@@ -5961,7 +5957,7 @@ export default function App() {
 
                   {/* Controls */}
                     <div className="mt-12 flex flex-wrap items-center justify-between gap-4 py-6 border-y border-outline-variant/10">
-                      <div className="min-w-[220px] flex-1 max-w-xl">
+                      <div className="min-w-55 flex-1 max-w-xl">
                         <input
                           type="search"
                           value={searchTerm}
@@ -6055,7 +6051,7 @@ export default function App() {
                           <option className="bg-background" value="most-popular">Most Popular</option>
                         </select>
                       </div>
-                      <div className="h-4 w-[1px] bg-outline-variant/20"></div>
+                      <div className="h-4 w-px bg-outline-variant/20"></div>
                       <div className="flex gap-2">
                         <button className="p-2 text-primary bg-surface-variant/30 rounded transition-colors">
                           <LayoutGrid size={20} />
@@ -6073,7 +6069,7 @@ export default function App() {
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-x-8 gap-y-12" aria-live="polite" aria-busy="true">
                     {Array.from({ length: 6 }).map((_, index) => (
                       <div key={`skeleton-${index}`} className="animate-pulse">
-                        <div className="aspect-[4/3] rounded-xl bg-surface-container-high mb-4" />
+                        <div className="aspect-4/3 rounded-xl bg-surface-container-high mb-4" />
                         <div className="h-4 bg-surface-container-high rounded mb-2 w-2/3" />
                         <div className="h-3 bg-surface-container-high rounded w-1/2" />
                       </div>
@@ -6103,7 +6099,7 @@ export default function App() {
                         className="group flex flex-col cursor-pointer"
                         onClick={() => openProductDetail(product)}
                     >
-                      <div className="relative aspect-[4/3] overflow-hidden bg-surface-container-low mb-8 rounded-xl">
+                      <div className="relative aspect-4/3 overflow-hidden bg-surface-container-low mb-8 rounded-xl">
                         <img 
                           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                           src={product.img} 
@@ -6114,7 +6110,7 @@ export default function App() {
                         <button className="absolute top-6 right-6 p-3 bg-background/40 backdrop-blur-md rounded-full text-on-surface/60 hover:text-primary transition-colors z-10">
                           <Heart size={18} />
                         </button>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
                           <button className="w-full py-4 bg-primary text-on-primary font-bold uppercase tracking-widest text-xs rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                             Quick View
                           </button>
@@ -6187,7 +6183,7 @@ export default function App() {
 
             {/* Footer */}
             <footer className="bg-surface-container-lowest w-full border-t border-outline-variant/10 pt-16">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
                 <div className="md:col-span-1">
                   <div className="text-xl font-bold text-primary mb-4 font-headline tracking-tighter">The Obsidian Curator</div>
                   <p className="text-on-surface-variant/60 text-sm max-w-xs font-body leading-relaxed">A legacy of refinement and the pursuit of the extraordinary. Dedicated to the collector who understands true luxury.</p>
@@ -6251,8 +6247,8 @@ export default function App() {
                   src="/images/local/asset-0083.png"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent opacity-80"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-background/40 to-transparent"></div>
               </div>
               
               <div className="relative z-10 max-w-2xl">
@@ -6262,7 +6258,7 @@ export default function App() {
                   transition={{ duration: 0.8, ease: "easeOut" }}
                   className="flex items-center gap-4 mb-8"
                 >
-                  <div className="w-12 h-[1px] bg-primary"></div>
+                  <div className="w-12 h-px bg-primary"></div>
                   <span className="font-mono text-primary tracking-[0.3em] uppercase text-[10px]">Private Access</span>
                 </motion.div>
                 
@@ -6463,7 +6459,7 @@ export default function App() {
                 src="/images/local/asset-0084.png"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-background via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-tr from-background via-transparent to-transparent"></div>
               <div className="relative z-10 px-16 max-w-2xl">
                 <span className="text-primary font-label tracking-[0.3em] uppercase text-xs mb-6 block">The Inner Circle</span>
                 <div className="flex items-center gap-4 mb-8">
@@ -6647,9 +6643,9 @@ export default function App() {
 
                 {/* Divider */}
                 <div className="relative py-4 flex items-center">
-                  <div className="flex-grow border-t border-outline-variant/20"></div>
-                  <span className="flex-shrink mx-4 text-xs font-label text-on-surface-variant/40 tracking-[0.2em] uppercase">Authenticate via</span>
-                  <div className="flex-grow border-t border-outline-variant/20"></div>
+                  <div className="grow border-t border-outline-variant/20"></div>
+                  <span className="shrink mx-4 text-xs font-label text-on-surface-variant/40 tracking-[0.2em] uppercase">Authenticate via</span>
+                  <div className="grow border-t border-outline-variant/20"></div>
                 </div>
 
                 {/* Social Login */}
@@ -6848,7 +6844,7 @@ export default function App() {
                               {isLoading ? "Processing..." : "Send Reset Link"}
                               {!isLoading && <ArrowRight size={16} />}
                             </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] transition-all duration-500 group-hover:bg-[100%_0%]"></div>
+                            <div className="absolute inset-0 bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] transition-all duration-500 group-hover:bg-position-[100%_0%]"></div>
                           </button>
                         </div>
                       </form>
@@ -6987,7 +6983,7 @@ export default function App() {
 
             {/* Global Footer */}
             <footer className="relative z-10 w-full mt-20 border-t border-outline-variant/5 bg-surface-container-lowest">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-[1920px] mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 max-w-480 mx-auto">
                 <div className="col-span-1 md:col-span-2">
                   <div className="text-lg font-bold text-primary mb-4 font-headline tracking-tighter">The Obsidian Curator</div>
                   <p className="text-on-surface-variant text-xs leading-relaxed max-w-sm font-body">

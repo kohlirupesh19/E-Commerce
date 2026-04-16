@@ -63,9 +63,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleFallback(Exception ex) {
-        ex.printStackTrace(); // Still print to console
-        String message = ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred (" + ex.getClass().getSimpleName() + ")";
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", message));
+                .body(Map.of("error", "An unexpected error occurred"));
     }
 }

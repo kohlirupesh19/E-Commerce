@@ -4,6 +4,7 @@ import com.obsidian.curator.dto.response.MessageResponse;
 import com.obsidian.curator.dto.response.NotificationDto;
 import com.obsidian.curator.entity.Notification;
 import com.obsidian.curator.entity.User;
+import com.obsidian.curator.entity.enums.NotificationType;
 import com.obsidian.curator.exception.ResourceNotFoundException;
 import com.obsidian.curator.repository.NotificationRepository;
 import com.obsidian.curator.repository.UserRepository;
@@ -62,10 +63,23 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationDto mapToDto(Notification notification) {
         return NotificationDto.builder()
                 .id(notification.getId())
-                .title(notification.getTitle())
+                .title(mapTitle(notification.getType()))
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
                 .createdAt(notification.getCreatedAt())
                 .build();
+    }
+
+    private String mapTitle(NotificationType type) {
+        if (type == null) {
+            return "Notification";
+        }
+
+        return switch (type) {
+            case ORDER -> "Order Update";
+            case DELIVERY -> "Delivery Update";
+            case PROMO -> "Exclusive Offer";
+            case SECURITY -> "Security Alert";
+        };
     }
 }
